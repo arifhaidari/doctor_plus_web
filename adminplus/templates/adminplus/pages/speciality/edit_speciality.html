@@ -1,0 +1,216 @@
+{% extends "adminplus/adminp_dashboard.html" %}
+{% block title %}
+Edit Speciality
+{% endblock title %}
+{% block content %}
+<div class="page-wrapper">
+  <div class="content container-fluid">
+    <!-- Page Header -->
+    <div class="page-header">
+      <div class="row">
+        <div class="col-sm-7 col-auto">
+          <h3 class="page-title">Edit Speciality</h3>
+          <ul class="breadcrumb">
+            <li class="breadcrumb-item"><a href="{% url 'adminplus:dashboard' %}">Dashboard</a></li>
+            <li class="breadcrumb-item"><a href="{% url 'adminplus:specialities' %}">Specialities</a></li>
+            <li class="breadcrumb-item active">Edit Speciailty</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+    <!-- /Page Header -->
+    <div class="row">
+      <div class="col-sm-12 col-md-12 col-12 col-xl-12 col-lg-12">
+        <div class="card">
+          <div class="card-body">
+            <div class="card-title">
+              <h3>Speciality</h3>
+            </div>
+            <form action="." method="post" id="edit-sp" enctype="multipart/form-data">
+              {% csrf_token %}
+              {% for field in form %}
+              <div class="col-12 col-sm-12">
+                <label>{{ field.label }}</label>
+                {{ field }}
+                {{ field.errors }}
+              </div>
+              {% endfor %}
+              <br>
+              <input type="hidden" name="speciality" value="specialities-form">
+            </form>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-body">
+            <div class="card-title">
+              <h3>Conditions</h3>
+            </div>
+            <div class="col-md-12 col-12 col-xl-12 col-xs-12 col-sm-12 col-lg-12 p-4">
+              <div class="row">
+                <dvi class="col-md-4 col-4 col-xs-4 col-sm-4 col-md-4">
+                  <span class="pr-3"></span>
+                  <h5 class="d-inline">Name</h5>
+                </dvi>
+                <dvi class="col-md-4 col-4 col-xs-4 col-sm-4 col-md-4 ml-3">
+                  <h5>Farsi Name</h5>
+                </dvi>
+                <dvi class="col-md-3 col-3 col-xs-3 col-sm-3 col-md-3">
+                  <h5>Pashto Name</h5>
+                </dvi>
+                <dvi class="col-md-1 col-1 col-xs-1 col-sm-1 col-md-1 ml-n5" align="right">
+                  <span class="fa fa-trash text-danger h4"></span>
+                </dvi>
+              </div>
+              <form method="post" action="." id="edit-con">
+                {% csrf_token %}
+                {{ condition_form }}
+                <input type="hidden" name="conditions" value="condition-form">
+              </form>
+            </div>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-body">
+            <div class="card-title">
+              <h3>Services</h3>
+            </div>
+            <div class="col-md-12 col-12 col-xl-12 col-xs-12 col-sm-12 col-lg-12 p-4">
+              <div class="row">
+                <dvi class="col-md-4 col-4 col-xs-4 col-sm-4 col-md-4">
+                  <span class="pr-3"></span>
+                  <h5 class="d-inline">Name</h5>
+                </dvi>
+                <dvi class="col-md-4 col-4 col-xs-4 col-sm-4 col-md-4 ml-3">
+                  <h5>Farsi Name</h5>
+                </dvi>
+                <dvi class="col-md-3 col-3 col-xs-3 col-sm-3 col-md-3">
+                  <h5>Pashto Name</h5>
+                </dvi>
+                <dvi class="col-md-1 col-1 col-xs-1 col-sm-1 col-md-1 ml-n5" align="right">
+                  <span class="fa fa-trash text-danger h4"></span>
+                </dvi>
+              </div>
+              <form method="post" action="." id="edit-ser">
+                {% csrf_token %}
+                {{ service_form }}
+                <input type="hidden" name="services" value="services-form">
+              </form>
+            </div>
+          </div>
+        </div>
+        <button class="btn btn-primary btn-block col-md-4 ml-3 mb-5" id="btn_submit_all">Save Changes</button>
+      </div>
+    </div>
+  </div>
+</div>
+</div>
+</div>
+{% endblock content %}
+{% block pagelevel_styles %}
+<style media="screen">
+label {
+  display: block;
+  margin-top: 2%;
+  margin-bottom: 0px;
+}
+
+::placeholder {
+  color: red;
+  opacity: 1;
+  /* Firefox */
+}
+</style>
+{% endblock pagelevel_styles %}
+{% block script %}
+<script>
+$(document).ready(function() {
+  // converting to select2
+  $("select").select2({
+    "width": "100%",
+  });
+  // check box resizing
+  $("input[type='checkbox']").addClass('mt-2 ml-3').css({
+    height: '20px',
+    width: '20px'
+  });
+  // forms arrangements
+  $("input[type='text']").addClass('d-inline form-control');
+  $("label[for^='id_condition_set-']").remove();
+  $("label[for^='id_services-']").remove();
+
+  // form validations
+  // speciality form validation
+  $('#edit-sp').validate({
+    rules: {
+      "name": "required",
+      "farsi_name": "required",
+      "pashto_name": "required",
+      "speciality_category": "required",
+    }
+  });
+
+  // conditions form validation
+  $("#edit-con").validate({
+    errorPlacement: function(error, element) {
+      element.attr("placeholder", error[0].outerText);
+    }
+  });
+  $("#edit-con").find("input[type='text']").each(function(index, el) {
+    let len = $("#edit-con").find("input[type='text']").length;
+    let exf = (index == len - 1 || index == len - 2 || index == len - 3 ||
+      index == len - 4 || index == len - 5 || index == len - 6 ||
+      index == len - 7 || index == len - 8 || index == len - 9)
+    if (!(exf)) {
+      $(this).rules('add', {
+        required: true,
+        minlength: 3,
+      });
+    }
+  });
+  // services form validation
+  $("#edit-ser").validate({
+    errorPlacement: function(error, element) {
+      element.attr("placeholder", error[0].outerText);
+    }
+  });
+  $("#edit-ser").find("input[type='text']").each(function(index, el) {
+    let len = $("#edit-ser").find("input[type='text']").length;
+    let exf = (index == len - 1 || index == len - 2 || index == len - 3 ||
+      index == len - 4 || index == len - 5 || index == len - 6 ||
+      index == len - 7 || index == len - 8 || index == len - 9)
+    if (!(exf)) {
+      $(this).rules('add', {
+        required: true,
+        minlength: 3,
+      });
+    }
+  });
+  // submit forms
+  $("#btn_submit_all").click(function(event) {
+    console.log("submit all clicked!")
+    if ($("#edit-sp").valid() && $("#edit-con").valid() && $("#edit-ser").valid()) {
+      console.log("forms are valid sending now.. ")
+      let speciality_form = $("#edit-sp").serialize();
+      let conditions_form = $("#edit-con").serialize();
+      let services_form = $("#edit-ser").serialize();
+
+      axios.post(".", services_form).then((response) => {
+        console.log("services form sent!")
+      }).catch((error) => { console.error(error); });
+
+      axios.post(".", conditions_form).then((response) => {
+        console.log("conditions form sent!")
+      }).catch((error) => { console.error(error); });
+
+      axios.post(".", speciality_form).then((response) => {
+        console.log("specialities form sent!")
+      }).catch((error) => { console.error(error); });
+      // location.reload();
+      window.location.href = window.location.href;
+    } else {
+      console.log("all forms weren't valid! so submission canceled.")
+    } 
+  });
+}); // documnet.ready end
+</script>
+{% endblock script %}

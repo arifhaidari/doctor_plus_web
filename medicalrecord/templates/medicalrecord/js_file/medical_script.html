@@ -1,0 +1,137 @@
+<script type="text/javascript"> var theToken = '{{ csrf_token }}';</script>
+<script type="text/javascript"> var addUrl = '{% url "medicalrecord:add_medical" %}';</script>
+<script>
+     var isSaveError = false;
+     
+     // Fields
+     const medicalForm = document.getElementById('medical_record_form');
+     const title = document.getElementById('title');
+     const patient = document.getElementById('patient');
+     const relatedDoctor = document.getElementById('related_doctor');
+     const medicalDocuments = document.getElementById('medical_documents');
+     const sharingPolicy = document.getElementById('sharing_policy');
+     // const sharedWith = document.getElementById('shared_with');
+
+     // Error fields
+     const titleError = document.getElementById('title_error');
+     const patientError = document.getElementById('patient_error');
+     const relatedDoctorError = document.getElementById('related_doctor_error');
+     const medicalDocumentsError = document.getElementById('medical_documents_error');
+     // const sharedWithError = document.getElementById('shared_with_error');
+
+     function setError(inputField, errorArea, errorMessage) {
+          console.log('got in setErrroor r ')
+          isSaveError = true
+          inputField.style.border = 'dashed 2px red'
+          errorArea.innerHTML = errorMessage
+          errorArea.style.display = 'block'
+     }
+     // have a global key to keep track of how file already uploaded
+     // every time adding or removing new files do addition and subtraction 
+     
+     // 
+     // we can use picture name as a id
+     // find a way to extract name of the file as split in python 
+     // var fileLength = 0;
+     function readURL(input) {
+           if (input.files && input.files[0]) {
+               $("#documets_wrapper").children("div").remove();
+
+             for (let i = 0; i < input.files.length; i++) {
+                  if(i >= 20) {
+                       break;
+                  }
+                  if(event.target.files[i].name.split('.').pop() != 'pdf') {
+                    var tempHtml = '<div class="upload-images" id="image_'+ i +'">' +
+                              '<img src="'+URL.createObjectURL(event.target.files[i])+'" alt="Upload Image">' +
+                         '</div>';
+               $('#documets_wrapper').append(tempHtml);
+                  } else {
+                    var tempHtml = '<div class="msg-box">' +
+                                   '<div>' +
+                                        '<div class="chat-msg-attachments">' +
+                                        '<div class="chat-attachment">' +
+                                        '<img src="/static/img/file.jpg" alt="Attachment">' +
+                                        '<div class="chat-attach-caption">File</div>' +
+                                        '<a href="'+URL.createObjectURL(event.target.files[i])+'" class="chat-attach-download">' +
+                                             '<i class="fas fa-download"></i>' +
+                                        '</a>' +
+                                        '</div>' +
+                                        '</div>' +
+                                   '</div>' +
+                                   '</div>';
+               $('#documets_wrapper').append(tempHtml);
+                  }
+               }
+             
+           }
+          //  should send the input.files.length as post value as well to know how many file do we have 
+       }
+
+       $("#medical_submit_button").on('click', function () {
+     console.log('register_button got pressed')
+     medicalForm.addEventListener('submit', (e) => {
+          console.log('the save change button got called');
+          if (title.value.trim() === '' || title.value.trim() == null) {
+               setError(title, titleError, 'Title field is emtpy')
+          } 
+
+          if (patient.value.trim() === '' || patient.value.trim() == null) {
+               setError(patient, patientError, 'Patient is not selected')
+          }
+          
+          if (relatedDoctor.value.trim() === '' || relatedDoctor.value.trim() == null) {
+               setError(relatedDoctor, relatedDoctorError, 'Related Doctor is not selected')
+          }
+
+          if (medicalDocuments.files.length == 0) {
+               setError(medicalDocuments, medicalDocumentsError, 'Upload at least one document')
+          }
+
+          
+
+          if (isSaveError) {
+               console.log('yes there is error')
+               e.preventDefault()
+               isSaveError = false
+          } 
+          
+          // else {
+          //      const formData = new FormData();
+          //      formData.append('csrfmiddlewaretoken', theToken);
+          //      formData.append('title', title.value);
+          //      formData.append('patient', patient.value);
+          //      formData.append('related_doctor', relatedDoctor.value);
+          //      formData.append('medical_documents', medicalDocuments.value);
+          //      formData.append('sharing_policy', sharingPolicy);
+          //      formData.append('shared_with', sharedWith.value);
+          //      $.ajax({
+          //      type: 'POST',
+          //      url: addUrl,
+          //      contentType: false,
+          //      processData: false,
+          //      data: formData,
+          //      success: function(response) {
+          //           console.log('value of response');
+          //           console.log(response);
+          //           // if (!response.is_error) {
+          //           //      console.log('no error at all')
+                         
+          //           // } else {
+          //           // console.log('do not do anything');
+          //           // }
+          //      },
+          //      error: function(error) {
+          //           console.log('error submitting by modal ================', error);
+          //      },
+          //      cache: false,
+          //      contentType: false,
+          //      processData: false,
+          //      });
+          // }
+     })
+})
+
+</script>
+
+       

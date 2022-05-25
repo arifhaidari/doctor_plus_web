@@ -1,0 +1,485 @@
+{% extends 'doctor_sidebar.html' %}
+{% load static %}
+{% load i18n %}
+{% load doctor_tags %}
+{% block title %}
+Dashboard | Doctor
+{% endblock title %}
+{% block pageleve_styles %}
+<style>
+  .canceld_appoinment {
+    pointer-events: none;
+    opacity: 0.5;
+    background: #CCC;
+  }
+
+</style>
+{% endblock pageleve_styles %}
+{% block content %}
+<div class="col-md-7 col-lg-8 col-xl-9">
+  <div class="row">
+    <div class="col-md-12">
+      <div class="card dash-card">
+        <div class="card-body">
+          <div class="row">
+            <div class="col-md-12 col-lg-4">
+              <div class="dash-widget dct-border-rht">
+                <div class="circle-bar circle-bar1">
+                  <div class="circle-graph1" data-percent="75">
+                    <img src="{% static 'img/icon-01.png' %}" class="img-fluid" alt="patient">
+                  </div>
+                </div>
+                <div class="dash-widget-info">
+                  <h6>{% trans "Total Patient" %}</h6>
+                  <h3>{{ patient_no }}</h3>
+                  <p class="text-muted">{% trans "Till Today" %}</p>
+                </div>
+              </div>
+            </div>
+            <div class="col-md-12 col-lg-4">
+              <div class="dash-widget dct-border-rht">
+                <div class="circle-bar circle-bar2">
+                  <div class="circle-graph2" data-percent="65">
+                    <img src="{% static 'img/icon-02.png' %}" class="img-fluid" alt="Patient">
+                  </div>
+                </div>
+                <div class="dash-widget-info">
+                  <h6>{% trans "Today Patient" %}</h6>
+                  <h3>{{ total_patients_today }}</h3>
+                  <p class="text-muted">{% now "j. F, Y" %}</p>
+                </div>
+              </div>
+            </div>
+            <div class="col-md-12 col-lg-4">
+              <div class="dash-widget">
+                <div class="circle-bar circle-bar3">
+                  <div class="circle-graph3" data-percent="50">
+                    <img src="{% static 'img/icon-03.png' %}" class="img-fluid" alt="Patient">
+                  </div>
+                </div>
+                <div class="dash-widget-info">
+                  <h6>{% trans "Appoinments" %}</h6>
+                  <h3>{{ completed_appt_no }}</h3>
+                  <p class="text-muted">{% trans "Completed Appts No" %}</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="row">
+    <div class="col-md-12">
+      <div class="mb-2 mr-4">
+        <div class="btn-group">
+          <button type="button" class="btn btn-info" data-toggle="dropdown">
+            <span class="fa  fa-arrow-circle-right"></span>
+            Export Today Appointments
+          </button>
+          <div class="dropdown-menu">
+            <a class="dropdown-item" href="javascript:void(0)">Select Clinic</a>
+            <div class="dropdown-divider"></div>
+            {% for clinic in request.user.doctor.clinic_set.all %}
+            <a class="dropdown-item" href="{% url 'appointment:doctor_today_appt_list' clinic.id %}">
+              {{ clinic }}
+            </a>
+            {% endfor %}
+          </div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-body">
+          <div class="card-header">
+            <div class="meta-data">
+              <h4 class="card-title d-inline-block"><b>{% trans "Patient Appoinments" %}</b></h4>
+            </div>
+          </div>
+          <!-- Tab Menu -->
+          <nav class="user-tabs mb-4">
+            <ul class="nav nav-tabs nav-tabs-bottom nav-justified">
+              <li class="nav-item">
+                <a class="nav-link active" href="#today" data-toggle="tab">{% trans "Today" %}</a>
+              </li>
+              <li class="nav-item">
+                <a class="nav-link" href="#tomorrow" data-toggle="tab">{% trans "Tomorrow" %}</a>
+              </li>
+              <li class="nav-item">
+                <a class="nav-link" href="#upcoming" data-toggle="tab"><span class="med-records">{% trans "Upcoming" %}</span></a>
+              </li>
+            </ul>
+          </nav>
+          <!-- /Tab Menu -->
+          <!-- Appointment Tabs -->
+          <div class="tab-content pt-0">
+            <div id="today" class="tab-pane fade show active">
+              <div class="card card-table mb-0">
+                <div class="card-body">
+                  <div class="table-responsive">
+                    <table class="table table-hover table-center mb-0">
+                      <thead>
+                        <tr>
+                          <th>{% trans "Patient" %}</th>
+                          <th>{% trans "Appt Date" %}</th>
+                          <th>{% trans "Booking Date" %}</th>
+                          <th>{% trans "Clinic" %}</th>
+                          <th>{% trans "Status" %}</th>
+                          <th></th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {% for ap in today_appoinments %}
+                        {% if ap.relative is not None %}
+                        <tr name="appoint_{{ap.id}}" class="canceld_appoinment">
+                          <td>
+                            <h2 class="table-avatar">
+                              <a href="{% url 'doctor:my_patient_detail' 'rel' ap.relative.user.id %}" class="avatar avatar-sm mr-2"><img class="avatar-img rounded-circle" src="{% if ap.relative.user.avatar %}{{ ap.relative.user.avatar.url }}{% else %}{% if ap.relative.user.gender == 'Male' %}{% static 'img/male_profile.png' %}{% else %}{% static 'img/female_profile.png' %}{% endif %}{% endif %}" alt="User Image"></a>
+                              <a href="{% url 'doctor:my_patient_detail' 'rel' ap.relative.user.id %}"> {{ ap.relative}} <span>View Profile</span></a>
+                            </h2>
+                          </td>
+                          <td>{{ ap.appt_date|date:"d. M, Y" }} <span class="d-block text-info">{{ ap.start_appt_time|default:"" }}</span></td>
+                          <td>{{ ap.booked_at|date:"d. M, Y" }}<span class="d-block text-info">{{ ap.booked_at|timesince }} ago</span></td>
+                          <td>{{ ap.clinic }}</td>
+                          {% if ap.status == "COMPLETED" %}
+                          <td><span class="badge badge-pill bg-success">{{ ap.status }}</span></td>
+                          {% if not ap.feedback_status %}
+                          <td>
+                            <div class="table-action">
+                              <a href="javascript:void(0);" class="btn btn-sm bg-info-light disabled">
+                                <i class="fa fa-star"></i> No Rating Yet
+                              </a>
+                              <a href="javascript:add_condition_thread({{ap.id}});" class="btn btn-sm bg-primary-light">
+                                <i class="fas fa-folder"></i> Condition Thread
+                              </a>
+                            </div>
+                          </td>
+                          {% else %}
+                          <td>
+                            <div class="table-action">
+                              <a href="{% got_feedback ap.id %}" class="btn btn-sm bg-success-light">
+                                <i class="fa fa-star"></i> View Rating
+                              </a>
+                              <a href="javascript:add_condition_thread({{ap.id}});" class="btn btn-sm bg-primary-light">
+                                <i class="fas fa-folder"></i> Condition Thread
+                              </a>
+                            </div>
+                          </td>
+                          {% endif %}
+                          {% elif ap.status == "EXPIRED" %}
+                          <td><span class="badge badge-pill bg-danger">{{ ap.status }}</span></td>
+                          {% elif ap.status == "PATIENT_CANCELED" %}
+                          <td><span class="badge badge-pill bg-danger">{{ ap.status }}</span></td>
+                          {% elif ap.status == "DOCTOR_CANCELED" %}
+                          <td><span class="badge badge-pill bg-danger">{{ ap.status }}</span></td>
+                          {% elif ap.status == "BOOKED" %}
+                          <td><span class="badge badge-pill bg-warning">{{ ap.status }}</span></td>
+                          <td>
+                            <div class="table-action">
+                              <a href="javascript:void(0);" class="btn btn-sm bg-danger-light" onclick="cancel_appointment({{ap.id}})">
+                                <i class="fa fa-times"></i> Cancel
+                              </a>
+                            </div>
+                          </td>
+                          {% endif %}
+                        </tr>
+                        {% comment %} when relative is none {% endcomment %}
+                        {% elif ap.relative is None %}
+                        <tr name="appoint_{{ap.id}}" class="canceld_appoinment">
+                          <td>
+                            <h2 class="table-avatar">
+                              <a href="{% url 'doctor:my_patient_detail' 'pat' ap.patient.user.id %}" class="avatar avatar-sm mr-2"><img class="avatar-img rounded-circle" src="{% if ap.patient.user.avatar %}{{ ap.patient.user.avatar.url }}{% else %}{% if ap.patient.user.gender == 'Male' %}{% static 'img/male_profile.png' %}{% else %}{% static 'img/female_profile.png' %}{% endif %}{% endif %}" alt="User Image"></a>
+                              <a href="{% url 'doctor:my_patient_detail' 'pat' ap.patient.user.id %}"> {{ ap.patient}} <span>View Profile</span></a>
+                            </h2>
+                          </td>
+                          <td>{{ ap.appt_date|date:"d. M, Y" }} <span class="d-block text-info">{{ ap.start_appt_time|default:"" }}</span></td>
+                          <td>{{ ap.booked_at|date:"d. M, Y" }}<span class="d-block text-info">{{ ap.booked_at|timesince }} ago</span></td>
+                          <td>{{ ap.clinic }}</td>
+                          {% if ap.status == "COMPLETED" %}
+                          <td><span class="badge badge-pill bg-success">{{ ap.status }}</span></td>
+                          {% if not ap.feedback_status %}
+                          <td>
+                            <div class="table-action">
+                              <a href="javascript:void(0);" class="btn btn-sm bg-info-light disabled">
+                                <i class="fa fa-star"></i> No Rating Yet
+                              </a>
+                              <a href="javascript:add_condition_thread({{ap.id}});" class="btn btn-sm bg-primary-light">
+                                <i class="fas fa-folder"></i> Condition Thread
+                              </a>
+                            </div>
+                          </td>
+                          {% else %}
+                          <td>
+                            <div class="table-action">
+                              <a href="{% got_feedback ap.id %}" class="btn btn-sm bg-success-light">
+                                <i class="fa fa-star"></i> View Rating
+                              </a>
+                              <a href="javascript:add_condition_thread({{ap.id}});" class="btn btn-sm bg-primary-light">
+                                <i class="fas fa-folder"></i> Condition Thread
+                              </a>
+                            </div>
+                          </td>
+                          {% endif %}
+                          {% elif ap.status == "EXPIRED" %}
+                          <td><span class="badge badge-pill bg-danger">{{ ap.status }}</span></td>
+                          {% elif ap.status == "PATIENT_CANCELED" %}
+                          <td><span class="badge badge-pill bg-danger">{{ ap.status }}</span></td>
+                          {% elif ap.status == "DOCTOR_CANCELED" %}
+                          <td><span class="badge badge-pill bg-danger">{{ ap.status }}</span></td>
+                          {% elif ap.status == "BOOKED" %}
+                          <td><span class="badge badge-pill bg-warning">{{ ap.status }}</span></td>
+                          <td>
+                            <div class="table-action">
+                              <a href="javascript:void(0);" class="btn btn-sm bg-danger-light" onclick="cancel_appointment({{ap.id}})">
+                                <i class="fa fa-times"></i> Cancel
+                              </a>
+                            </div>
+                          </td>
+                          {% endif %}
+                        </tr>
+                        {% endif %}
+                        <!-- end of relative if -->
+                        {% empty %}
+                        <tr>
+                          <td>
+                            <h3 align="center"> {% trans "No appoinments" %} </h3>
+                          </td>
+                        </tr>
+                        {% endfor %}
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div id="tomorrow" class="tab-pane fade show">
+              <div class="card card-table mb-0">
+                <div class="card-body">
+                  <div class="table-responsive">
+                    <table class="table table-hover table-center mb-0">
+                      <thead>
+                        <tr>
+                          <th>{% trans "Patient" %}</th>
+                          <th>{% trans "Appt Date" %}</th>
+                          <th>{% trans "Booking Date" %}</th>
+                          <th>{% trans "Clinic" %}</th>
+                          <th>{% trans "Status" %}</th>
+                          <th></th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {% for ap in tomorrow_appoinments %}
+                        {% if ap.relative is not None %}
+                        <tr name="appoint_{{ap.id}}" class="canceld_appoinment">
+                          <td>
+                            <h2 class="table-avatar">
+                              <a href="{% url 'doctor:my_patient_detail' 'rel' ap.relative.user.id %}" class="avatar avatar-sm mr-2"><img class="avatar-img rounded-circle" src="{% if ap.relative.user.avatar %}{{ ap.relative.user.avatar.url }}{% else %}{% if ap.relative.user.gender == 'Male' %}{% static 'img/male_profile.png' %}{% else %}{% static 'img/female_profile.png' %}{% endif %}{% endif %}" alt="User Image"></a>
+                              <a href="{% url 'doctor:my_patient_detail' 'rel' ap.relative.user.id %}"> {{ ap.relative}} <span>View Profile</span></a>
+                            </h2>
+                          </td>
+                          <td>{{ ap.appt_date|date:"d. M, Y" }} <span class="d-block text-info">{{ ap.start_appt_time|default:"" }}</span></td>
+                          <td>{{ ap.booked_at|date:"d. M, Y" }}<span class="d-block text-info">{{ ap.booked_at|timesince }} ago</span></td>
+                          <td>{{ ap.clinic }}</td>
+                          {% if ap.status == "PATIENT_CANCELED" %}
+                          <td><span class="badge badge-pill bg-danger">{{ ap.status }}</span></td>
+                          {% elif ap.status == "DOCTOR_CANCELED" %}
+                          <td><span class="badge badge-pill bg-danger">{{ ap.status }}</span></td>
+                          {% elif ap.status == "BOOKED" %}
+                          <td><span class="badge badge-pill bg-warning">{{ ap.status }}</span></td>
+                          <td>
+                            <div class="table-action">
+                              <a href="javascript:void(0);" class="btn btn-sm bg-danger-light" onclick="cancel_appointment({{ap.id}})">
+                                <i class="fa fa-times"></i> Cancel
+                              </a>
+                            </div>
+                          </td>
+                          {% endif %}
+                        </tr>
+                        {% comment %} when relative is none {% endcomment %}
+                        {% elif ap.relative is None %}
+                        <tr name="appoint_{{ap.id}}" class="canceld_appoinment">
+                          <td>
+                            <h2 class="table-avatar">
+                              <a href="{% url 'doctor:my_patient_detail' 'pat' ap.patient.user.id %}" class="avatar avatar-sm mr-2"><img class="avatar-img rounded-circle" src="{% if ap.patient.user.avatar %}{{ ap.patient.user.avatar.url }}{% else %}{% if ap.patient.user.gender == 'Male' %}{% static 'img/male_profile.png' %}{% else %}{% static 'img/female_profile.png' %}{% endif %}{% endif %}" alt="User Image"></a>
+                              <a href="{% url 'doctor:my_patient_detail' 'pat' ap.patient.user.id %}"> {{ ap.patient}} <span>View Profile</span></a>
+                            </h2>
+                          </td>
+                          <td>{{ ap.appt_date|date:"d. M, Y" }} <span class="d-block text-info">{{ ap.start_appt_time|default:"" }} ago</span></td>
+                          <td>{{ ap.booked_at|date:"d. M, Y" }}<span class="d-block text-info">{{ ap.booked_at|timesince }} ago</span></td>
+                          <td>{{ ap.clinic }}</td>
+                          {% if ap.status == "PATIENT_CANCELED" %}
+                          <td><span class="badge badge-pill bg-danger">{{ ap.status }}</span></td>
+                          {% elif ap.status == "DOCTOR_CANCELED" %}
+                          <td><span class="badge badge-pill bg-danger">{{ ap.status }}</span></td>
+                          {% elif ap.status == "BOOKED" %}
+                          <td><span class="badge badge-pill bg-warning">{{ ap.status }}</span></td>
+                          <td>
+                            <div class="table-action">
+                              <a href="javascript:void(0);" class="btn btn-sm bg-danger-light" onclick="cancel_appointment({{ap.id}})">
+                                <i class="fa fa-times"></i> Cancel
+                              </a>
+                            </div>
+                          </td>
+                          {% endif %}
+                        </tr>
+                        {% endif %}
+                        <!-- end of relative if -->
+                        {% empty %}
+                        <tr>
+                          <td>
+                            <h3 align="center"> {% trans "No appoinments" %} </h3>
+                          </td>
+                        </tr>
+                        {% endfor %}
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div id="upcoming" class="tab-pane fade show">
+              <div class="card card-table mb-0">
+                <div class="card-body">
+                  <div class="table-responsive">
+                    <table class="table table-hover table-center mb-0">
+                      <thead>
+                        <tr>
+                          <th>{% trans "Patient" %}</th>
+                          <th>{% trans "Appt Date" %}</th>
+                          <th>{% trans "Booking Date" %}</th>
+                          <th>{% trans "Clinic" %}</th>
+                          <th>{% trans "Status" %}</th>
+                          <th></th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {% for ap in upcoming_appoinments %}
+                        {% if ap.relative is not None %}
+                        <tr name="appoint_{{ap.id}}" class="canceld_appoinment">
+                          <td>
+                            <h2 class="table-avatar">
+                              <a href="{% url 'doctor:my_patient_detail' 'rel' ap.relative.user.id %}" class="avatar avatar-sm mr-2"><img class="avatar-img rounded-circle" src="{% if ap.relative.user.avatar %}{{ ap.relative.user.avatar.url }}{% else %}{% if ap.relative.user.gender == 'Male' %}{% static 'img/male_profile.png' %}{% else %}{% static 'img/female_profile.png' %}{% endif %}{% endif %}" alt="User Image"></a>
+                              <a href="{% url 'doctor:my_patient_detail' 'rel' ap.relative.user.id %}"> {{ ap.relative}} <span>View Profile</span></a>
+                            </h2>
+                          </td>
+                          <td>{{ ap.appt_date|date:"d. M, Y" }} <span class="d-block text-info">{{ ap.start_appt_time|default:"" }}</span></td>
+                          <td>{{ ap.booked_at|date:"d. M, Y" }}<span class="d-block text-info">{{ ap.booked_at|timesince }} ago</span></td>
+                          <td>{{ ap.clinic }}</td>
+                          {% if ap.status == "PATIENT_CANCELED" %}
+                          <td><span class="badge badge-pill bg-danger">{{ ap.status }}</span></td>
+                          {% elif ap.status == "DOCTOR_CANCELED" %}
+                          <td><span class="badge badge-pill bg-danger">{{ ap.status }}</span></td>
+                          {% elif ap.status == "BOOKED" %}
+                          <td><span class="badge badge-pill bg-warning">{{ ap.status }}</span></td>
+                          <td>
+                            <div class="table-action">
+                              <a href="javascript:void(0);" class="btn btn-sm bg-danger-light" onclick="cancel_appointment({{ap.id}})">
+                                <i class="fa fa-times"></i> Cancel
+                              </a>
+                            </div>
+                          </td>
+                          {% endif %}
+                        </tr>
+                        {% comment %} when relative is none {% endcomment %}
+                        {% elif ap.relative is None %}
+                        <tr name="appoint_{{ap.id}}" class="canceld_appoinment">
+                          <td>
+                            <h2 class="table-avatar">
+                              <a href="{% url 'doctor:my_patient_detail' 'pat' ap.patient.user.id %}" class="avatar avatar-sm mr-2"><img class="avatar-img rounded-circle" src="{% if ap.patient.user.avatar %}{{ ap.patient.user.avatar.url }}{% else %}{% if ap.patient.user.gender == 'Male' %}{% static 'img/male_profile.png' %}{% else %}{% static 'img/female_profile.png' %}{% endif %}{% endif %}" alt="User Image"></a>
+                              <a href="{% url 'doctor:my_patient_detail' 'pat' ap.patient.user.id %}"> {{ ap.patient}} <span>View Profile</span></a>
+                            </h2>
+                          </td>
+                          <td>{{ ap.appt_date|date:"d. M, Y" }} <span class="d-block text-info">{{ ap.start_appt_time|default:"" }}</span></td>
+                          <td>{{ ap.booked_at|date:"d. M, Y" }}<span class="d-block text-info">{{ ap.booked_at|timesince }} ago</span></td>
+                          <td>{{ ap.clinic }}</td>
+                          {% if ap.status == "PATIENT_CANCELED" %}
+                          <td><span class="badge badge-pill bg-danger">{{ ap.status }}</span></td>
+                          {% elif ap.status == "DOCTOR_CANCELED" %}
+                          <td><span class="badge badge-pill bg-danger">{{ ap.status }}</span></td>
+                          {% elif ap.status == "BOOKED" %}
+                          <td><span class="badge badge-pill bg-warning">{{ ap.status }}</span></td>
+                          <td>
+                            <div class="table-action">
+                              <a href="javascript:void(0);" class="btn btn-sm bg-danger-light" onclick="cancel_appointment({{ap.id}})">
+                                <i class="fa fa-times"></i> Cancel
+                              </a>
+                            </div>
+                          </td>
+                          {% endif %}
+                        </tr>
+                        {% endif %}
+                        <!-- end of relative if -->
+                        {% empty %}
+                        <tr>
+                          <td>
+                            <h3 align="center"> {% trans "No appoinments" %} </h3>
+                          </td>
+                        </tr>
+                        {% endfor %}
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <!-- Appointment Tabs -->
+        </div>
+      </div>
+      {% for clinic in request.user.doctor.clinic_set.all %}
+      {# {% doctor_appointments_by_clinic request.user.doctor clinic %} #}
+      {% endfor %}
+    </div>
+  </div>
+</div>
+<!-- modals -->
+<div class="modal fade custom-modal" id="add-condition-thread">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3 class="modal-title"><b>Add Condition Thread</b></h3>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body">
+        <form method="post" id='submit-appointment-from' class="d-inline">
+          {% csrf_token %}
+          <label for="select-condition-thread">Select Condition Thread</label>
+          <select name='condition_threads' id="select-condition-thread" style="width:90%;" multiple>
+            {% for cn in appt_condition_treated %}
+            <option value="{{cn.id}}" name="condition-thread-item">{{ cn }}</option>
+            {% endfor %}
+          </select>
+          <span class="d-none" name='appid'></span>
+        </form>
+        <button class="btn btn-info" id='add-new-condition'><span class="fa fa-plus"></span></button>
+        <div id="new-condition" class="pt-3">
+          <hr>
+          <h5><b>Add New Option</b></h5>
+          <small>
+            <p>If you can't find appointment threaded condition please add new option so that others can use it later too.</p>
+          </small>
+          <form action="." method="post" id="new_appointment_condition_thread_form">
+            {% csrf_token %}
+            {{ add_app_codition_thread.as_p }}
+            <button type="submit" class="btn btn-primary"> Add </button>
+            <button type="button" class="btn btn-warning" id='cancel-new-thread'> Cancel </button>
+          </form>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" id="submit-appointment-thread" class="btn btn-primary"> Submit </button>
+      </div>
+    </div>
+  </div>
+</div>
+<!-- /modals -->
+{% endblock content %}
+{% block script %}
+<script type="text/javascript">
+  var csrftoken = '{{ csrf_token }}';
+
+</script>
+<script src="/static/doctor/js/doctor_dashboard.js"></script>
+{% endblock script %}
+

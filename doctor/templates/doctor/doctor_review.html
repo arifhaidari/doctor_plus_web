@@ -1,0 +1,115 @@
+{% extends 'doctor_sidebar.html' %}
+{% load static %}
+{% block title %}
+Reviews | Doctor
+{% endblock title %}
+{% block content %}
+<div class="col-md-7 col-lg-8 col-xl-9">
+  <div class="doc-review review-listing">
+    <ul class="comments-list">
+      {% for comment in comments %}
+      <!-- Comment List -->
+      <li name="comment_{{ comment.id }}">
+        <div class="comment">
+          <img class="avatar rounded-circle" alt="User Image" src="{% if comment.appointment.patient.user.avatar %}{{ comment.appointment.patient.user.avatar.url }}{% else %}{% if comment.appointment.patient.user.gender == 'Male' %}{% static 'img/male_profile.png' %}{% else %}{% static 'img/female_profile.png' %}{% endif %}{% endif %}">
+       
+          <div class="comment-body w-100">
+            <div class="meta-data">
+              <span class="comment-author">{{ comment.appointment.patient }}</span>
+              <span class="comment-date">{{ comment.timestamp|date:"g:i A, D d M Y" }}</span>
+              <div class="review-count rating">
+                <div name="good-stars">
+                  {% for item in ""|ljust:comment.better_count %}
+                  <i class="fas fa-star filled"></i>
+                  {% endfor %}
+                </div>
+                <div name="bad-stars">
+                  {% for item in ""|ljust:comment.good_count %}
+                  <i class="fas fa-star"></i>
+                  {% endfor %}
+                </div>
+              </div>
+            </div>
+            <p class="comment-content">
+              {{ comment }}
+            </p>
+          </div>
+        </div>
+        {% for rep in comment.replies.all %}
+        <ul class="comments-reply">
+          <!-- Comment Reply List -->
+          <li>
+            <div class="comment ">
+              <img class="avatar rounded-circle" alt="User Image" src="{% if rep.author.avatar %}{{ rep.author.avatar.url }}{% else %}{% if rep.author.gender == 'Male' %}{% static 'img/male_profile.png' %}{% else %}{% static 'img/female_profile.png' %}{% endif %}{% endif %}">
+              <div class="comment-body w-100">
+                <div class="meta-data">
+                  <span class="comment-author">{{ rep.author }}</span>
+                  <span class="comment-date">{{ rep.timestamp|date:"g:i A, D d M Y" }}</span>
+                  <input type="hidden" name="replied" value="true">
+                </div>
+                <p class="comment-content">
+                  {{ rep.reply }}
+                </p>
+              </div>
+            </div>
+          </li>
+          <!-- /Comment Reply List -->
+        </ul>
+        {% endfor %}
+        <div name="add-rep-{{ comment.id }}"></div>
+        <div class="comment-reply pl-5 text-info">
+          <a class="comment-btn" style="cursor:pointer;">
+            <i class="fas fa-reply"></i> Reply
+          </a>
+          <div class="card-body">
+            <form method="POST" name="create-reply">
+              {% csrf_token %}
+              <div class="form-group">
+                <textarea rows="4" class="form-control" name="reply"></textarea>
+                <input type="hidden" name="comment-id" value="{{ comment.id }}">
+                <input type="hidden" name="submit" value="create-reply">
+              </div>
+              <div class="submit-section">
+                <button class="btn btn-primary submit-btn" type="submit">Submit</button>
+              </div>
+            </form>
+          </div>
+        </div>
+      </li>
+      <!-- /Comment List -->
+      {% endfor %}
+    </ul>
+    <div class="text-left">
+      <div class="pt-3">
+        <ul class="pagination">
+          {% if comments.has_previous %}
+          <li class="page-item">
+            <a class="page-link" href="?page=1" tabindex="-1">First</a>
+          </li>
+          {% endif %}
+          {% for num in comments.paginator.page_range %}
+          {% if num == comments.number %}
+          <li class="page-item active">
+            <a class="page-link" href="#">{{ num }} <span class="sr-only">(current)</span></a>
+          </li>
+          {% elif num > comments.number|add:'-3' and num < comments.number|add:'3' %} <li class="page-item"><a class="page-link" href="?page={{num}}">{{ num }}</a></li>
+            {% endif %}
+            {% endfor %}
+            {% if comments.has_next %}
+            <li class="page-item">
+              <a class="page-link" href="?page={{ comments.paginator.num_pages }}">Last</a>
+            </li>
+            {% endif %}
+        </ul>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock content %}
+{% block script %}
+<script type="text/javascript">
+var csrftoken = '{{ csrf_token }}';
+</script>
+<script type="text/javascript" src="/static/axios.min.js"></script>
+{% include 'doctor/script/doctor_review_script.html' %}
+{% endblock script %}

@@ -1,0 +1,176 @@
+
+<script>
+$('#edit_family_member').toggle();
+
+
+function edit_family_member() {
+  $("#edit_family_member").toggle('normal')
+};
+$("#myform").submit(function(event) {
+  event.preventDefault();
+});
+
+
+$("#submit-edit-family-member").click(function() {
+  let form = new FormData($("#myform")[0])
+  axios.post(".", form).then((response) => {
+    console.log("resp ", response)
+    if (response.data.status == "success") {
+      myform.reset();
+      edit_family_member();
+      location.reload();
+    }
+  }).catch((error) => {
+    console.error(error);
+  })
+});
+
+
+var isError = false;
+
+function setError(inputField, errorArea, errorMessage) {
+     isError = true
+     console.log(errorMessage);
+     inputField.css('border', 'dashed 2px red');
+     errorArea.css('display', 'block');
+     errorArea.text(errorMessage);
+}
+
+$("button[type='submit']").click(function() {
+     // Validation form
+     // if ($("#name").val().trim() === '' || $("#name").val().trim() == null) {
+     //           setError($("#name"), $("#name_error"), 'Name field is emtpy')
+     //      } else {
+     //           if (!isNaN($("#name").val().trim())) {
+     //                setError($("#name"), $("#name_error"), 'Name must not be digits')
+     //           }
+     //      }
+     //      if ($("#rtl_name").val().trim() === '' || $("#rtl_name").val().trim() == null) {
+     //           setError($("#rtl_name"), $("#rtl_name_error"), 'Name (Farsi/Pashto) field is emtpy')
+     //      } else {
+     //           if (!isNaN($("#rtl_name").val().trim())) {
+     //                setError($("#rtl_name_error"), $("#rtl_name_error"), 'Name (Farsi/Pashto) must not be digits')
+     //           }
+     //      }
+     //      if ($("#phone").val().trim() === '' || $("#phone").val().trim() == null) {
+     //           setError($("#phone"), $("#phone_error"), 'Phone number field is emtpy')
+     //      } else {
+     //           if (isNaN($("#phone").val().trim())) {
+     //                setError($("#phone"), $("#phone_error"), 'Mobile numbers should be digits only')
+     //           }
+     //           else if ($("#phone").val().trim().length != 10) {
+     //                setError($("#phone"), $("#phone_error"), 'Phone number should be 10 digits e.g. 077 xxxx xxx')
+     //           }
+     //      }
+       
+     //      if ($("#city").val() === '' || $("#city").val() == null) {
+     //           setError($("#city"), $("#city_error"), 'Province is not selected')
+     //      }
+
+     //      if ($("#district").val() === '' || $("#district").val() == null) {
+     //           setError($("#district"), $("#district_error"), 'District is not selected')
+     //      }
+
+     //      if ($("#blood_group").val() === '' || $("#blood_group").val().trim() == null) {
+     //           setError($("#blood_group"), $("#blood_group_error"), 'Blood Group is not selected')
+     //      }
+
+     //      if ($("#relation").val() === '' || $("#relation").val().trim() == null) {
+     //           setError($("#relation"), $("#relation_error"), 'Relation with patient is not selected')
+     //      }
+     //      if ($("#dob").val().trim() === '' || $("#dob").val().trim() == null) {
+     //           setError($("#dob"), $("#dob_error"), 'Date of birth field is emtpy')
+     //      } else {
+     //           var currentDate = new Date()
+     //           var dobDate = new Date($("#dob").val().trim())
+	// 		if(dobDate > currentDate) {
+	// 			setError($("#dob"), $("#dob_error"), 'Birth date cannot be in the future or today')
+	// 		}
+     //      }
+
+          if (isError) {
+               console.log('yes there is error')
+               isError = false
+          } else {
+            
+               let form = new FormData($("#myform")[0])
+               // let form = $("#myform").serialize() // this one work but cannot transfer files and images 
+               axios.post(".", form).then((response) => {
+               console.log("resp ", response)
+               console.log('valuer of response.data.status')
+               console.log(response.data.status)
+               if (response.data.status == "success") {
+                    myform.reset();
+                    edit_family_member();
+                     location.reload();
+               } else {
+                    console.log('boom there we have problem ')
+                    // show some error to front end 
+                    $('#response_error').css('display', 'block');
+                    $('#response_error').text(response.data.status);
+               }
+               }).catch((error) => {
+               console.error(error);
+               })
+          }
+  
+});
+
+
+     $("#city").change(function(){
+          const url = $("#patient_profile_form").attr("data-districts-url");  // get the url of the `load_districts` view
+          const city_id = $(this).val();  // get the selected city ID from the HTML input
+          $.ajax({                       // initialize an AJAX request
+               url: "{% url 'user:ajax_load_districts' %}",                    // set the url of the request (= /persons/ajax/load-cities/ )
+               data: {
+                    'city_id': city_id     // add the city id to the GET parameters
+               },
+               success: function (data) {   // `data` is the return of the `load_districts` view function
+                    $("#district").html(data);  // replace the contents of the district input with the data that came from the server
+               }
+          });
+     })
+   
+
+
+
+function delete_family_member() {
+  Swal.fire({
+    title: 'Are you sure?',
+    text: "You won't be able to revert this!",
+    icon: 'warning',
+    showCancelButton: true,
+    confirmButtonColor: '#3085d6',
+    cancelButtonColor: '#d33',
+    confirmButtonText: 'Yes, delete it!'
+  }).then((result) => {
+    if (result.isConfirmed) {
+      let form = new FormData();
+      form.append("csrfmiddlewaretoken", "{{ csrf_token }}");
+      form.append('delete_family_member', "{{ relative.user.id }}");
+      axios.post(".", form).then((response) => {
+        console.log('value rof response.data.status')
+        console.log(response.data.status)
+        if (response.data.status == "success") {
+          Swal.fire(
+            'Deleted!',
+            'Your file has been deleted.',
+            'success'
+          )
+          location.href = "{% url 'relative:list' %}"
+        } else {
+          console.log('isnde the error section');
+        }
+      }).catch((error) => {
+        console.error(error);
+      })
+    }
+  })
+}
+
+// csrftoken
+var csrftoken = '{{ csrf_token }}';
+
+</script>
+<script src="/static/relative/js/relative_appointments.js"></script>
+<script src="/static/relative/js/relative_medicalrecord.js"></script>

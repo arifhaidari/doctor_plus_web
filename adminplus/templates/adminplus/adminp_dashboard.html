@@ -1,0 +1,156 @@
+{% extends "adminplus/adminp_base.html" %}
+{% load static %}
+{% block title %}
+Admin Dashboard
+{% endblock title %}
+{% block pagelevel_styles %}
+{% endblock pagelevel_styles %}
+{% block content %}
+<div class="page-wrapper">
+  <div class="content container-fluid">
+    <!-- Page Header -->
+    <div class="page-header">
+      <div class="row">
+        <div class="col-sm-12">
+          <h3 class="page-title">Welcome Admin!</h3>
+          <ul class="breadcrumb">
+            <li class="breadcrumb-item active">Dashboard</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+    <!-- /Page Header -->
+    <div class="row">
+      <div class="col-xl-3 col-sm-6 col-12">
+        <div class="card">
+          <div class="card-body">
+            <div class="dash-widget-header">
+              <span class="dash-widget-icon text-primary border-primary">
+                <i class="fe fe-users"></i>
+              </span>
+              <div class="dash-count">
+                <h3>{{ doctor_count }}</h3>
+              </div>
+            </div>
+            <div class="dash-widget-info">
+              <h6 class="text-muted">Doctors</h6>
+              <div class="progress progress-sm">
+                <div class="progress-bar bg-primary w-50"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="col-xl-3 col-sm-6 col-12">
+        <div class="card">
+          <div class="card-body">
+            <div class="dash-widget-header">
+              <span class="dash-widget-icon text-success">
+                <i class="fe fe-credit-card"></i>
+              </span>
+              <div class="dash-count">
+                <h3>{{ patient_count }}</h3>
+              </div>
+            </div>
+            <div class="dash-widget-info">
+              <h6 class="text-muted">Patients</h6>
+              <div class="progress progress-sm">
+                <div class="progress-bar bg-success w-50"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="col-xl-3 col-sm-6 col-12">
+        <div class="card">
+          <div class="card-body">
+            <div class="dash-widget-header">
+              <span class="dash-widget-icon text-danger border-danger">
+                <i class="fe fe-money"></i>
+              </span>
+              <div class="dash-count">
+                <h3>{{ appointment_count }}</h3>
+              </div>
+            </div>
+            <div class="dash-widget-info">
+              <h6 class="text-muted">Appointment</h6>
+              <div class="progress progress-sm">
+                <div class="progress-bar bg-danger w-50"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="col-xl-3 col-sm-6 col-12">
+        <div class="card">
+          <div class="card-body">
+            <div class="dash-widget-header">
+              <span class="dash-widget-icon text-warning border-warning">
+                <i class="fe fe-money"></i>
+              </span>
+              <div class="dash-count">
+                <h3>{{ doctors_under_review_count }}</h3>
+              </div>
+            </div>
+            <div class="dash-widget-info">
+              <h6 class="text-muted">Doctors under review</h6>
+              <div class="progress progress-sm">
+                <div class="progress-bar bg-warning w-50"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <!-- add other here -->
+    </div>
+    <div class="row">
+      <div class="col-md-12 col-lg-12">
+        <!-- Sales Chart -->
+        <div class="card card-chart">
+          <div class="card-header">
+            <h4 class="card-title">Doctors by Province</h4>
+          </div>
+          <div class="card-body">
+            <canvas id="doctors_by_province_chart" width="400" height="400"></canvas>
+          </div>
+        </div>
+        <!-- /Sales Chart -->
+      </div>
+    </div>
+    <div class="row">
+      <div class="col-md-6 d-flex">
+        <!-- Recent Orders -->
+        <div class="card card-table flex-fill">
+          <div class="card-header">
+            <h4 class="card-title">Patients By Province</h4>
+          </div>
+          <div class="card-body">
+            <canvas id="patients_by_province_chart" width="400" height="400"></canvas>
+          </div>
+        </div>
+        <!-- /Recent Orders -->
+      </div>
+      <div class="col-md-6 d-flex">
+        <!-- Feed Activity -->
+        <div class="card  card-table flex-fill">
+          <div class="card-header">
+            <h4 class="card-title">Appointments by Province</h4>
+          </div>
+          <div class="card-body">
+            <div class="table-responsive">
+              <canvas id="appointments_by_province_chart" width="400" height="400"></canvas>
+            </div>
+          </div>
+        </div>
+        <!-- /Feed Activity -->
+      </div>
+    </div>
+    <br><br>
+   
+  </div>
+</div>
+{% endblock content %}
+{% block script %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js@2.9.4/dist/Chart.min.js"></script>
+<script src="/static/adminplus/js/dashboard.js"></script>
+{% endblock script %}

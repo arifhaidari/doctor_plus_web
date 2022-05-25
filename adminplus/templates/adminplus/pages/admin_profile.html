@@ -1,0 +1,219 @@
+{% extends "adminplus/adminp_dashboard.html" %}
+{% load static %}
+{% block content %}
+<!-- Page Wrapper -->
+<div class="page-wrapper">
+  <div class="content container-fluid">
+    <!-- Page Header -->
+    <div class="page-header">
+      <div class="row">
+        <div class="col">
+          <h3 class="page-title">Profile</h3>
+          <ul class="breadcrumb">
+            <li class="breadcrumb-item"><a href="{% url 'adminplus:dashboard' %}">Dashboard</a></li>
+            <li class="breadcrumb-item active">Profile</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+    <!-- /Page Header -->
+    <div class="row">
+      <div class="col-md-12">
+        <div class="profile-header">
+          <div align="right">
+            buttons
+          </div>
+          <div class="row align-items-center">
+            <div class="col-auto profile-image">
+              <a href="#">
+                <img class="rounded-circle" alt="User Image" src="{% if request.user.avatar %}{{ request.user.avatar.url }}{% else %}{% if request.user.gender == 'Male' %}{% static 'img/male_profile.png' %}{% else %}{% static 'img/female_profile.png' %}{% endif %}{% endif %}">
+              </a>
+            </div>
+            <div class="col ml-md-n2 profile-user-info">
+              <h4 class="user-name mb-2">{{ request.user }}</h4>
+              <h6 class="text-muted"><span class="fa fa-mobile"></span> &nbsp;{{ request.user.phone }}</h6>
+              <h6 class="text-muted"><span class="fa fa-envelope"></span> &nbsp;{{ request.user.email }}</h6>
+              <div class="about-text">{{ doctor.bio }}</div>
+            </div>
+          </div>
+        </div>
+        <div class="profile-menu">
+          <ul class="nav nav-tabs nav-tabs-solid">
+            <li class="nav-item">
+              <a class="nav-link active" data-toggle="tab" href="#per_details_tab">About</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" data-toggle="tab" href="#edit_details_tab">Edit</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" data-toggle="tab" href="#change_password_tab">Change Password</a>
+            </li>
+          </ul>
+        </div>
+        <div class="tab-content profile-tab-cont">
+          <!-- Personal Details Tab -->
+          <div class="tab-pane fade show active" id="per_details_tab">
+            <!-- Personal Details -->
+            <div class="row">
+              <div class="col-lg-12">
+                <div class="card">
+                  <div class="card-body">
+                    <h5 class="card-title d-flex justify-content-between">
+                      <span>Personal Details</span>
+                    </h5>
+                    <div class="row">
+                      <p class="col-sm-2 text-muted text-sm-right mb-0 mb-sm-3">Name</p>
+                      <p class="col-sm-10">{{ request.user }}</p>
+                    </div>
+                    <div class="row">
+                      <p class="col-sm-2 text-muted text-sm-right mb-0 mb-sm-3">Email ID</p>
+                      <p class="col-sm-10">{{ request.user.email }}</p>
+                    </div>
+                    <div class="row">
+                      <p class="col-sm-2 text-muted text-sm-right mb-0 mb-sm-3">Mobile</p>
+                      <p class="col-sm-10">{{ request.user.phone }}</p>
+                    </div>
+                    <div class="row">
+                      <p class="col-sm-2 text-muted text-sm-right mb-0 mb-sm-3">Date of Birth</p>
+                      <p class="col-sm-10">{{ request.user.date_of_birth|date:"d, M. Y" }} &nbsp;({{ request.user.user_age }}, years old)</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <!-- /Personal Details -->
+          </div>
+          <!-- /Personal Details Tab -->
+          <!-- Edit Details Tab -->
+          <div class="tab-pane fade" id="edit_details_tab">
+            <div class="row">
+              <div class="col-lg-12">
+                <div class="card">
+                  <div class="card-body">
+                    <h5 class="card-title d-flex justify-content-between">
+                      <span>Edit Details</span>
+                    </h5>
+                    <form action="." method="post" id="edit-form" enctype="multipart/form-data">
+                      {% csrf_token %}
+                    {{ form.as_p }}
+                    <button type="submit" class="btn btn-info">Save Changes</button>
+                    </form>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <!-- /Edit Details Tab -->
+          <!-- chnage password Tab -->
+          <div class="tab-pane fade" id="change_password_tab">
+            <iframe src="{% url 'adminplus:password_change' %}" width="100%" height="700vh" frameborder="0"></iframe>
+          </div>
+          <!-- /chnage password Tab -->
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+<!-- /Page Wrapper -->
+{% endblock content %}
+{% block pagelevel_styles %}
+{% endblock pagelevel_styles %}
+{% block script %}
+<script>
+// form validtiion
+$('#edit-form').validate({
+  submitHandler: function(form) {
+    form.submit();
+  }
+  rules: {
+    "full_name": "required",
+    "rtl_full_name": "required",
+    "full_name": "required",
+    "full_name": "required",
+    "phone": {
+      required: true,
+      number: true,
+      minlength: 3,
+    },
+    "email": {
+      required: true,
+      email: true
+    }
+  }
+});
+
+
+
+let active = "{{ request.user.suspend }}"
+
+function set_active_suspend() {
+  console.log("active : ", active);
+  if (active == "False") {
+    $("#btn-active").addClass('d-none');
+    $("#btn-deactive").removeClass('d-none');
+  } else {
+    $("#btn-active").removeClass('d-none');
+    $("#btn-deactive").addClass('d-none');
+  }
+}
+set_active_suspend();
+
+$("#btn-active").click(function(event) {
+  let form = new FormData();
+  form.append('csrfmiddlewaretoken', '{{ csrf_token }}');
+  form.append('active_doctor', 1);
+  axios.post(".", form).then((response) => {
+    if (response.data.status == "success") {
+      active = "False";
+      set_active_suspend();
+    }
+  }).catch((error) => {
+    console.error(error);
+  });
+});
+$('#btn-deactive').click(function(event) {
+  let form = new FormData();
+  form.append('csrfmiddlewaretoken', '{{ csrf_token }}');
+  form.append('active_doctor', 0);
+  axios.post(".", form).then((response) => {
+    if (response.data.status == "success") {
+      active = "True";
+      set_active_suspend();
+    }
+  }).catch((error) => {
+    console.error(error);
+  })
+});
+
+// delete doctor
+function delete_doctor() {
+  Swal.fire({
+    title: 'Are you sure?',
+    text: "You won't be able to revert this!",
+    icon: 'warning',
+    showCancelButton: true,
+    confirmButtonColor: '#3085d6',
+    cancelButtonColor: '#d33',
+    confirmButtonText: 'Yes, delete it!'
+  }).then((result) => {
+    if (result.isConfirmed) {
+      let form = new FormData();
+      form.append("csrfmiddlewaretoken", "{{ csrf_token }}");
+      form.append('delete_doctor', 1);
+      axios.post(".", form).then((response) => {
+        if (response.data.status == "success") {
+          Swal.fire(
+            'Deleted!',
+            'Your file has been deleted.',
+            'success'
+          )
+          location.href = "{% url 'adminplus:doctors' %}"
+        }
+      }).catch((error) => {
+        console.error(error);
+      })
+    }
+  })
+}
+</script>
+{% endblock script %}

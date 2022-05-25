@@ -1,0 +1,160 @@
+<script>
+var isError = true;
+     // form.addEventListener('submit', (e) => {
+     $('#patient_profile_form').submit(function(e) {
+          // isError = true;
+          if ($("#name").val().trim() === '' || $("#name").val().trim() == null) {
+               setError($("#name"), $("#name_error"), 'Name field is emtpy')
+          } else {
+               if (!isNaN($("#name").val().trim())) {
+                    setError($("#name"), $("#name_error"), 'Name must not be digits')
+               }
+          }
+          if ($("#rtl_name").val().trim() === '' || $("#rtl_name").val().trim() == null) {
+               setError($("#rtl_name"), $("#rtl_name_error"), 'Name (Farsi/Pashto) field is emtpy')
+          } else {
+               if (!isNaN($("#rtl_name").val().trim())) {
+                    setError($("#rtl_name_error"), $("#rtl_name_error"), 'Name (Farsi/Pashto) must not be digits')
+               }
+          }
+          // if ($("#phone").val().trim() === '' || $("#phone").val().trim() == null) {
+          //      setError($("#phone"), $("#phone_error"), 'Phone number field is emtpy')
+          // } else {
+          //      if (isNaN($("#phone").val().trim())) {
+          //           setError($("#phone"), $("#phone_error"), 'Mobile numbers should be digits only')
+          //      }
+          //      else if ($("#phone").val().trim().length != 10) {
+          //           setError($("#phone"), $("#phone_error"), 'Phone number should be 10 digits e.g. 077 xxxx xxx')
+          //      }
+          // }
+       
+
+          if ($("#city").val() === '' || $("#city").val() == null) {
+               setError($("#city"), $("#city_error"), 'Province is not selected')
+          }
+
+          if ($("#district").val() === '' || $("#district").val() == null) {
+               setError($("#district"), $("#district_error"), 'District is not selected')
+          }
+
+          if ($("#blood_group").val() === '' || $("#blood_group").val().trim() == null) {
+               setError($("#blood_group"), $("#blood_group_error"), 'Blood Group is not selected')
+          }
+          if ($("#dob").val().trim() === '' || $("#dob").val().trim() == null) {
+               setError($("#dob"), $("#dob_error"), 'Date of birth field is emtpy')
+          } else {
+               var currentDate = new Date()
+               var dobDate = new Date($("#dob").val().trim())
+			if(dobDate > currentDate) {
+				setError($("#dob"), $("#dob_error"), 'Birth date cannot be in the future or today')
+			}
+          }
+
+          if (isError) {
+               console.log('yes there is error')
+               e.preventDefault()
+               isError = false
+          }
+     })
+
+     function setError(inputField, errorArea, errorMessage) {
+          isError = true
+          console.log(errorMessage);
+          inputField.css('border', 'dashed 2px red');
+          errorArea.css('display', 'block');
+          errorArea.text(errorMessage);
+     }
+
+     const csrf = document.getElementsByName('csrfmiddlewaretoken')
+     $("#city").change(function(){
+          const url = $("#patient_profile_form").attr("data-districts-url");  // get the url of the `load_districts` view
+          const city_id = $(this).val();  // get the selected city ID from the HTML input
+          $.ajax({                       // initialize an AJAX request
+               url: url,                    // set the url of the request (= /persons/ajax/load-cities/ )
+               data: {
+                    'city_id': city_id     // add the city id to the GET parameters
+               },
+               success: function (data) {   // `data` is the return of the `load_districts` view function
+                    $("#district").html(data);  // replace the contents of the district input with the data that came from the server
+               }
+          });
+     })
+     // Crop profile image and save it  
+     $(document).ready(function(){
+     var $modal = $('#crop_model');
+
+     var image = document.getElementById('sample_image');
+
+     var cropper;
+
+     $('#upload_image').change(function(event){
+          var files = event.target.files;
+          console.log(files)
+
+          var done = function(url){
+               image.src = url;
+               $modal.appendTo("body").modal('show');
+          };
+
+          if(files && files.length > 0)
+          {
+               reader = new FileReader();
+               reader.onload = function(event)
+               {
+                    done(reader.result);
+               };
+               reader.readAsDataURL(files[0]);
+          }
+     });
+
+     $modal.on('shown.bs.modal', function() {
+          cropper = new Cropper(image, {
+               aspectRatio: 1,
+               viewMode: 3,
+               preview:'.preview'
+          });
+     }).on('hidden.bs.modal', function(){
+          cropper.destroy();
+          cropper = null;
+     });
+
+
+     $('#crop').click(function(){
+
+          canvas = cropper.getCroppedCanvas({
+               width:300,
+               height:300
+          });
+          canvas.toBlob(function(blob){
+               url = URL.createObjectURL(blob);
+               $('#uploaded_image').attr('src', url);
+               ///////
+               const fd = new FormData();
+               fd.append('csrfmiddlewaretoken', csrf[0].value);
+               fd.append('avatar', blob, 'patient_avatar.png');
+
+               $.ajax({
+                    type:'POST',
+                    // url: '/patient/avatar/',
+                    url: '{% url "patient:save_patient_avatar" %}',
+                    enctype: 'multipart/form-data',
+                    data: fd,
+                    success: function(response){
+                         console.log('success', response)
+                    },
+                    error: function(error){
+                         console.log('error', error)
+                    },
+                    cache: false,
+                    contentType: false,
+                    processData: false,
+               })
+               $modal.appendTo("body").modal('hide');
+          });
+     });
+     });
+
+
+     ////////////////////////////
+     
+</script>

@@ -1,0 +1,17 @@
+<ul class="latest-posts">
+  {% for post in recent_posts %}
+  <li>
+    <div class="post-thumb">
+      <a href="{% url 'blog:details' post.id %}">
+        <img class="img-fluid" src="{{ post.images.first.image.url }}" alt="">
+      </a>
+    </div>
+    <div class="post-info">
+      <h4>
+        <a href="{% url 'blog:details' post.id %}">{{ post.title|title }}</a>
+      </h4>
+      <p>{{ post.timestamp|date:"d, M, Y" }}</p>
+    </div>
+  </li>
+  {% endfor %}
+</ul>

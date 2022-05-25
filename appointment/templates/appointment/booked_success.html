@@ -1,0 +1,67 @@
+{% extends "base.html" %}
+{% block title %}
+Appointment Booked
+{% endblock title %}
+{% block breadcrumb %}
+<!-- Breadcrumb -->
+<div class="breadcrumb-bar">
+  <div class="container-fluid">
+    <div class="row align-items-center">
+      <div class="col-md-12 col-12">
+        <nav aria-label="breadcrumb" class="page-breadcrumb">
+          <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="{% url 'home:homepage' %}">Home</a></li>
+            <li class="breadcrumb-item active" aria-current="page">Booking</li>
+          </ol>
+        </nav>
+        <h2 class="breadcrumb-title">Booking</h2>
+      </div>
+    </div>
+  </div>
+</div>
+<!-- /Breadcrumb -->
+{% endblock breadcrumb %}
+{% block content %}
+<div class="content success-page-cont">
+  <div class="container-fluid">
+    <div class="row justify-content-center">
+      <div class="col-lg-6">
+        <!-- Success Card -->
+        <div class="card success-card">
+          <div class="card-body">
+            <div class="success-cont">
+              <i class="fas fa-check"></i>
+              <h3>Appointment booked Successfully!</h3>
+              <p>Appointment booked with <strong>{{ appointment.doctor }}</strong><br> on <strong>{{ appointment.appt_date|date:"d, M. Y" }} at {{ appointment.start_appt_time }} to {{ appointment.end_appt_time }}</strong> for
+                {{ appointment.relative|default:"appointment.patient" }}
+              </p>
+              {% if appointment.relative %}
+              <a href="{% url 'relative:detail' appointment.relative.user.id %}" class="btn btn-primary view-inv-btn">View Appointment</a>
+              {% else %}
+              <a href="{% url 'patient:patient_dashboard_view' %}" class="btn btn-primary view-inv-btn">View Appointment</a>
+              {% endif %}
+            </div>
+          </div>
+        </div>
+        <!-- /Success Card -->
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock content %}
+{% block script %}
+<script type="text/javascript">
+  let form = new FormData();
+  form.append('csrfmiddlewaretoken', '{{ csrf_token }}');
+  form.append('appointment-success-notification', '{{ appointment.id }}')
+  axios.post('.', form)
+    .then(function(response) {
+      //Getting data from response
+      console.log("appointment-success-notification sent!");
+    })
+    .catch(function(error) {
+      console.log(error);
+    });
+
+</script>
+{% endblock script %}

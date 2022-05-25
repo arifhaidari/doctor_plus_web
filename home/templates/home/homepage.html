@@ -1,0 +1,180 @@
+{% extends 'base.html' %}
+{% load static %}
+{% load i18n %}
+{% load doctor_tags %}
+{% block title %}
+Home
+{% endblock title %}
+{% block content %}
+<!-- Home Banner -->
+<section class="section section-search">
+  <div class="container-fluid">
+    <div class="banner-wrapper">
+      <div class="banner-header text-center">
+        <h1>Search Doctor, Make an Appointment</h1>
+        <p>Discover the best doctors, clinic & hospital the city nearest to you.</p>
+      </div>
+      <!-- Search -->
+      <div class="search-box" style="height:10px;">
+        <form action="{% url 'home:search_view' %}" method="POST" id="search-form">
+          {% csrf_token %}
+          <input type="hidden" value="homepage" name="search_type">
+          <div class="form-group search-location">
+            <select name="province" class="form-control select">
+              <option value="all">All</option>
+              {% for province in provinces %}
+              <option value="{{ province.id }}">{{ province.name }}</option>
+              {% endfor %}
+            </select>
+            <span class="form-text">Search Based On Province</span>
+          </div>
+          <div class="form-group search-info">
+            <input type="text" class="form-control" autocomplete="off" placeholder="Search Doctors, Clinics, Hospitals, Diseases Etc" name="searched-content">
+            <span class="form-text">Ex : Dental or Sugar Check up etc</span>
+           
+          </div>
+          <button type="submit" class="btn btn-primary search-btn"><i class="fas fa-search"></i> <span>Search</span></button>
+        </form>
+      </div>
+      <!-- /Search -->
+    </div>
+  </div>
+</section>
+<!-- /Home Banner -->
+<!-- Clinic and Specialities -->
+<!-- <section class="section section-specialities > -->
+<div class="container">
+  <br>
+  <br>
+  <div class="section-header text-center">
+    <h2>Find Doctors By Specialities</h2>
+  </div>
+  <div class="row">
+        {% for category in speciality_categories %}
+    <div class="col-md-4">
+      <ul class="list-group">
+        <a href="javascript:search_sp_cat('{{category.name}}')">
+          <li class="list-group-item">
+            <i>
+              <img width="20px" src="{{ category.icon.url }}" class="img-fluid" alt="Speciality">
+            </i>
+            &nbsp;{{ category.name }}
+          </li>
+        </a>
+      </ul>
+    </div>
+        {% endfor %}
+  </div>
+</div>
+<!-- </section> -->
+<!-- Clinic and Specialities -->
+<!-- Popular Section -->
+<section class="section section-doctor">
+  <div class="container-fluid">
+    <div class="row">
+      <div class="col-lg-4">
+        <div class="section-header ">
+          <h2>Book Our Doctor</h2>
+          <p>Best Doctor Best Treatment</p>
+        </div>
+        <div class="about-content">
+          <p>The aims of this service are to create a platform where patients and doctors can efficiently access /interact with each other and provide ease and comfort to both sides. It also aims to resolve the problems that patients are facing while making appointments and keeping medical files.</p>
+          <p>Patients can choose doctors based on their professional profile, experience, fee, location, and other needed requirements. While doctors can access and update patients’ medical records after every checkup.</p>
+          <ul>
+            <li>Search for doctors by specialty, hospital, service, or disease.</li>
+            <li>Select based on experience, fee, rating, or location.</li>
+            <li>Book a confirmed appointment within seconds</li>
+          </ul>
+          {# <a href="javascript:;">Read More..</a> #}
+        </div>
+      </div>
+      <div class="col-lg-8">
+        <div class="doctor-slider slider">
+          <!-- Doctor Widget -->
+          {% for doctor in ""|top_rated_doctors %}
+          <div class="profile-widget">
+            <div class="doc-img">
+              <a href="{% url 'home:doctor_public_profile' doctor.user.id %}">
+                <img class="img-fluid" alt="User Image" src="{% if doctor.user.avatar %}{{ doctor.user.avatar.url }}{% else %}{% if doctor.user.gender == 'Male' %}{% static 'img/male_profile.png' %}{% else %}{% static 'img/female_profile.png' %}{% endif %}{% endif %}">
+              </a>
+              <a href="javascript:void(0)" class="fav-btn">
+                <i class="far fa-bookmark"></i>
+              </a>
+            </div>
+            <div class="pro-content">
+              <h3 class="title">
+                <a href="{% url 'home:doctor_public_profile' doctor.user.id %}">{{ doctor.user.full_name|slice:":25" }}</a>
+                <i class="fas fa-check-circle verified"></i>
+              </h3>
+             
+              <p class="speciality">
+                {% for speciality in doctor.speciality.all %}
+                {{speciality.name}}
+              {% empty %}
+              ---, ---
+              {% endfor %}
+              </p>
+              
+              <ul class="available-info">
+                <li>
+                  <i class="fas fa-map-marker-alt"></i> 
+                  {% if doctor.clinic_set.all %}
+                  {{ doctor.clinic_set.first.city.name }}, {{ doctor.clinic_set.first.district.name }}
+                  {% else %}
+                  ---, ---
+                  {% endif %}
+                </li>
+           
+                <li>
+                  <i class="far fa-money-bill-alt"></i> 
+                  {% if doctor.fee %}
+                  {{ doctor.fee }}
+                  {% else %}
+                  --
+                  {% endif %} AFN
+                </li>
+              </ul>
+              <div class="row row-sm">
+                <div class="col-6">
+                  <a href="{% url 'home:doctor_public_profile' doctor.user.id %}" class="btn view-btn">View Profile</a>
+                </div>
+                <div class="col-6">
+                  <a href="{% url 'appointment:public_time_slot' doctor.user.id %}" class="btn book-btn">Book Now</a>
+                </div>
+              </div>
+            </div>
+          </div>
+          {% endfor %}
+          <!-- Doctor Widget -->
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+<!-- /Popular Section -->
+<!-- Availabe Features -->
+<section class="section">
+  <img width="100%" src="{{ STATIC_URL }}/img/HowEN.jpg">
+</section>
+<!-- Availabe Features -->
+{% endblock content %}
+{% block script %}
+<script type="text/javascript">
+var csrftoken = '{{ csrf_token }}';
+</script>
+<script type="text/javascript" src="/static/axios.min.js"></script>
+<script>
+  let specialities = $("div[name='Specialities']")
+  let doctor_name = $("div[name='doc-items']")
+
+  let search_input = $("input[name='searched-content']")
+  let province = $("input[name='province']")
+
+  // sp categories clicked
+  function search_sp_cat (cat) {
+    search_input.val(cat);
+    $("form").submit();
+  }
+</script>
+<script src="{% static 'home/js/home.js' %}"></script>
+{% endblock script %}

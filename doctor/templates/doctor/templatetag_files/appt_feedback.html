@@ -1,0 +1,24 @@
+<div class="rating">
+  <div name="rating-stars" id="appt_feedback"></div>
+</div>
+<!-- scripts -->
+<script src="/static/js/jquery.min.js"></script>
+<script>
+average_star = "{{score_count}}";
+
+  fill_stars = Math.floor(average_star);
+  half_stars = average_star % 1;
+  empty_stars = Math.floor(5 - (fill_stars + half_stars))
+
+
+  for (var i = 0; i < fill_stars; i++) {
+    $("#appt_feedback").append(`<i class="fas fa-star filled"></i>`)
+  }
+  // if(half_stars != 0) {
+    for (var i = 0; i < half_stars; i++) {
+    $("#appt_feedback").append(`<i class="fas fa-star-half-alt filled"></i>`)
+  }
+  for (var i = 0; i < empty_stars; i++) {
+    $("#appt_feedback").append(`<i class="fas fa-star"></i>`)
+  }
+</script>

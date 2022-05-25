@@ -1,0 +1,594 @@
+{% extends 'doctor_sidebar.html' %}
+{% load static %}
+{% block title %}
+Schedule | Doctor
+{% endblock title %}
+{% block content %}
+{% load appt_custom_filter %}
+<div class="col-md-7 col-lg-8 col-xl-9">
+  <div class="row">
+    
+    {% if request.user.doctor.clinic_set.all %}
+    {% for clinic in request.user.doctor.clinic_set.all %}
+    {% with new_user=request.user.id|stringformat:"s" get_clinic_id=clinic.id|stringformat:"s" day_pattern_object=clinic.dayschedulepattern_set.all|day_schedule_filter:request.user.doctor %}
+    <div class="col-sm-12">
+      <div class="card">
+        <div class="card-body">
+          <a href="{% url 'appointment:doctor_today_appt_list' clinic.id %}">
+            <h2 class="card-title text-center text-info">{{ clinic.clinic_name }}</h2>
+          </a>
+          <hr <div class="profile-box">
+          <form method="POST" name="appt_schedule" id="appt_schedule{{ forloop.counter0 }}">
+            {% csrf_token %}
+            <div class="row">
+              <div class="col-lg-3">
+                <input type="hidden" id="clinic_id{{ forloop.counter0 }}" value="{{ clinic.id }}">
+                <div class="form-group">
+                  <label>Timing Slot Duration</label>
+                  <select id="slot_duration{{ forloop.counter0 }}" class="select form-control">
+                    <option value="">Select Time Slot</option>
+                    {% if day_pattern_object %}
+                    <option value="15" {% if day_pattern_object.first.time_slot_duration|stringformat:"s" == '0:15:00' %}selected{% endif %}>15 mins</option>
+                    <option value="30" {% if day_pattern_object.first.time_slot_duration|stringformat:"s" == '0:30:00' %}selected{% endif %}>30 mins</option>
+                    <option value="45" {% if day_pattern_object.first.time_slot_duration|stringformat:"s" == '0:45:00' %}selected{% endif %}>45 mins</option>
+                    {% else %}
+                    <option value="15">15 mins</option>
+                    <option value="30">30 mins</option>
+                    <option value="45">45 mins</option>
+                    {% endif %}
+                  </select>
+                  <small id="slot_duration_error{{ forloop.counter0 }}" style="display: none;color: red;"></small>
+                </div>
+              </div>
+              <div class="col-lg-3">
+                <div class="form-group">
+                  <label>Start Time</label>
+                  <select id="slot_start{{ forloop.counter0 }}" class="select form-control">
+                    <option value="">Select Start Time</option>
+                    {% if day_pattern_object %}
+                    {% include 'appointment/snippets/start_time_options.html' with clinic_pattern=day_pattern_object.first.start_day_time|stringformat:"s" %}
+                    {% else %}
+                    {% include 'appointment/snippets/start_time_options.html' with clinic_pattern="Not_Available" %}
+                    {% endif %}
+                  </select>
+                  <small id="slot_start_error{{ forloop.counter0 }}" style="display: none;color: red;"></small>
+                </div>
+              </div>
+              <div class="col-lg-3">
+                <div class="form-group">
+                  <label>End Time</label>
+                  <select id="slot_end{{ forloop.counter0 }}" class="select form-control">
+                    <option value="">Select End Time</option>
+                    {% if day_pattern_object %}
+                    {% include 'appointment/snippets/end_time_options.html' with clinic_pattern=day_pattern_object.first.end_day_time|stringformat:"s" %}
+                    {% else %}
+                    {% include 'appointment/snippets/end_time_options.html' with clinic_pattern="Not_Available" %}
+                    {% endif %}
+                  </select>
+                  <small id="slot_end_error{{ forloop.counter0 }}" style="display: none;color: red;"></small>
+                </div>
+              </div>
+              <div class="col-lg-3">
+                <div class="form-group">
+                  <span>Apply For Everyday</span>
+                  <button type="submit" id="save_appt_changes{{ forloop.counter0 }}" onclick="submitChanges('{{ forloop.counter0 }}', '{{ today_weekday }}')" class="mt-2 btn btn-info nav-link active submit-btn text-center">
+                    <i class="fa fa-medkit" id="save_change_button_icon{{ forloop.counter0 }}"></i> Save Changes</button>
+                </div>
+              </div>
+            </div>
+          </form>
+          <div class="row">
+            <div class="col-md-12">
+              <div class="card schedule-widget mb-0">
+                <!-- Schedule Header -->
+                <div class="schedule-header">
+                  <!-- Schedule Nav -->
+                  <div class="schedule-nav">
+                    <ul class="nav nav-tabs nav-justified">
+                      <li class="nav-item">
+                        <a id="toggle_saturday{{ forloop.counter0 }}" class="nav-link {% if today_weekday == 'Saturday' %}active{% endif %}" data-toggle="tab" href="#slot_saturday{{ forloop.counter0 }}">Saturday</a>
+                      </li>
+                      <li class="nav-item">
+                        <a id="toggle_sunday{{ forloop.counter0 }}" class="nav-link {% if today_weekday == 'Sunday' %}active{% endif %}" data-toggle="tab" href="#slot_sunday{{ forloop.counter0 }}">Sunday</a>
+                      </li>
+                      <li class="nav-item">
+                        <a id="toggle_monday{{ forloop.counter0 }}" class="nav-link {% if today_weekday == 'Monday' %}active{% endif %}" data-toggle="tab" href="#slot_monday{{ forloop.counter0 }}">Monday</a>
+                      </li>
+                      <li class="nav-item">
+                        <a id="toggle_tuesday{{ forloop.counter0 }}" class="nav-link {% if today_weekday == 'Tuesday' %}active{% endif %}" data-toggle="tab" href="#slot_tuesday{{ forloop.counter0 }}">Tuesday</a>
+                      </li>
+                      <li class="nav-item">
+                        <a id="toggle_wednesday{{ forloop.counter0 }}" class="nav-link {% if today_weekday == 'Wednesday' %}active{% endif %}" data-toggle="tab" href="#slot_wednesday{{ forloop.counter0 }}">Wednesday</a>
+                      </li>
+                      <li class="nav-item">
+                        <a id="toggle_thursday{{ forloop.counter0 }}" class="nav-link {% if today_weekday == 'Thursday' %}active{% endif %}" data-toggle="tab" href="#slot_thursday{{ forloop.counter0 }}">Thursday</a>
+                      </li>
+                      <li class="nav-item">
+                        <a id="toggle_friday{{ forloop.counter0 }}" class="nav-link {% if today_weekday == 'Friday' %}active{% endif %}" data-toggle="tab" href="#slot_friday{{ forloop.counter0 }}">Friday</a>
+                      </li>
+                    </ul>
+                  </div>
+                  <!-- /Schedule Nav -->
+                </div>
+                <!-- /Schedule Header -->
+                <!-- Schedule Content -->
+                <div class="tab-content schedule-cont">
+                  <!-- Saturday Slot -->
+                  <div id="slot_saturday{{ forloop.counter0 }}" class="tab-pane fade  {% if today_weekday == 'Saturday' %}show active{% endif %}">
+                    <h4 class="card-title d-flex justify-content-between">
+                      <span>Time Slots</span>
+                      <a class="edit-link" data-toggle="modal" onclick="addSlot('{{ clinic.id }}', 'Saturday', '{{ forloop.counter0 }}')" href=""><i class="fa fa-plus-circle"></i> Custom Schedule</a>
+                      <a href="javascript:void(0)" onclick="toggleActiveDay('{{ clinic.id }}', 'Saturday', '{{forloop.counter0 }}')">
+                        {% if day_pattern_object %}
+                        {% with saturday="Saturday,"|add:new_user %}
+                        {% if day_pattern_object|filter_by_day:saturday %}
+                        <i class="fa fa-toggle-on text-info fa-2x"></i>
+                        {% else %}
+                        <i class="fa fa-toggle-off text-info fa-2x"></i>
+                        {% endif %}
+                        {% endwith %}
+                        {% else %}
+                        <i class="fa fa-toggle-on text-info fa-2x"></i>
+                        {% endif %}
+                      </a>
+                    </h4>
+                    <!-- Slot List -->
+                    <div class="doc-times" id="slot_wrapper_saturday{{ forloop.counter0 }}">
+                      {% if day_pattern_object %}
+                      {% with saturday="Saturday,"|add:new_user saturday_pattern="Saturday,"|add:get_clinic_id %}
+                      {% if day_pattern_object|filter_by_day:saturday %}
+                      {% for appt_slot in request.user.doctor.appointment_set.all|filter_by_pattern:saturday_pattern %}
+                      <div id="{{ clinic.id }}_{{ forloop.counter0 }}_{{ appt_slot.day_pattern|stringformat:'s' }}" class="doc-slot-list
+                                                            {% if appt_slot.active and appt_slot.status == 'PENDING' %}
+                                                            bg-secondary
+                                                            {% elif not appt_slot.active %}
+                                                            bg-danger
+                                                            {% elif appt_slot.active and appt_slot.status == 'BOOKED' %}
+                                                            bg-dark
+                                                            {% elif appt_slot.active and appt_slot.status == 'PATIENT_CANCELED' %}
+                                                            bg-warning
+                                                            {% elif appt_slot.active and appt_slot.status == 'DOCTOR_CANCELED' %}
+                                                            bg-info
+                                                            {% endif %}">
+                        {{ appt_slot.start_appt_time}} - {{ appt_slot.end_appt_time}}
+                        <a href="javascript:void(0)" onclick="toggleApptSlot('{{ clinic.id }}','{{ appt_slot.start_appt_time }}', 'Saturday', '{{ forloop.counter0 }}')">
+                          <i class="{% if appt_slot.active %}fa fa-toggle-on text-red{% else %}fa fa-toggle-off text-white{% endif %} fa-lg"></i>
+                        </a>
+                      </div>
+                      {% endfor %}
+                      {% else %}
+                      <p class="text-muted mb-0">Not Available</p>
+                      {% endif %}
+                      {% endwith %}
+                      {% else %}
+                      <h2>No Slot Available</h2>
+                      {% endif %}
+                    </div>
+                    <!-- /Slot List -->
+                  </div>
+                  <!-- /Saturday Slot -->
+                  <!-- Sunday Slot -->
+                  <div id="slot_sunday{{ forloop.counter0 }}" class="tab-pane fade {% if today_weekday == 'Sunday' %}show active{% endif %}">
+                    <h4 class="card-title d-flex justify-content-between">
+                      <span>Time Slots</span>
+                      <a class="edit-link" data-toggle="modal" onclick="addSlot('{{ clinic.id }}', 'Sunday', '{{ forloop.counter0 }}')" href=""><i class="fa fa-plus-circle"></i> Custom Schedule</a>
+                      <a href="javascript:void(0)" onclick="toggleActiveDay('{{ clinic.id }}', 'Sunday', '{{forloop.counter0 }}')">
+                        {% if day_pattern_object %}
+                        {% with sunday="Sunday,"|add:new_user %}
+                        {% if day_pattern_object|filter_by_day:sunday %}
+                        <i class="fa fa-toggle-on text-info fa-2x"></i>
+                        {% else %}
+                        <i class="fa fa-toggle-off text-info fa-2x"></i>
+                        {% endif %}
+                        {% endwith %}
+                        {% else %}
+                        <i class="fa fa-toggle-on text-info fa-2x"></i>
+                        {% endif %}
+                      </a>
+                    </h4>
+                    <!-- Slot List -->
+                    <div class="doc-times" id="slot_wrapper_sunday{{ forloop.counter0 }}">
+                      {% if day_pattern_object %}
+                      {% with sunday="Sunday,"|add:new_user sunday_pattern="Sunday,"|add:get_clinic_id %}
+                      {% if day_pattern_object|filter_by_day:sunday %}
+                      {% for appt_slot in request.user.doctor.appointment_set.all|filter_by_pattern:sunday_pattern %}
+                      <div id="{{ clinic.id }}_{{ forloop.counter0 }}_{{ appt_slot.day_pattern|stringformat:'s' }}" class="doc-slot-list
+                                                            {% if appt_slot.active and appt_slot.status == 'PENDING' %}
+                                                            bg-secondary
+                                                            {% elif not appt_slot.active %}
+                                                            bg-danger
+                                                            {% elif appt_slot.active and appt_slot.status == 'BOOKED' %}
+                                                            bg-dark
+                                                            {% elif appt_slot.active and appt_slot.status == 'PATIENT_CANCELED' %}
+                                                            bg-warning
+                                                            {% elif appt_slot.active and appt_slot.status == 'DOCTOR_CANCELED' %}
+                                                            bg-info
+                                                            {% endif %}">
+                        {{ appt_slot.start_appt_time}} - {{ appt_slot.end_appt_time}}
+                        <a href="javascript:void(0)" onclick="toggleApptSlot('{{ clinic.id }}','{{ appt_slot.start_appt_time }}', 'Sunday', '{{ forloop.counter0 }}')">
+                          <i class="{% if appt_slot.active %}fa fa-toggle-on text-red{% else %}fa fa-toggle-off text-white{% endif %} fa-lg"></i>
+                        </a>
+                      </div>
+                      {% endfor %}
+                      {% else %}
+                      <p class="text-muted mb-0">Not Available</p>
+                      {% endif %}
+                      {% endwith %}
+                      {% else %}
+                      <h2>No Slot Available</h2>
+                      {% endif %}
+                    </div>
+                    <!-- /Slot List -->
+                  </div>
+                  <!-- /Sunday Slot -->
+                  <!-- Monday Slot -->
+                  <div id="slot_monday{{ forloop.counter0 }}" class="tab-pane fade {% if today_weekday == 'Monday' %}show active{% endif %}">
+                    <h4 class="card-title d-flex justify-content-between">
+                      <span>Time Slots</span>
+                      <a class="edit-link" data-toggle="modal" onclick="addSlot('{{ clinic.id }}', 'Monday', '{{ forloop.counter0 }}')" href=""><i class="fa fa-plus-circle"></i> Custom Schedule</a>
+                      <a href="javascript:void(0)" id="toggle_day_icon{{ forloop.counter0 }}" onclick="toggleActiveDay('{{ clinic.id }}', 'Monday', '{{forloop.counter0 }}')">
+                        {% if day_pattern_object %}
+                        {% with monday="Monday,"|add:new_user %}
+                        {% if day_pattern_object|filter_by_day:monday %}
+                        <i class="fa fa-toggle-on text-info fa-2x"></i>
+                        {% else %}
+                        <i class="fa fa-toggle-off text-info fa-2x"></i>
+                        {% endif %}
+                        {% endwith %}
+                        {% else %}
+                        <i class="fa fa-toggle-on text-info fa-2x"></i>
+                        {% endif %}
+                      </a>
+                    </h4>
+                    <!-- Slot List -->
+                    <div class="doc-times" id="slot_wrapper_monday{{ forloop.counter0 }}">
+                      {% if day_pattern_object %}
+                      {% with monday="Monday,"|add:new_user monday_pattern="Monday,"|add:get_clinic_id %}
+                      {% if day_pattern_object|filter_by_day:monday %}
+                      {% for appt_slot in request.user.doctor.appointment_set.all|filter_by_pattern:monday_pattern %}
+                      <div id="{{ clinic.id }}_{{ forloop.counter0 }}_{{ appt_slot.day_pattern|stringformat:'s' }}" class="doc-slot-list
+                                                            {% if appt_slot.active and appt_slot.status == 'PENDING' %}
+                                                            bg-secondary
+                                                            {% elif not appt_slot.active %}
+                                                            bg-danger
+                                                            {% elif appt_slot.active and appt_slot.status == 'BOOKED' %}
+                                                            bg-dark
+                                                            {% elif appt_slot.active and appt_slot.status == 'PATIENT_CANCELED' %}
+                                                            bg-warning
+                                                            {% elif appt_slot.active and appt_slot.status == 'DOCTOR_CANCELED' %}
+                                                            bg-info
+                                                            {% endif %}">
+                        {{ appt_slot.start_appt_time}} - {{ appt_slot.end_appt_time}}
+                        <a href="javascript:void(0)" onclick="toggleApptSlot('{{ clinic.id }}','{{ appt_slot.start_appt_time }}', 'Monday', '{{ forloop.counter0 }}')">
+                          <i class="{% if appt_slot.active %}fa fa-toggle-on text-red{% else %}fa fa-toggle-off text-white{% endif %} fa-lg"></i>
+                        </a>
+                      </div>
+                      {% endfor %}
+                      {% else %}
+                      <p class="text-muted mb-0">Not Available</p>
+                      {% endif %}
+                      {% endwith %}
+                      {% else %}
+                      <h2>No Slot Available</h2>
+                      {% endif %}
+                    </div>
+                    <!-- /Slot List -->
+                  </div>
+                  <!-- /Monday Slot -->
+                  <!-- Tuesday Slot -->
+                  <div id="slot_tuesday{{ forloop.counter0 }}" class="tab-pane fade  {% if today_weekday == 'Tuesday' %}show active{% endif %}">
+                    <h4 class="card-title d-flex justify-content-between">
+                      <span>Time Slots</span>
+                      <a class="edit-link" data-toggle="modal" onclick="addSlot('{{ clinic.id }}', 'Tuesday', '{{ forloop.counter0 }}')" href=""><i class="fa fa-plus-circle"></i> Custom Schedule</a>
+                      <a href="javascript:void(0)" onclick="toggleActiveDay('{{ clinic.id }}', 'Tuesday', '{{forloop.counter0 }}')">
+                        {% if day_pattern_object %}
+                        {% with tuesday="Tuesday,"|add:new_user %}
+                        {% if day_pattern_object|filter_by_day:tuesday %}
+                        <i class="fa fa-toggle-on text-info fa-2x"></i>
+                        {% else %}
+                        <i class="fa fa-toggle-off text-info fa-2x"></i>
+                        {% endif %}
+                        {% endwith %}
+                        {% else %}
+                        <i class="fa fa-toggle-on text-info fa-2x"></i>
+                        {% endif %}
+                      </a>
+                    </h4>
+                    <!-- Slot List -->
+                    <div class="doc-times" id="slot_wrapper_tuesday{{ forloop.counter0 }}">
+                      {% if day_pattern_object %}
+                      {% with tuesday="Tuesday,"|add:new_user tuesday_pattern="Tuesday,"|add:get_clinic_id %}
+                      {% if day_pattern_object|filter_by_day:tuesday %}
+                      {% for appt_slot in request.user.doctor.appointment_set.all|filter_by_pattern:tuesday_pattern %}
+                      <div id="{{ clinic.id }}_{{ forloop.counter0 }}_{{ appt_slot.day_pattern|stringformat:'s' }}" class="doc-slot-list
+                                                            {% if appt_slot.active and appt_slot.status == 'PENDING' %}
+                                                            bg-secondary
+                                                            {% elif not appt_slot.active %}
+                                                            bg-danger
+                                                            {% elif appt_slot.active and appt_slot.status == 'BOOKED' %}
+                                                            bg-dark
+                                                            {% elif appt_slot.active and appt_slot.status == 'PATIENT_CANCELED' %}
+                                                            bg-warning
+                                                            {% elif appt_slot.active and appt_slot.status == 'DOCTOR_CANCELED' %}
+                                                            bg-info
+                                                            {% endif %}">
+                        {{ appt_slot.start_appt_time}} - {{ appt_slot.end_appt_time}}
+                        <a href="javascript:void(0)" onclick="toggleApptSlot('{{ clinic.id }}','{{ appt_slot.start_appt_time }}', 'Tuesday', '{{ forloop.counter0 }}')">
+                          <i class="{% if appt_slot.active %}fa fa-toggle-on text-red{% else %}fa fa-toggle-off text-white{% endif %} fa-lg"></i>
+                        </a>
+                      </div>
+                      {% endfor %}
+                      {% else %}
+                      <p class="text-muted mb-0">Not Available</p>
+                      {% endif %}
+                      {% endwith %}
+                      {% else %}
+                      <h2>No Slot Available</h2>
+                      {% endif %}
+                    </div>
+                    <!-- /Slot List -->
+                  </div>
+                  <!-- /Tuesday Slot -->
+                  <!-- Wednesday Slot -->
+                  <div id="slot_wednesday{{ forloop.counter0 }}" class="tab-pane fade {% if today_weekday == 'Wednesday' %}show active{% endif %}">
+                    <h4 class="card-title d-flex justify-content-between">
+                      <span>Time Slots</span>
+                      <a class="edit-link" data-toggle="modal" onclick="addSlot('{{ clinic.id }}', 'Wednesday', '{{ forloop.counter0 }}')" href=""><i class="fa fa-plus-circle"></i> Custom Schedule</a>
+                      <a href="javascript:void(0)" onclick="toggleActiveDay('{{ clinic.id }}', 'Wednesday', '{{forloop.counter0 }}')">
+                        {% if day_pattern_object %}
+                        {% with wedneday="Wednesday,"|add:new_user %}
+                        {% if day_pattern_object|filter_by_day:wedneday %}
+                        <i class="fa fa-toggle-on text-info fa-2x"></i>
+                        {% else %}
+                        <i class="fa fa-toggle-off text-info fa-2x"></i>
+                        {% endif %}
+                        {% endwith %}
+                        {% else %}
+                        <i class="fa fa-toggle-on text-info fa-2x"></i>
+                        {% endif %}
+                      </a>
+                    </h4>
+                    <!-- Slot List -->
+                    <div class="doc-times" id="slot_wrapper_wednesday{{ forloop.counter0 }}">
+                      {% if day_pattern_object %}
+                      {% with wedneday="Wednesday,"|add:new_user wednesday_pattern="Wednesday,"|add:get_clinic_id %}
+                      {% if day_pattern_object|filter_by_day:wedneday %}
+                      {% for appt_slot in request.user.doctor.appointment_set.all|filter_by_pattern:wednesday_pattern %}
+                      <div id="{{ clinic.id }}_{{ forloop.counter0 }}_{{ appt_slot.day_pattern|stringformat:'s' }}" class="doc-slot-list
+                                                            {% if appt_slot.active and appt_slot.status == 'PENDING' %}
+                                                            bg-secondary
+                                                            {% elif not appt_slot.active %}
+                                                            bg-danger
+                                                            {% elif appt_slot.active and appt_slot.status == 'BOOKED' %}
+                                                            bg-dark
+                                                            {% elif appt_slot.active and appt_slot.status == 'PATIENT_CANCELED' %}
+                                                            bg-warning
+                                                            {% elif appt_slot.active and appt_slot.status == 'DOCTOR_CANCELED' %}
+                                                            bg-info
+                                                            {% endif %}">
+                        {{ appt_slot.start_appt_time}} - {{ appt_slot.end_appt_time}}
+                        <a href="javascript:void(0)" onclick="toggleApptSlot('{{ clinic.id }}','{{ appt_slot.start_appt_time }}', 'Wednesday', '{{ forloop.counter0 }}')">
+                          <i class="{% if appt_slot.active %}fa fa-toggle-on text-red{% else %}fa fa-toggle-off text-white{% endif %} fa-lg"></i>
+                        </a>
+                      </div>
+                      {% endfor %}
+                      {% else %}
+                      <p class="text-muted mb-0">Not Available</p>
+                      {% endif %}
+                      {% endwith %}
+                      {% else %}
+                      <h2>No Slot Available</h2>
+                      {% endif %}
+                    </div>
+                    <!-- /Slot List -->
+                  </div>
+                  <!-- /Wednesday Slot -->
+                  <!-- Thursday Slot -->
+                  <div id="slot_thursday{{ forloop.counter0 }}" class="tab-pane fade {% if today_weekday == 'Thursday' %}show active{% endif %}">
+                    <h4 class="card-title d-flex justify-content-between">
+                      <span>Time Slots</span>
+                      <a class="edit-link" data-toggle="modal" onclick="addSlot('{{ clinic.id }}', 'Thursday', '{{ forloop.counter0 }}')" href=""><i class="fa fa-plus-circle"></i> Custom Schedule</a>
+                      <a href="javascript:void(0)" onclick="toggleActiveDay('{{ clinic.id }}', 'Thursday', '{{forloop.counter0 }}')">
+                        {% if day_pattern_object %}
+                        {% with thursday="Thursday,"|add:new_user %}
+                        {% if day_pattern_object|filter_by_day:thursday %}
+                        <i class="fa fa-toggle-on text-info fa-2x"></i>
+                        {% else %}
+                        <i class="fa fa-toggle-off text-info fa-2x"></i>
+                        {% endif %}
+                        {% endwith %}
+                        {% else %}
+                        <i class="fa fa-toggle-on text-info fa-2x"></i>
+                        {% endif %}
+                      </a>
+                    </h4>
+                    <!-- Slot List -->
+                    <div class="doc-times" id="slot_wrapper_thursday{{ forloop.counter0 }}">
+                      {% if day_pattern_object %}
+                      {% with thursday="Thursday,"|add:new_user thursday_pattern="Thursday,"|add:get_clinic_id %}
+                      {% if day_pattern_object|filter_by_day:thursday %}
+                      {% for appt_slot in request.user.doctor.appointment_set.all|filter_by_pattern:thursday_pattern %}
+                      <div id="{{ clinic.id }}_{{ forloop.counter0 }}_{{ appt_slot.day_pattern|stringformat:'s' }}" class="doc-slot-list
+                                                            {% if appt_slot.active and appt_slot.status == 'PENDING' %}
+                                                            bg-secondary
+                                                            {% elif not appt_slot.active %}
+                                                            bg-danger
+                                                            {% elif appt_slot.active and appt_slot.status == 'BOOKED' %}
+                                                            bg-dark
+                                                            {% elif appt_slot.active and appt_slot.status == 'PATIENT_CANCELED' %}
+                                                            bg-warning
+                                                            {% elif appt_slot.active and appt_slot.status == 'DOCTOR_CANCELED' %}
+                                                            bg-info
+                                                            {% endif %}">
+                        {{ appt_slot.start_appt_time}} - {{ appt_slot.end_appt_time}}
+                        <a href="javascript:void(0)" onclick="toggleApptSlot('{{ clinic.id }}','{{ appt_slot.start_appt_time }}', 'Thursday', '{{ forloop.counter0 }}')">
+                          <i class="{% if appt_slot.active %}fa fa-toggle-on text-red{% else %}fa fa-toggle-off text-white{% endif %} fa-lg"></i>
+                        </a>
+                      </div>
+                      {% endfor %}
+                      {% else %}
+                      <p class="text-muted mb-0">Not Available</p>
+                      {% endif %}
+                      {% endwith %}
+                      {% else %}
+                      <h2>No Slot Available</h2>
+                      {% endif %}
+                    </div>
+                    <!-- /Slot List -->
+                  </div>
+                  <!-- /Thursday Slot -->
+                  <!-- Friday Slot -->
+                  <div id="slot_friday{{ forloop.counter0 }}" class="tab-pane fade {% if today_weekday == 'Friday' %}show active{% endif %}">
+                    <h4 class="card-title d-flex justify-content-between">
+                      <span>Time Slots</span>
+                      <a class="edit-link" data-toggle="modal" onclick="addSlot('{{ clinic.id }}', 'Friday', '{{ forloop.counter0 }}')" href=""><i class="fa fa-plus-circle"></i> Custom Schedule</a>
+                      <a href="javascript:void(0)" onclick="toggleActiveDay('{{ clinic.id }}', 'Friday', '{{forloop.counter0 }}')">
+                        {% if day_pattern_object %}
+                        {% with friday="Friday,"|add:new_user %}
+                        {% if day_pattern_object|filter_by_day:friday %}
+                        <i class="fa fa-toggle-on text-info fa-2x"></i>
+                        {% else %}
+                        <i class="fa fa-toggle-off text-info fa-2x"></i>
+                        {% endif %}
+                        {% endwith %}
+                        {% else %}
+                        <i class="fa fa-toggle-on text-info fa-2x"></i>
+                        {% endif %}
+                      </a>
+                    </h4>
+                    <!-- Slot List -->
+                    <div class="doc-times" id="slot_wrapper_friday{{ forloop.counter0 }}">
+                      {% if day_pattern_object %}
+                      {% with friday="Friday,"|add:new_user friday_pattern="Friday,"|add:get_clinic_id %}
+                      {% if day_pattern_object|filter_by_day:friday %}
+                      {% for appt_slot in request.user.doctor.appointment_set.all|filter_by_pattern:friday_pattern %}
+                      <div id="{{ clinic.id }}_{{ forloop.counter0 }}_{{ appt_slot.day_pattern|stringformat:'s' }}" class="doc-slot-list
+                                                            {% if appt_slot.active and appt_slot.status == 'PENDING' %}
+                                                            bg-secondary
+                                                            {% elif not appt_slot.active %}
+                                                            bg-danger
+                                                            {% elif appt_slot.active and appt_slot.status == 'BOOKED' %}
+                                                            bg-dark
+                                                            {% elif appt_slot.active and appt_slot.status == 'PATIENT_CANCELED' %}
+                                                            bg-warning
+                                                            {% elif appt_slot.active and appt_slot.status == 'DOCTOR_CANCELED' %}
+                                                            bg-info
+                                                            {% endif %}">
+                        {{ appt_slot.start_appt_time}} - {{ appt_slot.end_appt_time}}
+                        <a href="javascript:void(0)" onclick="toggleApptSlot('{{ clinic.id }}','{{ appt_slot.start_appt_time }}', 'Friday', '{{ forloop.counter0 }}')">
+                          <i class="{% if appt_slot.active %}fa fa-toggle-on text-red{% else %}fa fa-toggle-off text-white{% endif %} fa-lg"></i>
+                        </a>
+                      </div>
+                      {% endfor %}
+                      {% else %}
+                      <p class="text-muted mb-0">Not Available</p>
+                      {% endif %}
+                      {% endwith %}
+                      {% else %}
+                      <h2>No Slot Available</h2>
+                      {% endif %}
+                    </div>
+                    <!-- /Slot List -->
+                  </div>
+                  <!-- /Friday Slot -->
+                </div>
+                <!-- /Schedule Content -->
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    {% endwith %}
+    {% endfor %}
+    {% else %}
+    <h2>You did not select any clinic for your practice</h2>
+    {% endif %}
+  </div>
+</div>
+<!-- Add Time Slot Modal -->
+<div class="modal fade custom-modal" id="add_time_slot">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">Custom Schedule <small>(It will reset your settings)</small></h5>
+        <button type="button" class="close" onclick="slotTagDefaulter()" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body">
+        <form id="add_custom_schedule">
+          {% csrf_token %}
+          <div class="hours-info">
+            <div class="row form-row hours-cont">
+              <div class="col-12 col-md-12">
+                <div class="row form-row">
+                  <div class="col-12 col-md-4">
+                    <div class="form-group">
+                      <label>Time Slot</label>
+                      <select id="slot_duration" class="form-control select">
+                        <option value="">-----</option>
+                        <option value="15">15 mins</option>
+                        <option value="30">30 mins</option>
+                        <option value="45">45 mins</option>
+                      </select>
+                      <small id="slot_duration_error" style="display: none;color: red;"></small>
+                    </div>
+                  </div>
+                  <div class="col-12 col-md-4">
+                    <div class="form-group">
+                      <label>Start Time</label>
+                      <select id="slot_start" class="form-control select">
+                        <option value="">-----</option>
+                        {% include 'appointment/snippets/start_time_options.html' with clinic_pattern='88:88:88' %}
+                      </select>
+                      <small id="slot_start_error" style="display: none;color: red;"></small>
+                    </div>
+                  </div>
+                  <div class="col-12 col-md-4">
+                    <div class="form-group">
+                      <label>End Time</label>
+                      <select id="slot_end" class="form-control select">
+                        <option value="">-----</option>
+                        {% include 'appointment/snippets/end_time_options.html' with clinic_pattern='88:88:88' %}
+                      </select>
+                      <small id="slot_end_error" style="display: none;color: red;"></small>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="submit-section text-center">
+            <button type="submit" id="add_custom_schedule_button" class="btn btn-secondary submit-btn">Save Changes</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+<!-- /Add Time Slot Modal -->
+<div class="modal fade custom-modal" id="toggle_day_pattern">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">Custom Schedule <small>(It will reset your settings)</small></h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+        
+      </div>
+      <div class="modal-body">
+        <p>Do you want to activate/deactivate this day?</p>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary submit-btn" data-dismiss="modal"> No </button>
+        <button type="button" onclick="submitToggleDay()" class="btn btn-primary submit-btn"> Yes </button>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock content %}
+{% block script %}
+{% include 'appointment/scripts/schedule_time_script.html' %}
+{% endblock script %}

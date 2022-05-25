@@ -1,0 +1,214 @@
+{% extends "adminplus/adminp_dashboard.html" %}
+{% load static %}
+{% load adminplus_tags %}
+{% block content %}
+<!-- Page Wrapper -->
+<div class="page-wrapper">
+  <div class="content container-fluid">
+    <!-- Page Header -->
+    <div class="page-header">
+      <div class="row">
+        <div class="col">
+          <h3 class="page-title">Profile</h3>
+          <ul class="breadcrumb">
+            <li class="breadcrumb-item"><a href="{% url 'adminplus:dashboard' %}">Dashboard</a></li>
+            <li class="breadcrumb-item active">Profile</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+    <!-- /Page Header -->
+    <div class="row">
+      <div class="col-md-12">
+        <div class="profile-header">
+          <div align="right">
+            <button class="btn btn-sm btn-danger" onclick="delete_doctor()"><span class="fa fa-trash"></span> &nbsp;Delete</button>
+            <button class="d-none btn btn-sm btn-info" id="btn-active"><span class="fa fa-pause"></span> &nbsp;Active Doctor</button>
+            <button class="d-none btn btn-sm btn-warning" id="btn-deactive"><span class="fa fa-pause"></span> &nbsp;Suspend</button>
+          </div>
+          <div class="row align-items-center">
+            <div class="col-auto profile-image">
+              <a href="#">
+                <img class="rounded-circle" alt="User Image" src="{% if doctor.user.avatar %}{{ doctor.user.avatar.url }}{% else %}{% if doctor.user.gender == 'Male' %}{% static 'img/male_profile.png' %}{% else %}{% static 'img/female_profile.png' %}{% endif %}{% endif %}">
+              </a>
+            </div>
+            <div class="col ml-md-n2 profile-user-info">
+              <h4 class="user-name">{{ doctor }}</h4>
+              <div class="pt-0">{% doctor_rating doctor %}</div>
+              <h6 class="text-muted"><span class="fa fa-mobile"></span> &nbsp;{{ doctor.user.phone }}</h6>
+              <h6 class="text-muted"><span class="fa fa-envelope"></span> &nbsp;{{ doctor.user.email }}</h6>
+              <div class="user-Location">
+                <span class="fa fa-map-marker text-muted"></span> &nbsp;
+                {{ doctor.clinic_set.first.city.name }}, {{ doctor.clinic_set.first.district.name }}
+              </div>
+              
+            </div>
+          </div>
+        </div>
+  
+        <div class="tab-content profile-tab-cont">
+          <!-- Personal Details Tab -->
+          <div class="tab-pane fade show active" id="per_details_tab">
+            <!-- Personal Details -->
+            <div class="row">
+              <div class="col-lg-12">
+                <div class="card">
+                  <div class="card-body">
+                    <h5 class="card-title d-flex justify-content-between">
+                      <span>Details</span>
+                    </h5>
+                    <div class="row">
+                      <p class="col-sm-2 text-muted text-sm-right mb-0 mb-sm-3">Name</p>
+                      <p class="col-sm-10">{{ doctor }}</p>
+                    </div>
+                    <div class="row">
+                      <p class="col-sm-2 text-muted text-sm-right mb-0 mb-sm-3">Date of Birth</p>
+                      <p class="col-sm-10">{{ doctor.user.date_of_birth|date:"d, M. Y" }} &nbsp;({{ doctor.user.user_age }}, years old)</p>
+                    </div>
+                    <div class="row">
+                      <p class="col-sm-2 text-muted text-sm-right mb-0 mb-sm-3">Email ID</p>
+                      <p class="col-sm-10">{{ doctor.user.email }}</p>
+                    </div>
+                    <div class="row">
+                      <p class="col-sm-2 text-muted text-sm-right mb-0 mb-sm-3">Mobile</p>
+                      <p class="col-sm-10">{{ doctor.user.phone }}</p>
+                    </div>
+                    <div class="row">
+                      <p class="col-sm-2 text-muted text-sm-right mb-0 mb-sm-3">Fee</p>
+                      <p class="col-sm-10">{{ doctor.fee }}</p>
+                    </div>
+                    <div class="row">
+                      <p class="col-sm-2 text-muted text-sm-right mb-0 mb-sm-3">Specialities</p>
+                      <p class="col-sm-10">
+                        {% for sp in doctor.speciality.all %}
+                        {{ sp }} <br>
+                        {% endfor %}
+                      </p>
+                    </div>
+                    <div class="row">
+                      <p class="col-sm-2 text-muted text-sm-right mb-0 mb-sm-3">Conditions</p>
+                      <p class="col-sm-10">
+                        {% for con in doctor.condition.all %}
+                        {{ con }} <br>
+                        {% endfor %}
+                      </p>
+                    </div>
+                    <div class="row">
+                      <p class="col-sm-2 text-muted text-sm-right mb-0 mb-sm-3">Services</p>
+                      <p class="col-sm-10">
+                        {% for ser in doctor.service.all %}
+                        {{ ser }} <br>
+                        {% endfor %}
+                      </p>
+                    </div>
+                    <div class="row">
+                      <p class="col-sm-2 text-muted text-sm-right mb-0">Address(Clinics)</p>
+                      <p class="col-sm-10 mb-0">
+                        {% for clin in doctor.clinic_set.all %}
+                        {{ clin.address }}, <br>{{ clin }} Clinic<br><br>
+                        {% endfor %}
+                      </p>
+                    </div>
+                    <div class="row">
+                      <p class="col-sm-2 text-muted text-sm-right mb-0 mb-sm-3">Bio (English)</p>
+                      <p class="col-sm-10">{{ doctor.bio }}</p>
+                    </div>
+                    <div class="row">
+                      <p class="col-sm-2 text-muted text-sm-right mb-0 mb-sm-3">Bio (Dari)</p>
+                      <p class="col-sm-10 text-right">{{ doctor.farsi_bio }}</p>
+                    </div>
+                    <div class="row">
+                      <p class="col-sm-2 text-muted text-sm-right mb-0 mb-sm-3">Bio (Pashto)</p>
+                      <p class="col-sm-10 text-right">{{ doctor.pashto_bio }}</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <!-- /Personal Details -->
+          </div>
+          <!-- /Personal Details Tab -->
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+<!-- /Page Wrapper -->
+{% endblock content %}
+{% block pagelevel_styles %}
+{% endblock pagelevel_styles %}
+{% block script %}
+<script>
+let active = "{{ doctor.user.suspend }}"
+
+function set_active_suspend() {
+  console.log("active : ", active);
+  if (active == "False") {
+    $("#btn-active").addClass('d-none');
+    $("#btn-deactive").removeClass('d-none');
+  } else {
+    $("#btn-active").removeClass('d-none');
+    $("#btn-deactive").addClass('d-none');
+  }
+}
+set_active_suspend();
+
+$("#btn-active").click(function(event) {
+  let form = new FormData();
+  form.append('csrfmiddlewaretoken', '{{ csrf_token }}');
+  form.append('active_doctor', 1);
+  axios.post(".", form).then((response) => {
+    if (response.data.status == "success") {
+      active = "False";
+      set_active_suspend();
+    }
+  }).catch((error) => {
+    console.error(error);
+  });
+});
+$('#btn-deactive').click(function(event) {
+  let form = new FormData();
+  form.append('csrfmiddlewaretoken', '{{ csrf_token }}');
+  form.append('active_doctor', 0);
+  axios.post(".", form).then((response) => {
+    if (response.data.status == "success") {
+      active = "True";
+      set_active_suspend();
+    }
+  }).catch((error) => {
+    console.error(error);
+  })
+});
+
+// delete doctor
+function delete_doctor() {
+  Swal.fire({
+    title: 'Are you sure?',
+    text: "You won't be able to revert this!",
+    icon: 'warning',
+    showCancelButton: true,
+    confirmButtonColor: '#3085d6',
+    cancelButtonColor: '#d33',
+    confirmButtonText: 'Yes, delete it!'
+  }).then((result) => {
+    if (result.isConfirmed) {
+      let form = new FormData();
+      form.append("csrfmiddlewaretoken", "{{ csrf_token }}");
+      form.append('delete_doctor', 1);
+      axios.post(".", form).then((response) => {
+        if (response.data.status == "success") {
+          Swal.fire(
+            'Deleted!',
+            'Your file has been deleted.',
+            'success'
+          )
+          location.href = "{% url 'adminplus:doctors' %}"
+        }
+      }).catch((error) => {
+        console.error(error);
+      })
+    }
+  })
+}
+</script>
+{% endblock script %}

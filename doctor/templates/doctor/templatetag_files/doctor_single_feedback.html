@@ -1,0 +1,90 @@
+{% extends "doctor_sidebar.html" %}
+{% load static %}
+{% block title %}
+Review | Doctor
+{% endblock title %}
+{% block content %}
+<div class="col-md-7 col-lg-8 col-xl-9">
+  <div class="doc-review review-listing">
+    <ul class="comments-list">
+      <!-- Comment List -->
+      <li name="comment_{{ object.id }}">
+        <div class="comment">
+          <img class="avatar rounded-circle" alt="User Image" src="{% if object.appointment.patient.user.avatar %}{{ object.appointment.patient.user.avatar.url }}{% else %}{% if object.appointment.patient.user.gender == 'Male' %}{% static 'img/male_profile.png' %}{% else %}{% static 'img/female_profile.png' %}{% endif %}{% endif %}">
+          <div class="comment-body w-100">
+            <div class="meta-data">
+              <span class="comment-author">{{ object.appointment.patient }}</span>
+              <span class="comment-date">{{ object.timestamp|date:"g:i A, D d M Y" }}</span>
+              <div class="review-count rating">
+                <div name="good-stars">
+                  {% for item in ""|ljust:object.better_count %}
+                  <i class="fas fa-star filled"></i>
+                  {% endfor %}
+                </div>
+                <div name="bad-stars">
+                  {% for item in ""|ljust:object.good_count %}
+                  <i class="fas fa-star"></i>
+                  {% endfor %}
+                </div>
+              </div>
+            </div>
+            <p class="comment-content">
+              {{ object }}
+            </p>
+          </div>
+        </div>
+        {% for rep in object.replies.all %}
+        <ul class="comments-reply">
+          <!-- Comment Reply List -->
+          <li>
+            <div class="comment ">
+              <img class="avatar rounded-circle" alt="User Image" src="{% if rep.author.user.avatar %}{{ rep.author.user.avatar.url }}{% else %}{% if rep.author.user.gender == 'Male' %}{% static 'img/male_profile.png' %}{% else %}{% static 'img/female_profile.png' %}{% endif %}{% endif %}">
+              <div class="comment-body w-100">
+                <div class="meta-data">
+                  <span class="comment-author">{{ rep.author }}</span>
+                  <span class="comment-date">{{ rep.timestamp|date:"g:i A, D d M Y" }}</span>
+                  <input type="hidden" name="replied" value="true">
+                </div>
+                <p class="comment-content">
+                  {{ rep.reply }}
+                </p>
+              </div>
+            </div>
+          </li>
+          <!-- /Comment Reply List -->
+        </ul>
+        {% endfor %}
+        <div name="add-rep-{{ object.id }}"></div>
+        <div class="comment-reply pl-5 text-info">
+          <a class="comment-btn" style="cursor:pointer;">
+            <i class="fas fa-reply"></i>
+            Reply
+          </a>
+          <div class="card-body">
+            <form method="POST" name="create-reply">
+              {% csrf_token %}
+              <div class="form-group">
+                <textarea rows="4" class="form-control" name="reply"></textarea>
+                <input type="hidden" name="comment-id" value="{{ object.id }}">
+                <input type="hidden" name="submit" value="create-reply">
+              </div>
+              <div class="submit-section">
+                <button class="btn btn-primary submit-btn" type="submit">Submit</button>
+              </div>
+            </form>
+          </div>
+        </div>
+      </li>
+      <!-- /Comment List -->
+    </ul>
+  </div>
+</div>
+{% endblock content %}
+{% block script %}
+<script type="text/javascript">
+  var csrftoken = '{{ csrf_token }}';
+
+</script>
+<script type="text/javascript" src="/static/axios.min.js"></script>
+<script type="text/javascript" src="{% static 'doctor/js/doctor_review.js' %}"></script>
+{% endblock script %}

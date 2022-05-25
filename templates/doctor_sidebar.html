@@ -1,0 +1,153 @@
+{% load static %}
+{% load doctor_tags %}
+<!DOCTYPE html>
+<html>
+
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <title>
+      {% block title %}
+      {% endblock title %}
+    </title>
+    {% include "base_snippets/css.html" %}
+    <script src="/static/swtalert.js"></script>
+    {% block pagelevel_styles %}{% endblock pagelevel_styles %}
+  </head>
+
+  <body>
+    <div class="main-wrapper">
+      {% include "base_snippets/navbar.html" %}
+      {% include "base_snippets/django_messages.html" %}
+      {% block doctor_breadcrumb %}
+      {% include 'base_snippets/doctor_breadcrumb.html' %}
+      {% endblock doctor_breadcrumb %}
+      <!-- Page Content -->
+      <div class="content">
+        <div class="container-fluid">
+          <div class="row">
+            <div class="col-md-5 col-lg-4 col-xl-3 theiaStickySidebar">
+              <!-- Profile Sidebar -->
+              <div class="profile-sidebar">
+                <div class="widget-profile pro-widget-content">
+                  <div class="profile-info-widget">
+                    <a href="#" class="booking-doc-img">
+                      <img src="{% if request.user.avatar %}{{ request.user.avatar.url }}{% else %}{% if request.user.gender == 'Male' %}{% static 'img/male_profile.png' %}{% else %}{% static 'img/female_profile.png' %}{% endif %}{% endif %}" alt="User Image alternative">
+                    </a>
+                    <div class="profile-det-info">
+                      <h3>{{ request.user }}</h3>
+                      <div class="patient-details">
+                        <h5 class="mb-0">
+                          {% for speciality in request.user.doctor.speciality.all %}
+                          {{ speciality }},
+                          {% endfor %}
+                        </h5>
+                        <h5 class="mb-0">
+                          {% for service in request.user.doctor.service.all %}
+                          {{ service }},
+                          {% endfor %}
+                        </h5>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                <div class="dashboard-widget">
+                  <nav class="dashboard-menu">
+                    <ul>
+                      <li name="menu-item">
+                        <a href="{% url 'doctor:dashboard' %}">
+                          <i class="fas fa-columns"></i>
+                          <span>Dashboard</span>
+                        </a>
+                      </li>
+                      <li name="menu-item">
+                        <a href="{% url 'doctor:my_patient' %}">
+                          <i class="fas fa-user-injured"></i>
+                          <span>My Patients</span>
+                        </a>
+                      </li>
+                      <li name="menu-item">
+                        <a href="{% url 'appointment:schedule' %}">
+                          <i class="fas fa-hourglass-start"></i>
+                          <span>Schedule Timings</span>
+                        </a>
+                      </li>
+                      <li name="menu-item">
+                        <a href="{% url 'doctor:doctor_review' %}">
+                          <i class="fas fa-star fa-spin"></i>
+                          <span>Reviews</span>
+                        </a>
+                      </li>
+                      <li name="menu-item">
+                        <a href="{% url 'doctor:doctor_note' %}">
+                          <i class="fas fa-bell"></i>
+                          <span>Notifications</span>
+                          <small class="unread-msg">{% total_notifications request.user %} new</small>
+                        </a>
+                      </li>
+                      <li name="menu-item">
+                        <a href="{% doctor_last_chat request.user %}">
+                          <i class="fas fa-comments"></i>
+                          <span>Message</span>
+                          <small class="unread-msg">{% total_chat_notifications request.user %} new</small>
+                        </a>
+                      </li>
+                      
+                      <li name="menu-item">
+                        <a href="{% url 'doctor:doctor_profile' %}">
+                          <i class="fas fa-user-cog"></i>
+                          <span>Profile Settings</span>
+                        </a>
+                      </li>
+                      <li name="menu-item">
+                        <a href="{% url 'doctor:socialmedia' %}">
+                          <i class="fas fa-share-alt"></i>
+                          <span>Social Media</span>
+                        </a>
+                      </li>
+                      <li name="menu-item">
+                        <a href="{% url 'doctor:doctor_password' %}">
+                          <i class="fas fa-lock"></i>
+                          <span>Change Password</span>
+                        </a>
+                      </li>
+                      <li>
+                        <a href="{% url 'logout' %}">
+                          <i class="fas fa-sign-out-alt"></i>
+                          <span>Logout</span>
+                        </a>
+                      </li>
+                    </ul>
+                  </nav>
+                </div>
+              </div>
+              <!-- /Profile Sidebar -->
+            </div>
+            <!-- content goes here -->
+            {% block content %}
+            {% endblock content %}
+          </div>
+        </div>
+      </div>
+      {% include "base_snippets/footer.html" %}
+    </div>
+    {% include "base_snippets/js.html" %}
+    <!-- scripts -->
+    <script>
+      // active related sidebar item
+      function sidebar_active_item() {
+        let active_item = $("li[name='menu-item']");
+        for (let x of active_item) {
+          if ($(x).find('a').attr('href') == location.pathname) {
+            $(x).addClass('active');
+          };
+        };
+      };
+      sidebar_active_item();
+
+    </script>
+    {% block script %}{% endblock script %}
+    {% block pagelevel_scripts %}{% endblock pagelevel_scripts %}
+  </body>
+
+</html>

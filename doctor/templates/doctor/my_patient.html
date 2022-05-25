@@ -1,0 +1,74 @@
+{% extends 'doctor_sidebar.html' %}
+{% load static %}
+{% block title %}
+Patients | Doctor
+{% endblock title %}
+{% block content %}
+<div class="col-md-7 col-lg-8 col-xl-9">
+  <div class="row row-grid">
+    <!-- 
+    {% for x in my_patients %}
+    {% ifchanged x.patient or x.relative %}
+    mp : {{ x }} <br>
+    {% endifchanged %}
+    {% endfor %}
+    <br>
+    <br>
+     -->
+     {% if my_patients %}
+    {% for pt in my_patients %}
+    {% ifchanged pt.patient or pt.relative %}
+    <div class="col-md-6 col-lg-4 col-xl-3">
+      <div class="card widget-profile pat-widget-profile">
+        <div class="card-body">
+          <div class="pro-widget-content">
+            {% if pt.relative %}
+            <div class="profile-info-widget">
+              <a href="{% url 'doctor:my_patient_detail' 'rel' pt.relative.user.id %}" class="booking-doc-img">
+                <img src="{% if pt.relative.user.avatar %}{{ pt.relative.user.avatar.url }}{% else %}{% if pt.relative.user.gender == 'Male' %}{% static 'img/male_profile.png' %}{% else %}{% static 'img/female_profile.png' %}{% endif %}{% endif %}" alt="User Image">
+             
+              </a>
+              <div class="profile-det-info">
+                <h3><a href="{% url 'doctor:my_patient_detail' 'rel' pt.relative.user.id %}">{{ pt.relative }}</a></h3>
+                <div class="patient-details">
+                  <h5><b>Patient ID :</b> P0016 relative</h5>
+                  <h5 class="mb-0"><i class="fas fa-map-marker-alt"></i> Alabama, USA</h5>
+                </div>
+              </div>
+            </div>
+          </div>
+          {% elif pt.patient %}
+          <div class="profile-info-widget">
+            <a href="{% url 'doctor:my_patient_detail' 'pat' pt.patient.user.id %}" class="booking-doc-img">
+              <img src="{% if pt.patient.user.avatar %}{{ pt.patient.user.avatar.url }}{% else %}{% if pt.patient.user.gender == 'Male' %}{% static 'img/male_profile.png' %}{% else %}{% static 'img/female_profile.png' %}{% endif %}{% endif %}" alt="User Image">
+            </a>
+            <div class="profile-det-info">
+              <h3><a href="{% url 'doctor:my_patient_detail' 'pat' pt.patient.user.id %}">{{ pt.relative|default:pt.patient }}</a></h3>
+              <div class="patient-details">
+                <h5><b>Patient ID :</b> P0016 not relative</h5>
+                <h5 class="mb-0"><i class="fas fa-map-marker-alt"></i> Alabama, USA</h5>
+              </div>
+            </div>
+          </div>
+        </div>
+        {% endif %}
+        <div class="patient-info">
+          <ul>
+            <li>Phone <span>{{ pt.relative.user.phone|default:pt.patient.user.phone }}</span></li>
+            <li>Age <span>{{ pt.relative.user.user_age|default:pt.patient.user.user_age|default:"" }} Years, {{ pt.relative.user.gender|default:pt.patient.user.gender }}</span></li>
+            <li>Blood Group <span>{{ pt.relative.blood_group|default:pt.patient.blood_group }}</span></li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </div>
+  {% endifchanged %}
+  {% endfor %}
+  {% else %}
+  <h2>Patient's appointment which is booked in your clinic and it is completed, will be listed here.</h2>
+  {% endif %}
+</div>
+</div>
+{% endblock content %}
+{% block script %}
+{% endblock script %}

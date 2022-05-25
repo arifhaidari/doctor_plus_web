@@ -1,0 +1,86 @@
+{% load static %}
+<!-- Appointment Tab -->
+
+<div id="pat_appointments" class="tab-pane fade show active">
+  <div class="card card-table mb-0">
+    <div class="card-body">
+      <div class="table-responsive">
+        <table class="table table-hover table-center mb-0">
+          <thead>
+            <tr>
+              <th>Doctor</th>
+              <th>Appt Date</th>
+              <th>Slot</th>
+              <th>Feedback</th>
+              <th>Status</th>
+              <th>Action</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for ap in appoinments %}
+            <tr name="appt_{{ ap.id }}">
+              <td>
+                <h2 class="table-avatar">
+                  <a href="{% url 'home:doctor_public_profile' ap.doctor.user.id %}" class="avatar avatar-sm mr-2">
+                    <img class="avatar-img rounded-circle" src="{% if ap.doctor.user.avatar %}{{ ap.doctor.user.avatar.url }}{% else %}{% if ap.doctor.user.gender == 'Male' %}{% static 'img/male_profile.png' %}{% else %}{% static 'img/female_profile.png' %}{% endif %}{% endif %}" alt="User Image">
+                  </a>
+                  <a href="{% url 'home:doctor_public_profile' ap.doctor.user.id %}">{{ ap.doctor.title }} {{ ap.doctor.user.get_full_name }} <span>{{ ap.clinic }}</span></a>
+                </h2>
+              </td>
+              <td><a class="text-info" href="{% url 'relative:appt_detail' ap.id %}">{{ ap.appt_date|date:"d, M. Y" }}</a></td>
+              <td>{{ ap.start_appt_time }} - {{ ap.end_appt_time }}</td>
+              <td>
+                {% if not ap.feedback_status and ap.status == 'COMPLETED' %}
+                <a href="{% url 'patient:feedback' ap.id %}" class="btn btn-sm bg-success-light">
+                  <i class="fa fa-comment"></i> Give Feedback
+                </a>
+                {% elif ap.status == 'BOOKED' %}
+                
+                {% else %}
+                Given
+                {% endif %}
+              </td>
+              {% if ap.status == "COMPLETED" %}
+                <td><span class="badge badge-pill bg-success">{{ ap.status }}</span></td>
+                
+                {% elif ap.status == "EXPIRED" %}
+                <td><span class="badge badge-pill bg-danger">{{ ap.status }}</span></td>
+                {% elif ap.status == "PATIENT_CANCELED" %}
+                <td><span class="badge badge-pill bg-danger-light">{{ ap.status }}</span></td>
+                {% elif ap.status == "DOCTOR_CANCELED" %}
+                <td><span class="badge badge-pill bg-danger-light">{{ ap.status }}</span></td>
+                {% elif ap.status == "BOOKED" %}
+                <td><span class="badge badge-pill bg-warning">{{ ap.status }}</span></td>
+                {% endif %}
+                <td>
+                  <div class="btn-group">
+                    <button type="button" class="btn btn-info dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Action</button>
+                    <div class="dropdown-menu">
+                      <a href="{% url 'relative:appt_detail' ap.id %}" class="dropdown-item">
+                        <i class="far fa-eye text-info"></i>&nbsp;&nbsp; Detail
+                      </a>
+                      {% if ap.status == "BOOKED" %}
+                      <div class="dropdown-divider"></div>
+                      <a href="{% url 'appointment:reschedule' ap.doctor.user.id ap.patient.user.id %}" class="dropdown-item">
+                        <i class="fa fa-clock text-success"></i>&nbsp;&nbsp; Reschedule
+                      </a>
+                      <a href="javascript:void(0);" name="cancel_appointment" data-appid="{{ap.id}}" class="dropdown-item">
+                        <i class="fa fa-times text-danger"></i>&nbsp;&nbsp; Cancel
+                      </a>
+                      {% endif %}
+                    </div>
+                  </div>
+                </td>
+            </tr>
+            {% empty %}
+            <td>
+              <h4>no appointments</h4>
+            </td>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+<!-- /Appointment Tab -->

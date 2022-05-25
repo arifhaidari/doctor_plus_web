@@ -1,0 +1,191 @@
+{% extends "base.html" %}
+{% load static %}
+{% load doctor_tags %}
+{% load mathfilters %}
+{% block title %}
+Search
+{% endblock title %}
+{% block content %}
+<div class="main-wrapper">
+  <!-- Breadcrumb -->
+  <div class="breadcrumb-bar">
+    <div class="container-fluid">
+      <div class="row align-items-center">
+        <div class="col-md-10 col-12">
+          <nav aria-label="breadcrumb" class="page-breadcrumb">
+            <ol class="breadcrumb">
+              <li class="breadcrumb-item"><a href="index.html">Home</a></li>
+              <li class="breadcrumb-item active" aria-current="page">Search</li>
+            </ol>
+          </nav>
+          {# <h2 class="breadcrumb-title">2245 matches found for : Dentist In Bangalore</h2> #}
+          <h2 class="breadcrumb-title">Search Page</h2>
+        </div>
+      </div>
+    </div>
+  </div>
+  <!-- /Breadcrumb -->
+  <!-- Page Content -->
+  <div class="content">
+    <div class="container-fluid">
+      <div class="row">
+        <div class="col-md-12 col-lg-4 col-xl-3 theiaStickySidebar">
+          <!-- Search Filter -->
+          <div class="card search-filter">
+            <div class="card-header">
+              <h4 class="card-title mb-0">Search Filter</h4>
+            </div>
+            <div class="card-body">
+              <form action="" method="POST" id="search-filters">
+                {% csrf_token %}
+                <input type="hidden" value="search_page" name="search_type">
+                <div class="filter-widget">
+                  <div class="form-group search-location">
+                    <select name="province" class="form-control select">
+                      <option value="all">All</option>
+                      {% for province in provinces %}
+                      <option value="{{ province.id }}" {% if province.id|slugify == province_id %}selected{% endif %}>{{ province.name }} - {{ province.rtl_name }}</option>
+                      {% endfor %}
+                    </select>
+                  </div>
+                  <div class="form-group search-info">
+                    <input type="text" class="form-control pl-5" placeholder="Search Doctors, Clinics.." value="{{ searched_content }}" name="searched-content">
+                  </div>
+                </div>
+                <div class="filter-widget">
+                  <h4>Gender</h4>
+                  <div>
+                    <label class="custom_check">
+                      <input type="checkbox" name="gender_male" {% if gender_male %}checked{% endif %} id="male_checkbox">
+                      <span class="checkmark"></span> Male Doctor
+                    </label>
+                  </div>
+                  <div>
+                    <label class="custom_check">
+                      <input type="checkbox" name="gender_female" {% if gender_female %}checked{% endif %} id="female_checkbox">
+                      <span class="checkmark"></span> Female Doctor
+                    </label>
+                  </div>
+                </div>
+                <div class="filter-widget">
+                  <h4>Select Specialities</h4>
+                  <div class="menu-list">
+                    <select name="speciality" class="form-control select">
+                      <option value="all">All</option>
+                      {% for category in speciality_categories %}
+                      <option value="{{ category.id }}" {% if category.id|slugify == category_id %}selected{% endif %}>{{ category.name }} - {{ category.farsi_name }}</option>
+                      {% endfor %}
+                    </select>
+                  </div>
+                </div>
+                <div class="">
+                  <button type="submit" class="btn btn-block btn-primary p-3">Search</button>
+                </div>
+              </form>
+            </div>
+          </div>
+          <!-- /Search Filter -->
+        </div>
+        <div class="col-md-12 col-lg-8 col-xl-9">
+          <!-- Doctor Widget -->
+          {% for doci in doctors %}
+          <div class="card" name="doctor-item" id="{{doci.user.id}}" value="{{doci__user__gender}}">
+            <div class="card-body">
+              <div class="doctor-widget">
+                <div class="doc-info-left">
+                  <div class="doctor-img">
+                    <a href="{% url 'home:doctor_public_profile' doci.user.id %}">
+                      <img src="{% if doci.user.avatar %}{{ doci.user.avatar.url }}{% else %}{% if doci.user.gender == 'Male' %}{% static 'img/male_profile.png' %}{% else %}{% static 'img/female_profile.png' %}{% endif %}{% endif %}" class="img-fluid" alt="User Image">
+                    </a>
+                  </div>
+                  <div class="doc-info-cont">
+                    <h4 class="doc-name"><a href="{% url 'home:doctor_public_profile' doci.user.id %}">{{ doci.title }} {{ doci.user }}</a></h4>
+                    <p class="doc-speciality">
+                      {% for sp in doci.speciality.all %}
+                      {% if forloop.last %}
+                      {{sp}}.
+                      {% else %}
+                      {{sp}},
+                      {% endif %}
+                      {% endfor %}</p>
+                    {% doctor_rating doci %}
+                    <div class="clinic-services">
+                      {% for service in doci.service.all %}
+                      <span class="mb-1 ml-1">{{ service }}</span>
+                      {% endfor %}
+                    </div>
+                  </div>
+                </div>
+                <div class="doc-info-right">
+                  <div class="clini-infos">
+                    <ul>
+                      <b>Address</b>
+                      {% for clin in doci.clinic_set.all %}
+                      <li><i class="fas fa-map-marker-alt"></i> {{clin.address}}</li>
+                      {% endfor %}
+                      <li><i class="far fa-money-bill-alt"></i> {{ doci.fee|default:"not set" }}, AFN </li>
+                    </ul>
+                  </div>
+                  <div class="clinic-booking">
+                    <a class="view-pro-btn" href="{% url 'home:doctor_public_profile' doci.user.id %}">View Profile</a>
+                    <a class="apt-btn" href="{% url 'appointment:public_time_slot' doci.user.id %}">Book Appointment</a>
+                    <input type="hidden" name="gender" value="{{ doci.user.gender }}">
+                    <input type="hidden" name="speciality" value="{{doci.speciality_cats}}">
+                    <input type="hidden" name="speciality-item" value="{{doci.specialities}}">
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          {% empty %}
+          <img src="{{ STATIC_URL }}/img/noresult.png" alt="Sorry, No Result Found!" class="mh-75 mw-100">
+          {% endfor %}
+          <!-- /Doctor Widget -->
+          <div class="text-left">
+            <div class="pt-3">
+              <ul class="pagination">
+                {% if doctors.has_previous %}
+                <li class="page-item">
+                  <a class="page-link" href="?page=1" tabindex="-1">First</a>
+                </li>
+                {% endif %}
+                {% for num in doctors.paginator.page_range %}
+                {% if num == doctors.number %}
+                <li class="page-item active">
+                  <a class="page-link" href="#">{{ num }} <span class="sr-only">(current)</span></a>
+                </li>
+                {% elif num > doctors.number|add:'-3' and num < doctors.number|add:'3' %} <li class="page-item"><a class="page-link" href="?page={{num}}">{{ num }}</a></li>
+                  {% endif %}
+                  {% endfor %}
+                  {% if doctors.has_next %}
+                  <li class="page-item">
+                    <a class="page-link" href="?page={{ doctors.paginator.num_pages }}">Last</a>
+                  </li>
+                  {% endif %}
+              </ul>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <!-- /Page Content -->
+</div>
+<!-- /Main Wrapper -->
+{% endblock content %}
+{% block pagelevel_styles %}
+  <style>
+    .searchfilter-cat {
+      color: white;
+      background-color: #15558d;
+      border-radius: 1vw;
+    }
+  </style>
+{% endblock pagelevel_styles %}
+{% block script %}
+<script type="text/javascript">
+var csrftoken = '{{ csrf_token }}';
+</script>
+<script type="text/javascript" src="/static/axios.min.js"></script>
+<script type="text/javascript" src="/static/home/js/home_search.js"></script>
+{% endblock script %}

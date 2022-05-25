@@ -1,0 +1,47 @@
+{% load static %}
+{% url 'doctor:doctor_profile' as doctor_profile %}
+{% url 'patient:patient_profile' as patient_profile %}
+
+{# print js #}
+<script src="/static/js/node_modules/print-js/dist/print.js"></script>
+
+{% if request.path == patient_profile or request.path == doctor_profile %}
+<!-- for Image cropping -->
+<script src="https://unpkg.com/cropperjs"></script>
+{% endif %}
+
+<!-- jQuery -->
+<script src="{% static 'js/jquery.min.js' %}"></script>
+
+<!-- axios -->
+<script src="/static/axios.min.js"></script>
+
+<!-- Bootstrap Core JS -->
+<script src="{% static 'js/popper.min.js' %}"></script>
+<script src="{% static 'js/bootstrap.min.js' %}"></script>
+
+<!-- Slick JS -->
+<script src="{% static 'js/slick.js' %}"></script>
+
+<!-- /// For Doctor sidebar -->
+<!-- Sticky Sidebar JS -->
+<script src="{% static 'plugins/theia-sticky-sidebar/ResizeSensor.js' %}"></script>
+<script src="{% static 'plugins/theia-sticky-sidebar/theia-sticky-sidebar.js' %}"></script>
+
+<!-- Circle Progress JS -->
+<script src="{% static 'js/circle-progress.min.js' %}"></script>
+
+<!-- Select2 JS -->
+<script src="{% static 'plugins/select2/js/select2.min.js' %}"></script>
+
+<!-- Dropzone JS -->
+<script src="{% static 'plugins/dropzone/dropzone.min.js' %}"></script>
+
+<!-- Bootstrap Tagsinput JS -->
+<script src="{% static 'plugins/bootstrap-tagsinput/js/bootstrap-tagsinput.js' %}"></script>
+
+<!-- Custom JS -->
+<script src="{% static 'js/script.js' %}"></script>
+
+<!-- validtion js -->
+<script src="/static/form_validation.min.js"></script>

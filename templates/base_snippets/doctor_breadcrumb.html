@@ -1,0 +1,97 @@
+{% url 'doctor:dashboard' as doctor_dashboard %}
+{% url 'doctor:my_patient' as my_patient %}
+{% url 'appointment:schedule' as doctor_schedule %}
+{% url 'doctor:doctor_note' as doctor_note %}
+{% url 'doctor:doctor_review' as doctor_review %}
+{% url 'doctor:doctor_chat' as doctor_chat %}
+{% url 'doctor:doctor_profile' as doctor_profile %}
+{% url 'doctor:socialmedia' as doctor_socialmedia %}
+{% url 'doctor:doctor_password' as doctor_password %}
+{% url 'doctor:my_patient_detail' as my_patient_detail %}
+{% url 'doctor:prescription' as doctor_prescription %}
+
+
+<!-- Breadcrumb -->
+<div class="breadcrumb-bar">
+     <div class="container-fluid">
+          <div class="row align-items-center">
+               <div class="col">
+                    <nav aria-label="breadcrumb" class="page-breadcrumb">
+                         <ol class="breadcrumb">
+                              {% if request.path == doctor_dashboard %}
+                              <li class="breadcrumb-item"><a href="{% url 'home:homepage' %}">Home</a></li>
+                              <li class="breadcrumb-item active" aria-current="page">Dashboard</li>
+                              {% elif request.path == my_patient %}
+                              <li class="breadcrumb-item"><a href="{% url 'doctor:dashboard' %}">Dashboard</a></li>
+                              <li class="breadcrumb-item active" aria-current="page">My Patients</li>
+                              {% elif request.path == doctor_schedule %}
+                              <li class="breadcrumb-item"><a href="{% url 'doctor:dashboard' %}">Dashboard</a></li>
+                              <li class="breadcrumb-item active" aria-current="page">Schedule Appointments</li>
+                              {% elif request.path == doctor_note %}
+                              <li class="breadcrumb-item"><a href="{% url 'doctor:dashboard' %}">Dashboard</a></li>
+                              <li class="breadcrumb-item active" aria-current="page">Notifications</li>
+                              {% elif request.path == doctor_review %}
+                              <li class="breadcrumb-item"><a href="{% url 'doctor:dashboard' %}">Dashboard</a></li>
+                              <li class="breadcrumb-item active" aria-current="page">Reviews</li>
+                              {% elif request.path == doctor_profile %}
+                              <li class="breadcrumb-item"><a href="{% url 'doctor:dashboard' %}">Dashboard</a></li>
+                              <li class="breadcrumb-item active" aria-current="page">Doctor Profile Settings</li>
+                              {% elif request.path == doctor_socialmedia %}
+                              <li class="breadcrumb-item"><a href="{% url 'doctor:dashboard' %}">Dashboard</a></li>
+                              <li class="breadcrumb-item active" aria-current="page">Social Media</li>
+                              {% elif request.path == doctor_password %}
+                              <li class="breadcrumb-item"><a href="{% url 'doctor:dashboard' %}">Dashboard</a></li>
+                              <li class="breadcrumb-item active" aria-current="page">Change Password</li>
+                              {% elif request.path == my_patient_detail %}
+                              <li class="breadcrumb-item"><a href="{% url 'doctor:dashboard' %}">Dashboard</a></li>
+                              <li class="breadcrumb-item"><a href="{% url 'doctor:my_patient' %}">My Patient</a></li>
+                              <li class="breadcrumb-item active" aria-current="page">My Patient Detail</li>
+                              {% elif request.path == doctor_prescription %}
+                              <li class="breadcrumb-item"><a href="{% url 'doctor:dashboard' %}">Dashboard</a></li>
+                              <li class="breadcrumb-item"><a href="{% url 'doctor:my_patient' %}">My Patient</a></li>
+                              <li class="breadcrumb-item"><a href="{% url 'doctor:my_patient_detail' %}">Patient Details</a></li>
+                              <li class="breadcrumb-item active" aria-current="page">Patient Prescription</li>
+                              {% endif %}
+                         </ol>
+                    </nav>
+                    <h2 class="breadcrumb-title">
+                         {% if request.path == doctor_dashboard %}
+                         Dashboard
+                         {% elif request.path == my_patient %}
+                         Patients
+                         {% elif request.path == doctor_schedule %}
+                         Schedule Appointments
+                         {% elif request.path == doctor_note %}
+                         Notifications
+                         {% elif request.path == doctor_review %}
+                         Reviews
+                         {% elif request.path == doctor_profile %}
+                         Doctor Profile Settings
+                         {% elif request.path == doctor_socialmedia %}
+                         Social Media
+                         {% elif request.path == doctor_password %}
+                         Change Password
+                         {% elif request.path == my_patient_detail %}
+                         My Patient Detail
+                         {% elif request.path == doctor_prescription %}
+                         Write Patient Prescription
+                         {% endif %}
+                    </h2>
+               </div>
+               <div class="col-auto text-right float-right ml-auto">
+                    {% if request.path == patient_dashboard %}
+                    <a href="#" class="btn btn-primary btn-sm"><i class="fa fa-plus-square"></i> Add Medical Record</a>
+                    {% elif request.path == relative_list %}
+                    <a href="#" class="btn btn-primary btn-sm"><i class="fas fa-user-plus"></i> Add Family Member</a>
+                    {% elif request.path == doctor_note %}
+                    <a href="#" class="btn btn-primary btn-sm"><i class="fa fa-trash"></i><b> Clear All Notifications</b></a>
+                    {% elif request.path == relative_detail %}
+                    <a href="#" class="btn btn-primary btn-sm"><i class="fa fa-plus-square"></i><b> Add Medical Record</b></a>
+                    {% endif %}
+               </div>
+          </div>
+     </div>
+</div>
+<!-- /Breadcrumb -->
+
+

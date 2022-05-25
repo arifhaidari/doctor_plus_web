@@ -1,0 +1,230 @@
+{% extends 'base.html' %}
+{% load static %}
+{% load socialaccount %}
+{% block title %}
+Register | Patient
+{% endblock title %}
+{% block content %}
+<!-- Page Content -->
+<div class="content">
+  <div class="container-fluid">
+    <div class="row">
+      <div class="col-md-8 offset-md-2">
+        <!-- Register Content -->
+        <div class="account-content">
+          <div class="row align-items-center justify-content-center">
+            <div class="col-md-7 col-lg-6 login-left">
+              <img src="{% static 'img/login-banner.png' %}" class="img-fluid" alt="Doccure Register">
+            </div>
+            <div class="col-md-12 col-lg-6 login-right">
+              <div class="login-header">
+                <h3>Patient Register <a href="{% url 'user:doctor_register' %}">Are you a
+                    Doctor?</a></h3>
+              </div>
+              <!-- Register Form -->
+              <form method="POST" id="patient_form" data-districts-url="{% url 'user:ajax_load_districts' %}">
+                {% csrf_token %}
+                <div class="form-group form-focus">
+                  <input type="text" id="name" name="name" class="form-control floating">
+                  <label class="focus-label">Name</label>
+                  <small id="name_error" style="display: none;color: red;"></small>
+                </div>
+                <div class="row">
+                  <div class="col-sm-6">
+                    <div class="form-group form-focus">
+                      <input type="number" name="phone" id="phone" class="form-control floating">
+                      <label class="focus-label">Mobile Number</label>
+                      <small id="phone_error" style="display: none;color: red;"></small>
+                    </div>
+                  </div>
+                  <div class="col-sm-6">
+                    <div class="form-group form-focus">
+                      <label class="gen-label">Gender <span class="text-danger">
+                          *</span></label><br>
+                      <div class="form-check-inline">
+                        <label class="form-check-label">
+                          <input type="radio" checked name="gender" value="Male" id="gender" class="form-check-input">Male
+                        </label>
+                      </div>
+                      <div class="form-check-inline">
+                        <label class="form-check-label">
+                          <input type="radio" name="gender" value="Female" id="gender" class="form-check-input">Female
+                        </label>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                <div class="row">
+                  <div class="col-sm-6">
+                    <div class="form-group">
+                      <select id="city" name="city" class="form-control">
+                        <option value="">Select Province</option>
+                        {% for city in cities %}
+                        <option value="{{ city.id }}">{{ city.name }} -
+                          {{ city.rtl_name }}</option>
+                        {% endfor %}
+                      </select>
+                      <small id="city_error" style="display: none;color: red;"></small>
+                    </div>
+                  </div>
+                  <div class="col-sm-6">
+                    <div class="form-group">
+                      <select id="district" name="district" class="form-control">
+                        <option value="">Select District</option>
+                      </select>
+                      <small id="district_error" style="display: none;color: red;"></small>
+                    </div>
+                  </div>
+                </div>
+                <div class="row">
+                  <div class="col-sm-6">
+                    <div class="form-group form-focus">
+                      <input type="password" name="password" id="password" class="form-control floating">
+                      <label class="focus-label">Password</label>
+                      <small id="password_error" style="display: none;color: red;"></small>
+                    </div>
+                  </div>
+                  <div class="col-sm-6">
+                    <div class="form-group form-focus">
+                      <input type="password" name="repeat_password" id="repeat_password" class="form-control floating">
+                      <label class="focus-label">Confirm Password</label>
+                      <small id="confirm_password_error" style="display: none;color: red;"></small>
+                    </div>
+                  </div>
+                </div>
+                <div class="text-right">
+                  <a class="forgot-link" href="{% url 'user:login' %}">Already have an
+                    account?</a>
+                </div>
+                <button class="btn btn-primary btn-block btn-lg login-btn" type="submit">Signup</button>
+                <div class="login-or">
+                  <span class="or-line"></span>
+                  <span class="span-or">or</span>
+                </div>
+                <div class="row form-row social-login">
+                  <div class="col-6">
+                    <a href="{% provider_login_url 'facebook' %}" class="btn btn-facebook btn-block"><i class="fab fa-facebook-f mr-1"></i> Login</a>
+                  </div>
+                  <div class="col-6">
+                    <a href="{% provider_login_url 'google' %}" class="btn btn-google btn-block"><i class="fab fa-google mr-1"></i> Login</a>
+                  </div>
+                </div>
+              </form>
+              <!-- /Register Form -->
+            </div>
+          </div>
+        </div>
+        <!-- /Register Content -->
+      </div>
+    </div>
+  </div>
+</div>
+<br><br><br>
+<!-- /Page Content -->
+{% endblock content %}
+{% block script %}
+<script src="https://code.jquery.com/jquery-3.3.1.min.js"></script>
+<script>
+var isError = false;
+const form = document.getElementById('patient_form')
+const name = document.getElementById('name');
+const phone = document.getElementById('phone');
+const city = document.getElementById('city');
+const district = document.getElementById('district');
+const password = document.getElementById('password');
+const repeat_password = document.getElementById('repeat_password');
+// Error displaying part
+const nameError = document.getElementById('name_error');
+const phoneError = document.getElementById('phone_error');
+const cityError = document.getElementById('city_error');
+const districtError = document.getElementById('district_error');
+const passwordError = document.getElementById('password_error');
+const confirmPasswordError = document.getElementById('confirm_password_error');
+
+
+$("#city").change(myFunction).change()
+
+function myFunction() {
+  const url = $("#patient_form").attr("data-districts-url"); // get the url of the `load_districts` view
+  // const url = '/user/ajax/districts/'
+  const city_id = $(this).val(); // get the selected city ID from the HTML input
+  $.ajax({ // initialize an AJAX request
+    url: url, // set the url of the request (= /persons/ajax/load-cities/ )
+    data: {
+      'city_id': city_id // add the city id to the GET parameters
+    },
+    success: function(data) { // `data` is the return of the `load_districts` view function
+      $("#district").html(data); // replace the contents of the district input with the data that came from the server
+      /*
+
+      let html_data = '<option value="">---------</option>';
+      data.forEach(function (city) {
+          html_data += `<option value="${city.id}">${city.name}</option>`
+      });
+      console.log(html_data);
+      $("#city").html(html_data);
+
+      */
+    }
+  });
+}
+
+form.addEventListener('submit', (e) => {
+  if (name.value.trim() === '' || name.value.trim() == null) {
+    setError(name, nameError, 'Name field is emtpy')
+  } else {
+    if (!isNaN(name.value.trim())) {
+      setError(name, nameError, 'Name must not be digits')
+    }
+  }
+  if (phone.value.trim() === '' || phone.value.trim() == null) {
+    setError(phone, phoneError, 'Phone number field is emtpy')
+  } else {
+    if (isNaN(phone.value)) {
+      setError(phone, phoneError, 'Mobile numbers should be digits only')
+    } else if (phone.value.length != 10) {
+      setError(phone, phoneError, 'Phone number should be 10 digits e.g. 077 xxxx xxx')
+    }
+  }
+
+  if (city.value === '' || city.value == null) {
+    setError(city, cityError, 'Province is not selected')
+  }
+
+  if (district.value === '' || district.value == null) {
+    setError(district, districtError, 'District is not selected')
+  }
+
+  if (password.value.trim() === '' || password.value.trim() == null) {
+    setError(password, passwordError, 'Password field is emtpy')
+  }
+
+  if (repeat_password.value.trim() === '' || repeat_password.value.trim() == null) {
+    setError(repeat_password, confirmPasswordError, 'Please confirm your password')
+  }
+
+  if (password.value.trim() !== '' && password.value.trim() != null && repeat_password.value.trim() !== '' && repeat_password.value.trim() != null) {
+    if (password.value.trim() !== repeat_password.value.trim()) {
+      setError(repeat_password, confirmPasswordError, 'Passwords do not match')
+    } else {
+      if (password.value.length < 4 || password.value.length > 20) {
+        setError(password, passwordError, 'Password must be between 4 and 20 characters')
+      }
+    }
+  }
+
+  if (isError) {
+    console.log('yes there is error')
+    e.preventDefault()
+    isError = false
+  }
+})
+
+function setError(inputField, errorArea, errorMessage) {
+  isError = true
+  inputField.style.border = 'dashed 2px red'
+  errorArea.innerHTML = errorMessage + "<br>"
+  errorArea.style.display = 'block'
+}
+</script>
+{% endblock script %}

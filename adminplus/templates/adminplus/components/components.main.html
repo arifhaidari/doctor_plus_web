@@ -1,0 +1,52 @@
+{% load i18n %}
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <!-- jQuery -->
+  <script src="/static/admin/js/jquery-3.2.1.min.js"></script>
+  <!-- axios -->
+  <script src="/static/axios.min.js"></script>
+  <!-- Favicon -->
+  <link rel="shortcut icon" type="image/x-icon" href="/static/admin/img/favicon.png">
+  <!-- Bootstrap CSS -->
+  <link rel="stylesheet" href="/static/admin/css/bootstrap.min.css">
+  <!-- Fontawesome CSS -->
+  <link rel="stylesheet" href="/static/admin/css/font-awesome.min.css">
+  <!-- Feathericon CSS -->
+  <link rel="stylesheet" href="/static/admin/css/feathericon.min.css">
+  <link rel="stylesheet" href="/static/admin/plugins/morris/morris.css">
+  <!-- Select2 -->
+  <link rel="stylesheet" href="/static/plugins/select2/css/select2.min.css">
+  <!-- Main CSS -->
+  <link rel="stylesheet" href="/static/admin/css/style.css">
+  {% block style %}
+  <style>
+  .error {
+    color: red;
+  }
+  </style>
+  {% endblock style %}
+</head>
+
+<body>
+  {% block content %}
+  <!-- your componenets content here -->
+  {% endblock content %}
+  <!-- Scripts -->
+  <!-- jQuery -->
+  <script src="/static/admin/js/jquery-3.2.1.min.js"></script>
+  <!-- axios -->
+  <script src="/static/axios.min.js"></script>
+  <!-- Select2 -->
+  <script src="/static/plugins/select2/js/select2.min.js"></script>
+  <!-- validtion js -->
+  <script src="/static/form_validation.min.js"></script>
+  <script src="/static/form_validation_additional_file.min.js"></script>
+  {% block script %}
+  <!-- your scripts here -->
+  {% endblock script %}
+</body>
+
+</html>

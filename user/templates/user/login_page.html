@@ -1,0 +1,127 @@
+{% extends 'base.html' %}
+{% load static %}
+{% load socialaccount %}
+{% block title %}
+Login
+{% endblock title %}
+{% block content %}
+<!-- Page Content -->
+<div class="content">
+  <div class="container-fluid">
+    <div class="row">
+      <div class="col-md-8 offset-md-2">
+        <!-- Login Tab Content -->
+        <div class="account-content">
+          <div class="row align-items-center justify-content-center">
+            <div class="col-md-7 col-lg-6 login-left">
+              <img src="{% static 'img/login-banner.png' %}" class="img-fluid" alt="Login">
+            </div>
+            <div class="col-md-12 col-lg-6 login-right">
+              <!-- <div class="login-header">
+                                        <h3>Login <span>Doctor Plus</span></h3>
+                                   </div> -->
+              <div class="login-header">
+                <h3>Login <span>Doctor Plus</span> <a href="{% url 'user:patient_register' %}">Sign Up</a></h3>
+              </div>
+              <form method="POST" id="login_form">
+                {% csrf_token %}
+                <div class="form-group form-focus">
+                  <!-- <input type="email" class="form-control floating"> -->
+                  {{ form.phone }}
+                  <label class="focus-label">Username</label>
+                  <small id="phone_error" style="display: none;color: red;"></small>
+                  <!-- {% for error in form.phone.errors %}
+                                             <small class="form-text text-danger"><li>{{ error }}</li></small>
+                                             {% endfor %} -->
+                </div>
+                <div class="form-group form-focus">
+                  <!-- <input type="password" class="form-control floating"> -->
+                  {{ form.password }}
+                  <label class="focus-label">Password</label>
+                  <small id="password_error" style="display: none;color: red;"></small>
+                </div>
+                {% for error in form.non_field_errors %}
+                <!-- <small class="form-text text-danger"><li>{{ error }}</li></small> -->
+                <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                  {{ error }}
+                  <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                  </button>
+                </div>
+                {% endfor %}
+                <div class="text-right">
+                  <a class="forgot-link" href="#">Forgot Password ?</a>
+                </div>
+                <button class="btn btn-primary btn-block btn-lg login-btn" type="submit">Login</button>
+                <div class="login-or">
+                  <span class="or-line"></span>
+                  <span class="span-or">or</span>
+                </div>
+                <div class="row form-row social-login">
+                  <div class="col-6">
+                    <a href="{% provider_login_url 'facebook' %}" class="btn btn-facebook btn-block"><i class="fab fa-facebook-f mr-1"></i> Login</a>
+                  </div>
+                  <div class="col-6">
+                    <a href="{% provider_login_url 'google' %}" class="btn btn-google btn-block"><i class="fab fa-google mr-1"></i> Login</a>
+                  </div>
+                </div>
+                <div class="text-center dont-have">Don’t have an account? <a href="{% url 'user:patient_register' %}">Register</a></div>
+              </form>
+            </div>
+          </div>
+        </div>
+        <!-- /Login Tab Content -->
+      </div>
+    </div>
+  </div>
+</div>
+<br><br><br>
+<!-- /Page Content -->
+{% endblock content %}
+{% block script %}
+<script>
+var isError = false;
+const form = document.getElementById('login_form')
+const phone = document.getElementById('id_phone');
+const password = document.getElementById('id_password');
+// Error displaying part
+const phoneError = document.getElementById('phone_error');
+const passwordError = document.getElementById('password_error');
+
+
+form.addEventListener('submit', (e) => {
+
+  if (phone.value.trim() === '' || phone.value.trim() == null) {
+    setError(phone, phoneError, 'Phone number field is emtpy')
+  } else {
+    if (isNaN(phone.value)) {
+      setError(phone, phoneError, 'Mobile numbers should be digits only')
+    } else if (phone.value.length != 10) {
+      setError(phone, phoneError, 'Phone number should be 10 digits e.g. 077 xxxx xxx')
+    }
+  }
+
+  if (password.value.trim() === '' || password.value.trim() == null) {
+    setError(password, passwordError, 'Password field is emtpy')
+  } else {
+    // if (password.value.length < 4 || password.value.length > 20) {
+    //      setError(password, passwordError, 'Password must be between 4 and 20 characters')
+    // }
+  }
+
+
+  if (isError) {
+    console.log('yes there is error')
+    e.preventDefault()
+    isError = false
+  }
+})
+
+function setError(inputField, errorArea, errorMessage) {
+  isError = true
+  inputField.style.border = 'dashed 2px red'
+  errorArea.innerHTML = errorMessage + "<br>"
+  errorArea.style.display = 'block'
+}
+</script>
+{% endblock script %}

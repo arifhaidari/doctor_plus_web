@@ -1,0 +1,95 @@
+{% load static %}
+<div class="tab-pane fade" id="pat_medical_records">
+  <div class="text-right pb-3">
+    <div class="btn-group">
+      <a class="btn btn-primary" href="{% url 'medicalrecord:add_medical' %}"><span class="fa fa-plus-square">&nbsp; </span>Add Medical Record</a>
+    </div>
+  </div>
+
+  <div class="card card-table mb-0">
+    <div class="card-body">
+      <div class="table-responsive">
+        <table class="table table-hover table-center mb-0">
+          <thead>
+            <tr>
+              <th style="cursor:pointer;">Related Doctor<i class="fa fa-sort teal-color"></i></th>
+                <th style="cursor:pointer;">Title</th>
+                <th style="cursor:pointer;">General Access <i class="fa fa-sort teal-color"></i></th>
+                <th style="cursor:pointer;">Timestamp <i class="fa fa-sort teal-color"></i></th>
+              <th class="text-center">Actions </th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for file in medicalrecords %}
+            <tr name="record_{{ file.id}}">
+              <td>
+                <h2 class="table-avatar">
+                  <a href="{% url 'home:doctor_public_profile' file.related_doctor.user.id %}" class="avatar avatar-sm mr-2">
+                    <img class="avatar-img rounded-circle" src="{% if file.related_doctor.user.avatar %}{{ file.related_doctor.user.avatar.url }}{% else %}{% if file.related_doctor.user.gender == 'Male' %}{% static 'img/male_profile.png' %}{% else %}{% static 'img/female_profile.png' %}{% endif %}{% endif %}" alt="User Image">
+                  </a>
+                  <a href="{% url 'home:doctor_public_profile' file.related_doctor.user.id %}">{{ file.related_doctor.title }} {{ file.related_doctor.user.full_name }} <span>View Profile</span></a>
+                </h2>
+              </td>
+              <td><a href="{{ file.file.url }}" name="record_title_{{file.id}}">{{ file.title }}</a></td>
+              <td class="text-center">
+                {% if file.general_access or file.patient.share_record_to_all %}
+              Yes
+              {% else %}
+              No
+              {% endif %}
+              </td>
+              <td class="text-center">
+                {{ file.timestamp|date:'d M Y' }}
+              </td>
+              <td class="text-center">
+                <div class="btn-group">
+                  <button type="button" class="btn btn-info dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Action</button>
+                  <div class="dropdown-menu">
+                    <a href="{% url 'medicalrecord:medical_detail' file.id %}" class="dropdown-item">
+                      <i class="far fa-eye text-info"></i>&nbsp;&nbsp; Detail
+                    </a>
+                    <div class="dropdown-divider"></div>
+                    <a href="{% url 'medicalrecord:edit_medical' file.id %}" class="dropdown-item">
+                      <i class="fas fa-edit text-success"></i>&nbsp;&nbsp; Edit
+                    </a>
+                    <a href="javascript:delete_medical_record({{file.id}});" class="dropdown-item">
+                      <i class="fas fa-edit text-danger"></i>&nbsp;&nbsp; Delete
+                    </a>
+                  </div>
+                </div>
+              </td>
+            </tr>
+            
+            {% empty %}
+            <td>No Records Found!</td>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+  <div class="text-left">
+    <div class="pt-3">
+      <ul class="pagination">
+        {% if medicalrecords.has_previous %}
+        <li class="page-item">
+          <a class="page-link" href="?page=1" tabindex="-1">First</a>
+        </li>
+        {% endif %}
+        {% for num in medicalrecords.paginator.page_range %}
+        {% if num == medicalrecords.number %}
+        <li class="page-item active">
+          <a class="page-link" href="#">{{ num }} <span class="sr-only">(current)</span></a>
+        </li>
+        {% elif num > medicalrecords.number|add:'-3' and num < medicalrecords.number|add:'3' %} <li class="page-item"><a class="page-link" href="?page={{num}}">{{ num }}</a></li>
+          {% endif %}
+          {% endfor %}
+          {% if medicalrecords.has_next %}
+          <li class="page-item">
+            <a class="page-link" href="?page={{ medicalrecords.paginator.num_pages }}">Last</a>
+          </li>
+          {% endif %}
+      </ul>
+    </div>
+  </div>
+</div>

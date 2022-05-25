@@ -1,0 +1,343 @@
+{% extends "adminplus/adminp_dashboard.html" %}
+{% load static %}
+{% block content %}
+<div class="main-wrapper">
+  <!-- Page Wrapper -->
+  <div class="page-wrapper">
+    <div class="content container-fluid">
+      <!-- Page Header -->
+      <div class="page-header">
+        <div class="row">
+          <div class="col-sm-7 col-auto">
+            <h3 class="page-title">Review Requests</h3>
+            <ul class="breadcrumb">
+              <li class="breadcrumb-item"><a href="{% url 'adminplus:dashboard' %}">Dashboard</a></li>
+              <li class="breadcrumb-item"><a href="{% url 'adminplus:doctors' %}">Doctors</a></li>
+              <li class="breadcrumb-item active">Review Requests</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+      <!-- /Page Header -->
+      <div class="row">
+        <div class="col-sm-12">
+          <div class="card">
+            <div class="card-body">
+              <div class="table-responsive">
+                <table class="datatable table table-hover table-center mb-0">
+                  <thead>
+                    <tr>
+                      <th>Doctor</th>
+                      <th>Phone</th>
+                      <th>Email</th>
+                      <th>License</th>
+                      <th class="text-right">Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {% for doctor in review_requests %}
+                    <tr id="request_{{ doctor.user.id }}">
+                      <td>
+                        <h2 class="table-avatar">
+                          <a href="{% url 'adminplus:doctor_profile' doctor.user.id %}" class="avatar avatar-sm mr-2"><img class="avatar-img rounded-circle" src="{% if doctor.user.avatar %}{{ doctor.user.avatar.url }}{% else %}{% if doctor.user.gender == 'Male' %}{% static 'img/male_profile.png' %}{% else %}{% static 'img/female_profile.png' %}{% endif %}{% endif %}" alt="User Image"></a>
+                          <a href="{% url 'adminplus:doctor_profile' doctor.user.id %}">{{ doctor }}</a>
+                        </h2>
+                      </td>
+                      <td>{{ doctor.user.phone|title|default:"No Phone set yet." }}</td>
+                      <td>{{ doctor.user.email|title|default:"No Email set yet." }}</td>
+                      <td>#{{ doctor.doc_license_no|default:"No License set yet." }}</td>
+                      <td class="text-right">
+                        <div class="actions">
+                          <a class="btn btn-sm bg-info-light" href="javascript:void(0);" name="view" data-id='{{doctor.user.id}}'>
+                            <i class="fa fa-eye"></i> View
+                          </a>
+                          <a class="btn btn-sm bg-success-light" data-id="{{ doctor.user.id }}" href="javascript:void(0)" name="approve">
+                            <i class="fa fa-check"></i> Approve
+                          </a>
+                          <a href="javascript:void(0)" data-id="{{ doctor.user.id }}" class="btn btn-sm bg-danger-light" name="reject">
+                            <i class="fa fa-trash"></i> Reject
+                          </a>
+                        </div>
+                      </td>
+                    </tr>
+                    <tr name="request_view" id="view_{{doctor.user.id}}">
+                      <td colspan="6">
+                        <div class="card">
+                          <div class="card-body">
+                            <div class="card-title text-info">
+                              <h3>Doctor Review Request</h3>
+                            </div>
+                            <div class="card-body">
+                              <div class="card">
+                                <div class="card-header">
+                                  <h4 class="card-title">Basic Information</h4>
+                                </div>
+                                <div class="card-body">
+                                  <div>
+                                    <table class="table table-bordered mb-0">
+                                      <tbody>
+                                        <tr>
+                                          <th>Title</th>
+                                          <td>{{ doctor.title }}</td>
+                                        </tr>
+                                        <tr>
+                                          <th>Full Name</th>
+                                          <td>{{ doctor.user.full_name }}</td>
+                                        </tr>
+                                        <tr>
+                                          <th>Persian Name</th>
+                                          <td>{{ doctor.user.rtl_full_name }}</td>
+                                        </tr>
+                                        <tr>
+                                          <th>Gender</th>
+                                          <td>{{ doctor.user.gender }}</td>
+                                        </tr>
+                                        <tr>
+                                          <th>Fee</th>
+                                          <td>{{ doctor.fee }}</td>
+                                        </tr>
+                                        <tr>
+                                          <th>License No</th>
+                                          <td>{{ doctor.doc_license_no }}</td>
+                                        </tr>
+                                        <tr>
+                                          <th>Phone</th>
+                                          <td>{{ doctor.user.phone }}</td>
+                                        </tr>
+                                        <tr>
+                                          <th>Email</th>
+                                          <td>{{ doctor.user.email }}</td>
+                                        </tr>
+                                        <tr>
+                                          <th>Date of Birth</th>
+                                          <td>{{ doctor.user.date_of_birth }} ({{doctor.user.user_age}} years old)</td>
+                                        </tr>
+                                      </tbody>
+                                    </table>
+                                  </div>
+                                </div>
+                              </div>
+                              <div class="card">
+                                <div class="card-header">
+                                  <h4 class="card-title">Address</h4>
+                                </div>
+                                <div class="card-body">
+                                  <div class="table-responsive">
+                                    <table class="table mb-0">
+                                      <thead>
+                                        <tr>
+                                          <th>City</th>
+                                          <th>District</th>
+                                          <th>Address</th>
+                                          <th>Address(Farsi/Pashto)</th>
+                                        </tr>
+                                      </thead>
+                                      <tbody>
+                                        <tr style="white-space: initial;">
+                                          <td>{{ doctor.user.address.city }}</td>
+                                          <td>{{ doctor.user.address.district }}</td>
+                                          <td>{{ doctor.user.address.address }}</td>
+                                          <td align="right">{{ doctor.user.address.rtl_address }}</td>
+                                        </tr>
+                                      </tbody>
+                                    </table>
+                                  </div>
+                                </div>
+                              </div>
+                              <br>
+                              <br>
+                              <div class="card">
+                                <div class="card-header">
+                                  <h4 class="card-title">Clinic Information</h4>
+                                </div>
+                                <div class="card-body">
+                                  <div class="table-responsive">
+                                    <table class="table mb-0">
+                                      <thead>
+                                        <tr>
+                                          <th>Clinic</th>
+                                          <th>Address</th>
+                                          <th>Created By</th>
+                                          <th>Status</th>
+                                        </tr>
+                                      </thead>
+                                      <tbody>
+                                        {% for clin in doctor.clinic_set.all %}
+                                        <tr>
+                                          <td>{{ clin }}</td>
+                                          <td>{{ clin.city }} {{ clin.district }} {{ clin.address }}</td>
+                                          {% if clin.created_by == doctor %}
+                                          <td>This Doctor</td>
+                                          {% else %}
+                                          <td>{{ clin.created_by|default:"System" }}</td>
+                                          {% endif %}
+                                          {% if clin.active %}
+                                          <td>Active</td>
+                                          {% else %}
+                                          <td>
+                                            <a href="{% url 'adminplus:clinic_reviews' %}" class="btn btn-warning">
+                                              Approve
+                                            </a>
+                                            <br><span class="badge badge-info">Clinic Not Approved Yet</span>
+                                          </td>
+                                          {% endif %}
+                                        </tr>
+                                        {% endfor %}
+                                      </tbody>
+                                    </table>
+                                  </div>
+                                </div>
+                              </div <br>
+                              <br>
+                              <div class="card">
+                                <div class="card-header">
+                                  <h4 class="card-title">Specialization, Conditions and Services</h4>
+                                </div>
+                                <div class="card-body">
+                                  <div class="table-responsive">
+                                    <table class="table mb-0">
+                                      <thead>
+                                        <tr>
+                                          <th>Specialties</th>
+                                          <th>Conditions</th>
+                                          <th>Services</th>
+                                        </tr>
+                                      </thead>
+                                      <tbody>
+                                        <tr>
+                                          <td>
+                                            {% for sp in doctor.speciality.all %}
+                                            <li>{{ sp }}</li>
+                                            {% endfor %}
+                                          </td>
+                                          <td>
+                                            {% for con in doctor.condition.all %}
+                                            <li>{{ con }}</li>
+                                            {% endfor %}
+                                          </td>
+                                          <td>
+                                            {% for sv in doctor.service.all %}
+                                            <li>{{ sv }}</li>
+                                            {% endfor %}
+                                          </td>
+                                        </tr>
+                                      </tbody>
+                                    </table>
+                                  </div>
+                                </div>
+                              </div>
+                              <h5>About</h5>
+                              <div class="row">
+                                <div class="col-md-4 col-sm-4 col-xl-4" style="white-space: initial;">{{ doctor.bio }}</div>
+                                <div class="col-md-4 col-sm-4 col-xl-4" style="white-space: initial;" align="right">{{ doctor.farsi_bio }}</div>
+                                <div class="col-md-4 col-sm-4 col-xl-4" style="white-space: initial;" align="right">{{ doctor.pashto_bio }}</div>
+                              </div>
+                            </div>
+                            <div align="right">
+                              <a href="javascript:void(0);" class="btn btn-info" name="approve" data-id="{{ doctor.user.id }}">Approve</a>
+                              <a href="javascript:void(0);" class="btn btn-danger" name="reject" data-id="{{ doctor.user.id }}">Reject</a>
+                              <a href="javascript:void(0);" class="btn btn-warning" id="close-detail">Close</a>
+                            </div>
+                          </div>
+                        </div>
+                      </td>
+                      <!-- 
+                      <td class="d-none"></td>
+                      <td class="d-none"></td>
+                      <td class="d-none"></td>
+                      <td class="d-none"></td>
+                       -->
+                    </tr>
+                    {% empty %}
+                    <tr>
+                      <td colspan="5">No Pending Requests.</td>
+                      <!-- 
+                      <td class="d-none"></td>
+                      <td class="d-none"></td>
+                      <td class="d-none"></td>
+                      <td class="d-none"></td>
+                       -->
+                    </tr>
+                    {% endfor %}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <!-- /Page Wrapper -->
+</div>
+{% endblock content %}
+{% block script %}
+<script>
+  jQuery(document).ready(function($) {
+    $("tr[name='request_view']").toggle('fast');
+    // click view
+    $('a[name="view"]').click(function(event) {
+      let id = $(this).data("id");
+      let details = $("#view_" + id).toggle('slow');
+    });
+    // close button of each detail view
+    $("#close-detail").click(function(event) {
+      $("tr[name='request_view']").toggle('slow');
+    });
+
+    // approve
+    $('a[name="approve"]').click(function(event) {
+      let form = new FormData();
+      form.append('csrfmiddlewaretoken', '{{ csrf_token }}');
+      form.append('approve', $(this).data("id"));
+      axios.post(".", form).then((response) => {
+        if (response.data.status == "success") {
+          $("#request_" + response.data.id).hide('slow');
+          $("#view_" + response.data.id).hide('slow');
+        }
+      }).catch((error) => {
+        console.error(error);
+      });
+    });
+
+    // rejection reason
+    async function review_rejection_reason() {
+      const {
+        value: text
+      } = await Swal.fire({
+        input: 'textarea',
+        inputLabel: 'Reason',
+        inputPlaceholder: 'Please explain why doctor is rejected...',
+        inputAttributes: {
+          'aria-label': 'Please explain why doctor is rejected'
+        },
+        showCancelButton: true
+      })
+      return text;
+    }
+
+    // reject
+    $('a[name="reject"]').click(async function(event) {
+      reason = await review_rejection_reason();
+      if (reason) {
+        let form = new FormData();
+        form.append('csrfmiddlewaretoken', '{{ csrf_token }}');
+        form.append('reject', $(this).data("id"));
+        form.append('reason', reason)
+        axios.post(".", form).then((response) => {
+          if (response.data.status == "success") {
+            console.log("now hidding the : ", response.data.id)
+            $("#request_" + response.data.id).hide('slow');
+            $("#view_" + response.data.id).hide('slow');
+          }
+        }).catch((error) => {
+          console.error(error);
+        });
+      } // if(reason) fun end
+
+    });
+
+  });
+
+</script>
+{% endblock script %}

@@ -1,0 +1,325 @@
+
+{% extends 'base.html' %}
+{% load static %}
+{% load doctor_tags %}
+{% load appt_custom_filter %}
+{% block title %}
+Booking Appointment
+{% endblock title %}
+{% block content %}
+{% include 'base_snippets/breadcrumb.html' %}
+<!-- Page Content -->
+<div class="content">
+  <div class="container">
+    <div class="card">
+      <div class="card-body">
+        <div class="booking-doc-info">
+          <a href="{% url 'home:doctor_public_profile' user_object.id %}" class="booking-doc-img">
+            <img src="{% if user_object.avatar %}{{ user_object.avatar.url }}{% else %}{% if user_object.gender == 'Male' %}{% static 'img/male_profile.png' %}{% else %}{% static 'img/female_profile.png' %}{% endif %}{% endif %}" alt="User Image">
+          </a>
+          <div class="booking-info">
+            <h4><a href="{% url 'home:doctor_public_profile' user_object.id %}">{{ user_object.full_name }}</a></h4>
+            {% doctor_rating user_object.doctor %}
+            <p class="doc-speciality">
+                {% for sp in user_object.doctor.speciality.all %}
+                <span style="padding:0.25vw; border:solid 0.10vw;">{{ sp }}</span>
+                {% endfor %}
+              </p>
+            
+          </div>
+        </div>
+        <div align="right">
+          <form action="POST" id="appointment-paitent-form">
+            <div class="col-md-3 col-sm-3 col-xs-3 col-xl-3  mt-n5">
+              <div align="left">Book Appointment For</div>
+              <select name="appointment-paitent" class="form-control">
+                <option value="Self">Self</option>
+                {% for rel in request.user.patient.relative.all %}
+                <option value="{{ rel.user.id }}">{{ rel }}</option>
+                {% endfor %}
+              </select>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+    <!-- Doctor Details Tab -->
+    <div class="card">
+      <div class="card-body pt-0">
+        <!-- Tab Menu -->
+        <nav class="user-tabs mb-4">
+          <ul class="nav nav-tabs nav-tabs-bottom nav-justified">
+            {% for clinic in user_object.doctor.clinic_set.all %}
+            <li class="nav-item">
+              <a class="nav-link {% if forloop.counter0 < 1 %}active{% endif %}" href="#clinic_tab_{{ user_object.id }}_{{ clinic.id }}" data-toggle="tab">{{ clinic.clinic_name }}</a>
+            </li>
+            {% endfor %}
+          </ul>
+        </nav>
+        <!-- /Tab Menu -->
+        <!-- Tab Content -->
+        <div class="tab-content pt-0">
+          {% for clinic in user_object.doctor.clinic_set.all %}
+          {% with doctor_id=user_object.id|stringformat:"s" get_clinic_id=clinic.id|stringformat:"s" %}
+          <form method="POST">{% csrf_token %}</form>
+          <!-- Overview Content -->
+          <div role="tabpanel" id="clinic_tab_{{ user_object.id }}_{{ clinic.id }}" class="tab-pane fade {% if forloop.counter0 < 1 %}show active{% endif %}">
+            <!-- Schedule Header -->
+            <div class="schedule-header">
+              <!-- Schedule Nav -->
+              <div class="schedule-nav">
+                <ul class="nav nav-tabs nav-justified">
+                  <li class="nav-item">
+                    <a id="toggle_saturday{{ forloop.counter0 }}" class="nav-link {% if today_weekday == 'Saturday' %}active{% endif %}" data-toggle="tab" href="#slot_saturday{{ forloop.counter0 }}">Saturday</a>
+                  </li>
+                  <li class="nav-item">
+                    <a id="toggle_sunday{{ forloop.counter0 }}" class="nav-link {% if today_weekday == 'Sunday' %}active{% endif %}" data-toggle="tab" href="#slot_sunday{{ forloop.counter0 }}">Sunday</a>
+                  </li>
+                  <li class="nav-item">
+                    <a id="toggle_monday{{ forloop.counter0 }}" class="nav-link {% if today_weekday == 'Monday' %}active{% endif %}" data-toggle="tab" href="#slot_monday{{ forloop.counter0 }}">Monday</a>
+                  </li>
+                  <li class="nav-item">
+                    <a id="toggle_tuesday{{ forloop.counter0 }}" class="nav-link {% if today_weekday == 'Tuesday' %}active{% endif %}" data-toggle="tab" href="#slot_tuesday{{ forloop.counter0 }}">Tuesday</a>
+                  </li>
+                  <li class="nav-item">
+                    <a id="toggle_wednesday{{ forloop.counter0 }}" class="nav-link {% if today_weekday == 'Wednesday' %}active{% endif %}" data-toggle="tab" href="#slot_wednesday{{ forloop.counter0 }}">Wednesday</a>
+                  </li>
+                  <li class="nav-item">
+                    <a id="toggle_thursday{{ forloop.counter0 }}" class="nav-link {% if today_weekday == 'Thursday' %}active{% endif %}" data-toggle="tab" href="#slot_thursday{{ forloop.counter0 }}">Thursday</a>
+                  </li>
+                  <li class="nav-item">
+                    <a id="toggle_friday{{ forloop.counter0 }}" class="nav-link {% if today_weekday == 'Friday' %}active{% endif %}" data-toggle="tab" href="#slot_friday{{ forloop.counter0 }}">Friday</a>
+                  </li>
+                </ul>
+              </div>
+              <!-- /Schedule Nav -->
+            </div>
+            <!-- /Schedule Header -->
+            <!-- Schedule Content -->
+            <div class="tab-content schedule-cont">
+              <!-- Saturday Slot -->
+              <div id="slot_saturday{{ forloop.counter0 }}" class="tab-pane fade  {% if today_weekday == 'Saturday' %}show active{% endif %}">
+                <div class="row">
+                  <div class="col-md-12">
+                    <!-- Time Slot -->
+                    <div class="doc-times">
+                      {% with saturday="Saturday,"|add:doctor_id saturday_pattern="Saturday,"|add:get_clinic_id %}
+                      {% for appt_slot in user_object.doctor.appointment_set.all|filter_by_pattern:saturday_pattern %}
+                      {% if appt_slot|filter_by_status:request.user or appt_slot.status == 'PENDING' and appt_slot.active %}
+                      <div id="{{ clinic.id }}_{{ appt_slot.id }}" class="doc-slot-list bg-secondary">
+                        {{ appt_slot.start_appt_time }} - {{ appt_slot.end_appt_time }}
+                        <a href="javascript:void(0);" name="active_slot" data-app="{{ clinic.id }},{{ appt_slot.id }},{{ booked_clinic_id }},{{ booked_appt_id }},{{ user_object.id }}">
+                          <i class="fa fa-check-circle fa-lg" ></i>
+                        </a>
+                      </div>
+                      {% endif %}
+                      {% empty %}
+                      <h4>Doctor is not available.</h4>
+                      {% endfor %}
+                      {% endwith %}
+                    </div>
+                    <!-- /Time Slot -->
+                  </div>
+                </div>
+              </div>
+              <!-- /Saturday Slot -->
+              <!-- Sunday Slot -->
+              <div id="slot_sunday{{ forloop.counter0 }}" class="tab-pane fade {% if today_weekday == 'Sunday' %}show active{% endif %}">
+                <div class="row">
+                  <div class="col-md-12">
+                    <!-- Time Slot -->
+                    <div class="doc-times">
+                      {% with sunday="Sunday,"|add:doctor_id sunday_pattern="Sunday,"|add:get_clinic_id %}
+                      {% for appt_slot in user_object.doctor.appointment_set.all|filter_by_pattern:sunday_pattern %}
+                      {% if appt_slot|filter_by_status:request.user or appt_slot.status == 'PENDING' and appt_slot.active %}
+                      <div id="{{ clinic.id }}_{{ appt_slot.id }}" class="doc-slot-list bg-secondary">
+                        {{ appt_slot.start_appt_time}} - {{ appt_slot.end_appt_time}}
+                        <a href="javascript:void(0);" name="active_slot" data-app="{{ clinic.id }},{{ appt_slot.id }},{{ booked_clinic_id }},{{ booked_appt_id }},{{ user_object.id }}">
+                          <i class="fa fa-check-circle fa-lg" ></i>
+                        </a>
+                      </div>
+                      {% endif %}
+                      {% empty %}
+                      <h4>Doctor is not available.</h4>
+                      {% endfor %}
+                      {% endwith %}
+                    </div>
+                    <!-- /Time Slot -->
+                  </div>
+                </div>
+              </div>
+              <!-- /Sunday Slot -->
+              <!-- Monday Slot -->
+              <div id="slot_monday{{ forloop.counter0 }}" class="tab-pane fade {% if today_weekday == 'Monday' %}show active{% endif %}">
+                <div class="row">
+                  <div class="col-md-12">
+                    <!-- Time Slot -->
+                    <div class="doc-times">
+                      {% with monday="Monday,"|add:doctor_id monday_pattern="Monday,"|add:get_clinic_id %}
+                      {% for appt_slot in user_object.doctor.appointment_set.all|filter_by_pattern:monday_pattern %}
+                      {% if appt_slot|filter_by_status:request.user or appt_slot.status == 'PENDING' and appt_slot.active %}
+                      <div id="{{ clinic.id }}_{{ appt_slot.id }}" class="doc-slot-list bg-secondary">
+                        {{ appt_slot.start_appt_time}} - {{ appt_slot.end_appt_time}}
+                        <a href="javascript:void(0);" name="active_slot" data-app="{{ clinic.id }},{{ appt_slot.id }},{{ booked_clinic_id }},{{ booked_appt_id }},{{ user_object.id }}">
+                          <i class="fa fa-check-circle fa-lg" ></i>
+                        </a>
+                      </div>
+                      {% endif %}
+                      {% empty %}
+                      <h4>Doctor is not available.</h4>
+                      {% endfor %}
+                      {% endwith %}
+                    </div>
+                    <!-- /Time Slot -->
+                  </div>
+                </div>
+              </div>
+              <!-- /Monday Slot -->
+              <!-- Tuesday Slot -->
+              <div id="slot_tuesday{{ forloop.counter0 }}" class="tab-pane fade  {% if today_weekday == 'Tuesday' %}show active{% endif %}">
+                <div class="row">
+                  <div class="col-md-12">
+                    <!-- Time Slot -->
+                    <div class="doc-times">
+                      {% with tuesday="Tuesday,"|add:doctor_id tuesday_pattern="Tuesday,"|add:get_clinic_id %}
+                      {% for appt_slot in user_object.doctor.appointment_set.all|filter_by_pattern:tuesday_pattern %}
+                      {% if appt_slot|filter_by_status:request.user or appt_slot.status == 'PENDING' and appt_slot.active %}
+                      <div id="{{ clinic.id }}_{{ appt_slot.id }}" class="doc-slot-list bg-secondary">
+                        {{ appt_slot.start_appt_time}} - {{ appt_slot.end_appt_time}}
+                        <a href="javascript:void(0);" name="active_slot" data-app="{{ clinic.id }},{{ appt_slot.id }},{{ booked_clinic_id }},{{ booked_appt_id }},{{ user_object.id }}">
+                          <i class="fa fa-check-circle fa-lg" ></i>
+                        </a>
+                      </div>
+                      {% endif %}
+                      {% empty %}
+                      <h4>Doctor is not available.</h4>
+                      {% endfor %}
+                      {% endwith %}
+                    </div>
+                    <!-- /Time Slot -->
+                  </div>
+                </div>
+              </div>
+              <!-- /Tuesday Slot -->
+              <!-- Wednesday Slot -->
+              <div id="slot_wednesday{{ forloop.counter0 }}" class="tab-pane fade {% if today_weekday == 'Wednesday' %}show active{% endif %}">
+                <div class="row">
+                  <div class="col-md-12">
+                    <!-- Time Slot -->
+                    <div class="doc-times">
+                      {% with wednesday="Wednesday,"|add:doctor_id wednesday_pattern="Wednesday,"|add:get_clinic_id %}
+                      {% for appt_slot in user_object.doctor.appointment_set.all|filter_by_pattern:wednesday_pattern %}
+                      {% if appt_slot|filter_by_status:request.user or appt_slot.status == 'PENDING' and appt_slot.active %}
+                      <div id="{{ clinic.id }}_{{ appt_slot.id }}" class="doc-slot-list bg-secondary ">
+                        {{ appt_slot.start_appt_time}} - {{ appt_slot.end_appt_time }}
+                        <a href="javascript:void(0);" name="active_slot" data-app="{{ clinic.id }},{{ appt_slot.id }},{{ booked_clinic_id }},{{ booked_appt_id }},{{ user_object.id }}">
+                          <i class="fa fa-check-circle fa-lg" ></i>
+                        </a>
+                      </div>
+                      {% endif %}
+                      {% empty %}
+                      <h4>Doctor is not available.</h4>
+                      {% endfor %}
+                      {% endwith %}
+                    </div>
+                    <!-- /Time Slot -->
+                  </div>
+                </div>
+              </div>
+              <!-- /Wednesday Slot -->
+              <!-- Thursday Slot -->
+              <div id="slot_thursday{{ forloop.counter0 }}" class="tab-pane fade {% if today_weekday == 'Thursday' %}show active{% endif %}">
+                <div class="row">
+                  <div class="col-md-12">
+                    <!-- Time Slot -->
+                    <div class="doc-times">
+                      {% with thursday="Thursday,"|add:doctor_id thursday_pattern="Thursday,"|add:get_clinic_id %}
+                      {% for appt_slot in user_object.doctor.appointment_set.all|filter_by_pattern:thursday_pattern %}
+                      {% if appt_slot|filter_by_status:request.user or appt_slot.status == 'PENDING' and appt_slot.active %}
+                      <div id="{{ clinic.id }}_{{ appt_slot.id }}" class="doc-slot-list bg-secondary">
+                        {{ appt_slot.start_appt_time}} - {{ appt_slot.end_appt_time}}
+                        <a href="javascript:void(0);" name="active_slot" data-app="{{ clinic.id }},{{ appt_slot.id }},{{ booked_clinic_id }},{{ booked_appt_id }},{{ user_object.id }}">
+                          <i class="fa fa-check-circle fa-lg" ></i>
+                        </a>
+                      </div>
+                      {% endif %}
+                      {% empty %}
+                      <h4>Doctor is not available.</h4>
+                      {% endfor %}
+                      {% endwith %}
+                    </div>
+                    <!-- /Time Slot -->
+                  </div>
+                </div>
+              </div>
+              <!-- /Thursday Slot -->
+              <!-- Friday Slot -->
+              <div id="slot_friday{{ forloop.counter0 }}" class="tab-pane fade {% if today_weekday == 'Friday' %}show active{% endif %}">
+                <div class="row">
+                  <div class="col-md-12">
+                    <!-- Time Slot -->
+                    <div class="doc-times">
+                      {% with friday="Friday,"|add:doctor_id friday_pattern="Friday,"|add:get_clinic_id %}
+                      {% for appt_slot in user_object.doctor.appointment_set.all|filter_by_pattern:friday_pattern %}
+                      {% if appt_slot|filter_by_status:request.user or appt_slot.status == 'PENDING' and appt_slot.active %}
+                      <div id="{{ clinic.id }}_{{ appt_slot.id }}" class="doc-slot-list bg-secondary">
+                        {{ appt_slot.start_appt_time}} - {{ appt_slot.end_appt_time}}
+                        <a href="javascript:void(0);" name="active_slot" data-app="{{ clinic.id }},{{ appt_slot.id }},{{ booked_clinic_id }},{{ booked_appt_id }},{{ user_object.id }}">
+                          <i class="fa fa-check-circle fa-lg" ></i>
+                        </a>
+                      </div>
+                      {% endif %}
+                      {% empty %}
+                      <h4>Doctor is not available.</h4>
+                      {% endfor %}
+                      {% endwith %}
+                    </div>
+                    <!-- /Time Slot -->
+                  </div>
+                </div>
+              </div>
+              <!-- /Friday Slot -->
+            </div>
+            <!-- /Schedule Content -->
+          </div>
+          {% endwith %}
+          {% endfor %}
+          <!-- /Overview Content -->
+          <small id="booking_slot_general_error" style="display: none;color: red;"></small>
+        </div>
+      </div>
+    </div>
+    <!-- /Doctor Details Tab -->
+    <!-- Submit Section -->
+    <div class="submit-section proceed-btn text-right">
+      <button class="btn btn-primary submit-btn" id="submit-proceed-btn">Proceed to Book</buttton>
+    </div>
+    <!-- /Submit Section -->
+  </div>
+</div>
+<!-- /Page Content -->
+<!-- modals -->
+<!-- <div class="modal fade custom-modal" id="cancel_appt_modal">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">Custom Schedule <small>(It will reset your settings)</small></h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body">
+        <p>Do you want to cancel your appointment?</p>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary submit-btn" data-dismiss="modal"> No </button>
+        <button type="button" onclick="submitCancelAppt()" class="btn btn-primary submit-btn"> Yes </button>
+      </div>
+    </div>
+  </div>
+</div> -->
+<!-- /modals -->
+{% endblock content %}
+{% block script %}
+{% include 'appointment/scripts/public_time_slot_script.html' %}
+{% endblock script %}

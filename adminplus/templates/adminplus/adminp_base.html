@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="en">
+  <!-- Mirrored from dreamguys.co.in/demo/doccure/admin/index.html by HTTrack Website Copier/3.x [XR&CO'2014], Tue, 24 Dec 2019 21:07:10 GMT -->
+
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=0">
+    <!-- jQuery -->
+    <script src="/static/admin/js/jquery-3.2.1.min.js"></script>
+    <!-- axios -->
+    <script src="/static/axios.min.js"></script>
+    <!-- Favicon -->
+    <link rel="shortcut icon" type="image/x-icon" href="/static/admin/img/favicon.png">
+    <!-- Bootstrap CSS -->
+    <link rel="stylesheet" href="/static/admin/css/bootstrap.min.css">
+    <!-- Fontawesome CSS -->
+    <!-- <link rel="stylesheet" href="/static/admin/css/font-awesome.min.css"> -->
+    <!-- Fontawesome CSS More-->
+    <!-- <link rel="stylesheet" href="/static/plugins/fontawesome/css/fontawesome.min.css"> -->
+    <link rel="stylesheet" href="/static/plugins/fontawesome/css/all.min.css">
+    <!-- Feathericon CSS -->
+    <link rel="stylesheet" href="/static/admin/css/feathericon.min.css">
+    <link rel="stylesheet" href="/static/admin/plugins/morris/morris.css">
+    <!-- Datatables CSS -->
+    <link rel="stylesheet" href="/static/admin/plugins/datatables/datatables.min.css">
+    <!-- Select2 -->
+    <link rel="stylesheet" href="/static/plugins/select2/css/select2.min.css">
+    <!-- Main CSS -->
+    <link rel="stylesheet" href="/static/admin/css/style.css">
+    <style>
+      .error {
+        color: red;
+      }
+
+    </style>
+    <title>
+      {% block title %} title {% endblock title %}
+    </title>
+    {% block pagelevel_styles %}
+    {% endblock pagelevel_styles %}
+  </head>
+
+  <body>
+    <!-- Main Wrapper -->
+    <div class="main-wrapper">
+      <!-- Header -->
+      {% include "adminplus/adminp_header.html" %}
+      <!-- /Header -->
+      <!-- Sidebar -->
+      {% include "adminplus/adminp_sidebar.html" %}
+      <!-- /Sidebar -->
+      <!-- Page Wrapper -->
+      {% block content %}
+      <h1>Contents Here!</h1>
+      {% endblock content %}
+      <!-- /Page Wrapper -->
+    </div>
+    <!-- /Main Wrapper -->
+    <!-- Select2 JS -->
+    <script src="/static/plugins/select2/js/select2.min.js"></script>
+    <!-- validtion js -->
+    <script src="/static/form_validation.min.js"></script>
+    <script src="/static/form_validation_additional_file.min.js"></script>
+    <!-- Bootstrap Core JS -->
+    <script src="/static/admin/js/popper.min.js"></script>
+    <script src="/static/admin/js/bootstrap.min.js"></script>
+    <!-- Datatables JS -->
+    <script src="/static/admin/plugins/datatables/jquery.dataTables.min.js"></script>
+    <script src="/static/admin/plugins/datatables/datatables.min.js"></script>
+    <!-- Slimscroll JS -->
+    <script src="/static/admin/plugins/slimscroll/jquery.slimscroll.min.js"></script>
+    <script src="/static/admin/plugins/raphael/raphael.min.js"></script>
+    {# // <script src="/static/admin/plugins/morris/morris.min.js"></script> #}
+    {# // <script src="/static/admin/js/chart.morris.js"></script> #}
+    <!-- toggle buttons plugin -->
+    <script src="/static/plugins/enhanced-switch-control/js/jquery.enhanced-switch.js"></script>
+    <!-- sweet alert -->
+    <script src="/static/swtalert.js"></script>
+    <!-- Select2 -->
+    <script src="/static/plugins/select2/js/select2.min.js"></script>
+    {% block script %}
+    {% endblock script %}
+    <!-- Custom JS -->
+    <script src="/static/admin/js/script.js"></script>
+  </body>
+  <!-- Mirrored from dreamguys.co.in/demo/doccure/admin/index.html by HTTrack Website Copier/3.x [XR&CO'2014], Tue, 24 Dec 2019 21:07:23 GMT -->
+
+</html>

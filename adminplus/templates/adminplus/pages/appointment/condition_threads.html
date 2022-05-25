@@ -1,0 +1,93 @@
+{% extends "adminplus/adminp_dashboard.html" %}
+{% block content %}
+<!-- Page Wrapper -->
+<div class="page-wrapper">
+  <div class="content container-fluid">
+    <!-- Page Header -->
+    <div class="page-header">
+      <div class="row">
+        <div class="col-sm-12">
+          <h3 class="page-title">Condition Threads</h3>
+          <ul class="breadcrumb">
+            <li class="breadcrumb-item"><a href="{% url 'adminplus:dashboard' %}">Dashboard</a></li>
+            <li class="breadcrumb-item active">Condition Threads</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+    <!-- /Page Header -->
+    <div class="row">
+      <div class="col-sm-12">
+        <div class="card">
+          <div class="card-body">
+            <div class="table-responsive">
+              <table class="datatable table table-hover table-center mb-0">
+                <thead>
+                  <tr>
+                    <th>Appointment</th>
+                    <th>Doctor</th>
+                    <th>Patient</th>
+                    <th>Clinic</th>
+                    <th>Condition Thread</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {% for app in object_list %}
+                  <tr name='appointment_{{app.id}}'>
+                    <td>#{{ app.id }}</td>
+                    <td>
+                      <h2 class="table-avatar">
+                        <a href="{% url 'adminplus:doctor_profile' app.doctor.user.id %}" class="avatar avatar-sm mr-2"><img class="avatar-img rounded-circle" src="{% if app.doctor.user.avatar %}{{ app.doctor.user.avatar.url }}{% else %}{% if app.doctor.user.gender == 'Male' %}{% static 'img/male_profile.png' %}{% else %}{% static 'img/female_profile.png' %}{% endif %}{% endif %}"></a>
+                        <a href="{% url 'adminplus:doctor_profile' app.doctor.user.id %}">{{ app.doctor }}</a>
+                      </h2>
+                    </td>
+                    <td>
+                      <h2 class="table-avatar">
+                        <a href="{% url 'adminplus:patient_profile' app.patient.user.id %}" class="avatar avatar-sm mr-2"><img class="avatar-img rounded-circle" src="{% if app.doctor.user.avatar %}{{ app.doctor.user.avatar.url }}{% else %}{% if app.doctor.user.gender == 'Male' %}{% static 'img/male_profile.png' %}{% else %}{% static 'img/female_profile.png' %}{% endif %}{% endif %}"></a>
+                        <a href="{% url 'adminplus:patient_profile' app.patient.user.id %}">{{ app.patient }}</a>
+                      </h2>
+                    </td>
+                    <td>{{ app.clinic }}</td>
+                    <td>{{ app.condition_threaded.last|default:"" }}</td>
+                  </tr>
+                  {% endfor %}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      	<div class="mb-3"><h4>Condition Thread Reports</h4></div>
+        <div class="card">
+          <div class="card-body">
+            <div class="table-responsive">
+              <table class="datatable table table-hover table-center mb-0">
+                <thead>
+                  <tr>
+                    <th>#</th>
+                    <th>city</th>
+                    <th>Condition</th>
+                    <th>Count</th>
+                    {# <th>Condition Thread</th> #}
+                  </tr>
+                </thead>
+                <tbody>
+                  {% for app in report_apps %}
+                  <tr>
+                    <td>#000{{ app.condition_threaded__id }}</td>
+                    <td>{{ app.clinic__city__name }}</td>
+                    <td>{{ app.condition_threaded__name }}</td>
+                    <td>{{ app.condition_threaded__count }}</td>
+                    {# <td>{{ app.condition_threaded.last|default:"" }}</td> #}
+                  </tr>
+                  {% endfor %}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+<!-- /Page Wrapper -->
+{% endblock content %}

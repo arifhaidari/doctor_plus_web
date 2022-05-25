@@ -1,0 +1,398 @@
+
+<script>
+  function toggleApptSlot(clinicId, startApptSlot, weekDay, loopCounter) {
+    const csrf = document.getElementsByName('csrfmiddlewaretoken');
+    const fd = new FormData();
+    fd.append('csrfmiddlewaretoken', csrf[0].value);
+    fd.append('start_appt_time', startApptSlot);
+    fd.append('day_pattern', weekDay);
+    fd.append('clinic_id', clinicId);
+    $.ajax({
+      type: 'POST',
+      url: '{% url "appointment:toggle_appt_slot" %}',
+      data: fd,
+      success: function(response) {
+        console.log('success modal submission ......');
+        var temp_list = []
+        if (response['active']) {
+          $('#' + clinicId + '_' + loopCounter + '_' + weekDay).html(
+            '' + response['start_appt_time'] + '' + ' - ' + response['end_appt_time'] + '' +
+            '<a href="javascript:void(0)" onclick="toggleApptSlot(\'' + response['clinic_id'] + '\', \'' + response['start_appt_time'] + '\', \'' + response['day_pattern'] + '\', \'' + loopCounter + '\');">' +
+            '<i class="fa fa-toggle-on text-red fa-lg"></i>' +
+            '</a>'
+          );
+
+          $('#' + clinicId + '_' + loopCounter + '_' + weekDay).removeClass('bg-danger');
+          $('#' + clinicId + '_' + loopCounter + '_' + weekDay).addClass('bg-secondary');
+        } else {
+          $('#' + clinicId + '_' + loopCounter + '_' + weekDay).html(
+            '' + response['start_appt_time'] + '' + ' - ' + response['end_appt_time'] + '' +
+            '<a href="javascript:void(0)" onclick="toggleApptSlot(\'' + response['clinic_id'] + '\', \'' + response['start_appt_time'] + '\', \'' + response['day_pattern'] + '\', \'' + loopCounter + '\');">' +
+            '<i class="fa fa-toggle-off text-white fa-lg"></i>' +
+            '</a>'
+          );
+          $('#' + clinicId + '_' + loopCounter + '_' + weekDay).removeClass('bg-secondary');
+          $('#' + clinicId + '_' + loopCounter + '_' + weekDay).addClass('bg-danger');
+        }
+
+      },
+      error: function(error) {
+        console.log('error submitting by modal ================', error);
+      },
+      cache: false,
+      contentType: false,
+      processData: false,
+    });
+  }
+
+  var globalClinicId = '';
+  var globalDayPattern = '';
+  var globalLoopCounter = '';
+
+  var isToggleError = false;
+
+  function toggleActiveDay(clinicId, dayPattern, loopCounter) {
+    $('#toggle_day_pattern').appendTo("body").modal('show');
+    console.log(loopCounter);
+    console.log(clinicId);
+    console.log(dayPattern);
+    globalClinicId = clinicId;
+    globalDayPattern = dayPattern;
+    globalLoopCounter = loopCounter;
+  }
+  
+
+  function submitToggleDay() {
+    $('#toggle_day_pattern').appendTo("body").modal('hide');
+    const csrf = document.getElementsByName('csrfmiddlewaretoken');
+    $('#toggle_day_icon' + globalLoopCounter).html('<i class="spinner-border text-info fa-2x"></i>');
+
+    if (globalDayPattern == '' || globalDayPattern == null || globalClinicId == '' || globalClinicId == null) {
+      isToggleError = true
+    }
+
+    if (isToggleError) {
+      console.log('yes there is error');
+      isToggleError = false;
+      $('#add_custom_schedule_button').text('Save Changes');
+    } else {
+      const fd = new FormData();
+      fd.append('csrfmiddlewaretoken', csrf[0].value);
+      fd.append('day_pattern', globalDayPattern);
+      fd.append('clinic_id', globalClinicId);
+      $.ajax({
+        type: 'POST',
+        url: '{% url "appointment:toggle_day" %}',
+        data: fd,
+        success: function(response) {
+          console.log('value of response');
+          console.log(response);
+          if (response.is_pattern_active) {
+            cutstomDaySchedule(response.appt_list, globalDayPattern, globalLoopCounter, true);
+            $('#toggle_day_icon' + globalLoopCounter).html('<i class="fa fa-toggle-on text-info fa-2x"></i>');
+          } else {
+            cutstomDaySchedule(response.appt_list, globalDayPattern, globalLoopCounter, false);
+            $('#toggle_day_icon' + glkobalLoopCounter).html('<i class="fa fa-toggle-off text-info fa-2x"></i>');
+          }
+          $('#toggle_day_pattern').appendTo("body").modal('hide');
+        },
+        error: function(error) {
+          console.log('error submitting by modal ================', error);
+          $('#toggle_day_pattern').appendTo("body").modal('hide');
+        },
+        cache: false,
+        contentType: false,
+        processData: false,
+      });
+    }
+  }
+
+  var isError = false
+
+  function addSlot(clinicId, dayPattern, loopCounter) {
+    $('#add_time_slot').appendTo("body").modal('show');
+    console.log('custom time slot change is got called +++++++++===========');
+    const csrf = document.getElementsByName('csrfmiddlewaretoken');
+    console.log(dayPattern);
+    console.log(clinicId);
+    $("#add_custom_schedule").submit(function(e) {
+      console.log('add_custom_schedule has been submitted')
+
+      var slotStartTime = new Date('2000-01-01 ' + $("#slot_start").val());
+      var slotEndTime = new Date('2000-01-01 ' + $("#slot_end").val());
+
+      $('#add_custom_schedule_button').html('<i class="spinner-border spinner-border-lg"></i>')
+      // e.preventDefault();
+      // Validation
+      if ($("#slot_duration").val() === '' || $("#slot_duration").val() == null) {
+        setFormError($("#slot_duration"), $("#slot_duration_error"), 'Slot duration is not selected', 351)
+      }
+
+      if ($("#slot_start").val() === '' || $("#slot_start").val() == null) {
+        setFormError($("#slot_start"), $("#slot_start_error"), 'Start time is not selected', 351)
+      } else {
+        if (slotEndTime < slotStartTime) {
+          setFormError($("#slot_start"), $("#slot_start_error"), 'Start time should be smaller than the end time', 351)
+        }
+      }
+
+      if ($("#slot_end").val() === '' || $("#slot_end").val() == null) {
+        setFormError($("#slot_end"), $("#slot_end_error"), 'End time is not selected', 351)
+      } else {
+        if (slotStartTime > slotEndTime) {
+          setFormError($("#slot_end"), $("#slot_end_error"), 'End time should be greater than start time', 351)
+        }
+        var diff = slotEndTime - slotStartTime;
+        var diffMinutes = Math.floor(diff / 60000);
+        var durationMinutes = Number($("#slot_duration").val());
+        if (durationMinutes > diffMinutes) {
+          setFormError($("#slot_duration"), $("#slot_duration_error"), 'Time interval between start and end is smaller than appointment time slot', 351)
+        }
+      }
+
+      if (isError) {
+        console.log('yes there is error');
+        e.preventDefault();
+        isError = false;
+        $('#add_custom_schedule_button').text('Save Changes');
+      } else {
+        const fd = new FormData();
+        fd.append('csrfmiddlewaretoken', csrf[0].value);
+        fd.append('slot_duration', $("#slot_duration").val());
+        fd.append('slot_start', $("#slot_start").val());
+        fd.append('slot_end', $("#slot_end").val());
+        fd.append('day_pattern', dayPattern);
+        fd.append('clinic_id', clinicId);
+        $.ajax({
+          type: 'POST',
+          url: '{% url "appointment:custom_schedule" %}',
+          data: fd,
+          success: function(response) {
+            slotTagDefaulter();
+            console.log('success modal submission ......');
+            console.log(response);
+            console.log(response.appt_list);
+            if(response.appt_list != 'error') {
+              cutstomDaySchedule(response.appt_list, dayPattern, loopCounter, true);
+
+            }
+            //
+            $('#add_time_slot').appendTo("body").modal('hide');
+          },
+          error: function(error) {
+            slotTagDefaulter();
+            console.log('error submitting by modal ================', error);
+            $('#add_time_slot').appendTo("body").modal('hide');
+          },
+          cache: false,
+          contentType: false,
+          processData: false,
+        });
+      }
+      e.preventDefault();
+    })
+  }
+
+  function cutstomDaySchedule(responseApptList, weekDay, loopCounter, isPatternActive) {
+    var particular_day_slot_list = [];
+    var toggleActiveElementObject = {
+      'Saturday': $('#slot_wrapper_saturday' + loopCounter),
+      'Sunday': $('#slot_wrapper_sunday' + loopCounter),
+      'Monday': $('#slot_wrapper_monday' + loopCounter),
+      'Tuesday': $('#slot_wrapper_tuesday' + loopCounter),
+      'Wednesday': $('#slot_wrapper_wednesday' + loopCounter),
+      'Thursday': $('#slot_wrapper_thursday' + loopCounter),
+      'Friday': $('#slot_wrapper_friday' + loopCounter),
+    };
+    if (isPatternActive) {
+      responseApptList.forEach(function(item, index) {
+        particular_day_slot_list.push(
+          '<div id="' + item['clinic_id'] + '_' + index + '_' + item['day_pattern'] + '" class="doc-slot-list bg-secondary">' +
+          '' + item['start_appt_time'] + '' + ' - ' + item['end_appt_time'] + '' +
+          '<a href="javascript:void(0)" onclick="toggleApptSlot(\'' + item['clinic_id'] + '\', \'' + item['start_appt_time'] + '\', \'' + item['day_pattern'] + '\', \'' + index + '\');">' +
+          '<i class="fa fa-toggle-on text-red fa-lg"></i>' +
+          '</a>' +
+          '</div>'
+        )
+      });
+      toggleActiveElementObject[weekDay].html(particular_day_slot_list);
+    } else {
+      toggleActiveElementObject[weekDay].html('<p class="text-muted mb-0">Not Available</p>');
+    }
+
+  }
+
+  function slotTagDefaulter() {
+    console.log('insdie the slot gat ... .... .. ');
+    $("#slot_duration").prop('selectedIndex', 0);
+    $("#slot_end").prop('selectedIndex', 0)
+    $("#slot_start").prop('selectedIndex', 0);
+    $('#add_custom_schedule_button').text('Save Changes');
+    $("#slot_end_error").css('display', 'none');
+    $("#slot_end_error").text('');
+    $("#slot_start_error").css('display', 'none');
+    $("#slot_end_error").text('');
+    $("#slot_duration_error").css('display', 'none');
+    $("#slot_duration_error").text('');
+  }
+
+  var isFormError = false;
+  var aDaySlotList = [];
+
+  function submitChanges(loopCounter, todayWeekDay) {
+    $('#save_change_button_icon' + loopCounter).removeClass('fa fa-medkit');
+    $('#save_change_button_icon' + loopCounter).addClass('spinner-border spinner-border-sm');
+
+    var toggleActiveElementList = [];
+    toggleActiveElementList.push(
+      ['Saturday', $('#toggle_saturday' + loopCounter), $('#slot_saturday' + loopCounter), $('#slot_wrapper_saturday' + loopCounter)],
+      ['Sunday', $('#toggle_sunday' + loopCounter), $('#slot_sunday' + loopCounter), $('#slot_wrapper_sunday' + loopCounter)],
+      ['Monday', $('#toggle_monday' + loopCounter), $('#slot_monday' + loopCounter), $('#slot_wrapper_monday' + loopCounter)],
+      ['Tuesday', $('#toggle_tuesday' + loopCounter), $('#slot_tuesday' + loopCounter), $('#slot_wrapper_tuesday' + loopCounter)],
+      ['Wednesday', $('#toggle_wednesday' + loopCounter), $('#slot_wednesday' + loopCounter), $('#slot_wrapper_wednesday' + loopCounter)],
+      ['Thursday', $('#toggle_thursday' + loopCounter), $('#slot_thursday' + loopCounter), $('#slot_wrapper_thursday' + loopCounter)],
+      ['Friday', $('#toggle_friday' + loopCounter), $('#slot_friday' + loopCounter), $('#slot_wrapper_friday' + loopCounter)]
+    );
+    var slotStartTime = new Date('2000-01-01 ' + $("#slot_start" + loopCounter).val());
+    var slotEndTime = new Date('2000-01-01 ' + $("#slot_end" + loopCounter).val());
+
+    console.log('submitChanges is got called +++++++++===========');
+    const csrf = document.getElementsByName('csrfmiddlewaretoken');
+    console.log(loopCounter);
+    // Validation
+    if ($("#slot_duration" + loopCounter).val() === '' || $("#slot_duration" + loopCounter).val() == null) {
+      setFormError($("#slot_duration" + loopCounter), $("#slot_duration_error" + loopCounter), 'Slot duration is not selected', loopCounter)
+    }
+
+    if ($("#slot_start" + loopCounter).val() === '' || $("#slot_start" + loopCounter).val() == null) {
+      setFormError($("#slot_start" + loopCounter), $("#slot_start_error" + loopCounter), 'Start time is not selected', loopCounter)
+    } else {
+      if (slotEndTime < slotStartTime) {
+        setFormError($("#slot_start" + loopCounter), $("#slot_start_error" + loopCounter), 'Start time should be smaller than the end time', loopCounter)
+      }
+    }
+
+    if ($("#slot_end" + loopCounter).val() === '' || $("#slot_end" + loopCounter).val() == null) {
+      setFormError($("#slot_end" + loopCounter), $("#slot_end_error" + loopCounter), 'End time is not selected', loopCounter)
+    } else {
+      if (slotStartTime > slotEndTime) {
+        setFormError($("#slot_end" + loopCounter), $("#slot_end_error" + loopCounter), 'End time should be greater than start time', loopCounter)
+      }
+      var diff = slotEndTime - slotStartTime;
+      var diffMinutes = Math.floor(diff / 60000);
+      var durationMinutes = Number($("#slot_duration" + loopCounter).val());
+      if (durationMinutes > diffMinutes) {
+        setFormError($("#slot_duration" + loopCounter), $("#slot_duration_error" + loopCounter), 'Time interval between start and end is smaller than appointment time slot', loopCounter)
+      }
+    }
+
+    // Submit the form
+    console.log('inside the appt_schedule');
+    if (isFormError) {
+      console.log('yes there is error');
+      $('#appt_schedule' + loopCounter).submit(function(e) {
+        console.log('heyeyee yoooo bro');
+        e.preventDefault();
+      });
+      isFormError = false;
+    } else {
+      const fd = new FormData();
+      fd.append('csrfmiddlewaretoken', csrf[0].value);
+      fd.append('slot_duration', $("#slot_duration" + loopCounter).val());
+      fd.append('slot_start', $("#slot_start" + loopCounter).val());
+      fd.append('slot_end', $("#slot_end" + loopCounter).val());
+      fd.append('clinic_id', $("#clinic_id" + loopCounter).val());
+      $.ajax({
+        type: 'POST',
+        url: '{% url "appointment:schedule" %}',
+        data: fd,
+        success: function(response) {
+          console.log('success successss fully ......');
+          $('#save_change_button_icon' + loopCounter).removeClass('spinner-border spinner-border-sm');
+          $('#save_change_button_icon' + loopCounter).addClass('fa fa-medkit');
+
+          toggleActiveElementList.forEach(function(item, index) {
+            toggleActiveClass(todayWeekDay, item[0], item[1], item[2], item[3])
+          });
+          redrawTheDay(response, toggleActiveElementList);
+        },
+        error: function(error) {
+          console.log('error ================', error);
+          $('#save_change_button_icon' + loopCounter).removeClass('spinner-border spinner-border-sm')
+          $('#save_change_button_icon' + loopCounter).addClass('fa fa-medkit')
+
+        },
+        cache: false,
+        contentType: false,
+        processData: false,
+      });
+    };
+    $('#appt_schedule' + loopCounter).submit(function(e) {
+      e.preventDefault();
+    });
+  }
+
+  function toggleActiveClass(todayWeekDay, myWeekDay, toggleButton, togglePane, toggleWrapper) {
+    if (todayWeekDay == myWeekDay) {
+      toggleButton.removeClass('active');
+      toggleButton.addClass('active');
+      togglePane.removeClass('show active');
+      togglePane.addClass('show active');
+    } else {
+      toggleButton.removeClass('active');
+      togglePane.removeClass('show active');
+    }
+    // redrawTheDay(toggleWrapper, todayWeekDay);
+  }
+
+
+  function redrawTheDay(response, toggleActiveElementList) {
+    console.log('inside the redrawTheDay');
+    // ['Saturday', $('#toggle_saturday' + loopCounter), $('#slot_saturday' + loopCounter), $('#slot_wrapper_saturday' + loopCounter)],
+
+    toggleActiveElementList.forEach(function(item, index) {
+      if (response.schedule_dict[item[0]]) { //if false
+        attatchToWrapper(item, response.appt_list);
+      } else {
+        item[3].html('<p class="text-muted mb-0">Not Available</p>');
+      }
+    });
+  }
+
+  function attatchToWrapper(toggleActiveElement, responseApptList) {
+    console.log('inside the attatchToWrapper');
+    var slot_list = [];
+
+    responseApptList.forEach(function(item, index) {
+      if (toggleActiveElement[0] == item['day_pattern']) {
+        slot_list.push(
+          '<div id="' + item['clinic_id'] + '_' + index + '_' + item['day_pattern'] + '" class="doc-slot-list bg-secondary">' +
+          '' + item['start_appt_time'] + '' + ' - ' + item['end_appt_time'] + '' +
+          '<a href="javascript:void(0)" onclick="toggleApptSlot(\'' + item['clinic_id'] + '\', \'' + item['start_appt_time'] + '\', \'' + item['day_pattern'] + '\', \'' + index + '\');">' +
+          '<i class="fa fa-toggle-on text-red fa-lg"></i>' +
+          '</a>' +
+          '</div>'
+        )
+      }
+
+    });
+    toggleActiveElement[3].html(slot_list);
+  }
+
+
+
+  function setFormError(inputField, errorArea, errorMessage, loopCounter) {
+    inputField.css('border', 'dashed 2px red');
+    errorArea.css('display', 'block');
+    errorArea.text(errorMessage);
+
+    if (loopCounter != 351 || loopCounter != "351") {
+      isFormError = true;
+      $('#save_change_button_icon' + loopCounter).removeClass('spinner-border spinner-border-sm')
+      $('#save_change_button_icon' + loopCounter).addClass('fa fa-medkit')
+    } else {
+      isError = true;
+    }
+  }
+
+</script>

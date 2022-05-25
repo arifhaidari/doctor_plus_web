@@ -1,0 +1,94 @@
+{% extends 'base.html' %}
+{% load static %}
+{% load doctor_tags %}
+{% block title %}
+Appt Detail
+{% endblock title %}
+{% block breadcrumb %}
+<div class="breadcrumb-bar">
+  <div class="container-fluid">
+    <div class="row align-items-center">
+      <div class="col">
+        <nav aria-label="breadcrumb" class="page-breadcrumb">
+          <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="{% url 'patient:patient_dashboard_view' %}">Dashboard</a></li>
+            <li class="breadcrumb-item"><a href="">Family Member Detail</a></li>
+          </ol>
+        </nav>
+        <h2 class="breadcrumb-title">
+          Appointment - <small>Appointment Summary</small>
+        </h2>
+      </div>
+      
+    </div>
+  </div>
+</div>
+{% endblock breadcrumb %}
+{% block content %}
+<!-- Page Content -->
+<div class="content success-page-cont">
+     <div class="container-fluid">
+     
+          <div class="row justify-content-center">
+               <div class="col-lg-6">
+               
+                    <!-- Success Card -->
+                    <div class="card success-card">
+                         <div class="card-body">
+                              <div class="success-cont">
+                                   <i class="fas fa-check"></i>
+                                   <h3>Appointment Summary</h3>
+                                   <p>Doctor: <strong>{{ appt_object.doctor.title }} {{ appt_object.doctor.user.full_name }}</strong><br></p>
+                                   <p>Patient: <strong>
+                                     {% if appt_object.relative %}
+                                     {{ appt_object.relative.user.full_name }}
+                                     {% else %}
+                                     {{ appt_object.patient.user.full_name }}
+                                     {% endif %}
+                                    </strong><br></p>
+                                   <p>Clinic: <strong>{{ appt_object.clinic.clinic_name }}</strong><br></p>
+                                   <p>Slot: <strong>{{ appt_object.start_appt_time }} - {{ appt_object.end_appt_time }}</strong><br></p>
+                                   <p>Status: <strong>{{ appt_object.status }}</strong><br></p>
+                                   <p>Feedback Status: <strong>
+                                     {% if appt_object.feedback_status %}
+                                     Given
+                                     {% else %}
+                                     Not Given
+                                     {% endif %}
+                                    </strong><br></p>
+                                   <p>Date: <strong>{{ appt_object.appt_date }}</strong><br></p>
+                                   {% if appt_object.status == 'COMPLETED' %}
+                                   <p>Remark: <strong>{{ appt_object.remark }}</strong><br></p>
+                                   <p>Condition Treated:
+                                     {% for condition in appt_object.condition_treated.all %}
+                                    <strong>{{ condition.name }}, </strong>
+                                    {% endfor %}
+                                    </p>
+                                    {% if appt_object.feedback_status %}
+                                    <p>Comment:
+                                      {% if appt_object.feedback.comment %}
+                                     <strong>{{ appt_object.feedback.comment }}, </strong>
+                                     {% endif %}
+                                     </p>
+                                     <p>Staff Behavior: <strong>{{ appt_object.feedback.staff_behavior }}</strong><br></p>
+                                     <p>Clinic Environment: <strong>{{ appt_object.feedback.clinic_environment }}</strong><br></p>
+                                     <p>Doctor Checkup: <strong>{{ appt_object.feedback.doctor_checkup }}</strong><br></p>
+                                     <p>Overall Experience: <strong>{{ appt_object.feedback.overall_experience }}</strong><br></p>
+                                     {% appt_feedback appt_object.feedback.score_count %}
+                                     {% endif %}
+                                    {% if not appt_object.feedback_status %}
+                                    <a href="{% url 'patient:feedback' appt_object.id %}" class="btn btn-primary view-inv-btn">Give Feedback</a>
+                                    {% endif %}
+                                    {% endif %}
+                              </div>
+                         </div>
+                    </div>
+                    <!-- /Success Card -->
+                    
+               </div>
+          </div>
+          
+     </div>
+</div>		
+<!-- /Page Content -->
+{% endblock content %}

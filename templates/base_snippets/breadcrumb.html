@@ -1,0 +1,86 @@
+{% url 'patient:patient_dashboard_view' as patient_dashboard %}
+{% url 'patient:password' as patient_password %}
+{% url 'patient:favorite_doctor' as patient_favorite_doctor %}
+{% url 'patient:patient_profile' as patient_profile %}
+{% url 'patient:patient_note' as patient_note %}
+{% url 'relative:list' as relative_list %}
+{% url 'relative:detail' as relative_detail %}
+{% url 'home:doctor_public_profile' as doctor_public_profile %}
+{% url 'appointment:public_time_slot' 1 as public_time_slot %}
+<!-- Breadcrumb -->
+<div class="breadcrumb-bar">
+  <div class="container-fluid">
+    <div class="row align-items-center">
+      <div class="col">
+        <nav aria-label="breadcrumb" class="page-breadcrumb">
+          <ol class="breadcrumb">
+            {% if request.path == patient_dashboard %}
+            <li class="breadcrumb-item"><a href="{% url 'home:homepage' %}">Home</a></li>
+            <li class="breadcrumb-item active" aria-current="page">Dashboard</li>
+            {% elif request.path == patient_favorite_doctor %}
+            <li class="breadcrumb-item"><a href="{% url 'patient:patient_dashboard_view' %}">Dashboard</a></li>
+            <li class="breadcrumb-item active" aria-current="page">Favorite</li>
+            {% elif request.path == patient_password %}
+            <li class="breadcrumb-item"><a href="{% url 'patient:patient_dashboard_view' %}">Dashboard</a></li>
+            <li class="breadcrumb-item active" aria-current="page">Change Password</li>
+            {% elif request.path == patient_profile %}
+            <li class="breadcrumb-item"><a href="{% url 'patient:patient_dashboard_view' %}">Dashboard</a></li>
+            <li class="breadcrumb-item active" aria-current="page">Patient Profile</li>
+            {% elif request.path == relative_list %}
+            <li class="breadcrumb-item"><a href="{% url 'patient:patient_dashboard_view' %}">Dashboard</a></li>
+            <li class="breadcrumb-item active" aria-current="page">Family Members</li>
+            {% elif request.path == patient_note %}
+            <li class="breadcrumb-item"><a href="{% url 'patient:patient_dashboard_view' %}">Dashboard</a></li>
+            <li class="breadcrumb-item active" aria-current="page">Notifications</li>
+            {% elif request.path == relative_detail %}
+            <li class="breadcrumb-item"><a href="{% url 'patient:patient_dashboard_view' %}">Dashboard</a></li>
+            <li class="breadcrumb-item active" aria-current="page">Family Member Details</li>
+            {% elif request.path == doctor_public_profile %}
+            <li class="breadcrumb-item"><a href="{% url 'home:homepage' %}">Home</a></li>
+            {# <li class="breadcrumb-item"><a href="{% url 'patient:patient_dashboard_view' %}">Dashboard</a></li> #}
+            <li class="breadcrumb-item"><a href="{% url 'patient:patient_dashboard_view' %}">Dashboard</a></li>
+            <li class="breadcrumb-item active" aria-current="page">Doctor Profile</li>
+            {% elif request.path == public_time_slot %}
+            <li class="breadcrumb-item"><a href="{% url 'home:homepage' %}">Home</a></li>
+            <li class="breadcrumb-item"><a href="{% url 'patient:patient_dashboard_view' %}">Dashboard</a></li>
+            <li class="breadcrumb-item active" aria-current="page">Booking Appointment</li>
+            {% endif %}
+          </ol>
+        </nav>
+        <h2 class="breadcrumb-title">
+          {% if request.path == patient_dashboard %}
+          Dashboard
+          {% elif request.path == patient_favorite_doctor %}
+          Favorite Doctors
+          {% elif request.path == patient_password %}
+          Change Password
+          {% elif request.path == patient_profile %}
+          Patient Profile
+          {% elif request.path == relative_list %}
+          Family Members
+          {% elif request.path == patient_note %}
+          Notifications
+          {% elif request.path == relative_detail %}
+          Family Member Details
+          {% elif request.path == doctor_public_profile %}
+          Doctor Profile
+          {% elif request.path == public_time_slot %}
+          Booking Appointment
+          {% endif %}
+        </h2>
+      </div>
+      <div class="col-auto text-right float-right ml-auto">
+        {% if request.path == patient_dashboard %}
+        <a href="#" class="btn btn-primary btn-sm"><i class="fa fa-plus-square"></i> Add Medical Record</a>
+        {% elif request.path == relative_list %}
+        <a href="#" class="btn btn-primary btn-sm"><i class="fas fa-user-plus"></i> Add Family Member</a>
+        {% elif request.path == patient_note %}
+        <a href="#" class="btn btn-primary btn-sm"><i class="fa fa-trash"></i><b> Clear All Notifications</b></a>
+        {% elif request.path == relative_detail %}
+        <a href="#" class="btn btn-primary btn-sm"><i class="fa fa-plus-square"></i><b> Add Medical Record</b></a>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+</div>
+<!-- /Breadcrumb -->

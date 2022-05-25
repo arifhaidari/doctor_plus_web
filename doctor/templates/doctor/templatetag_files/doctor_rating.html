@@ -1,0 +1,28 @@
+<div class="rating">
+  <div name="rating-stars" id="rating-{{doctor.user.id}}"></div>
+</div>
+<!-- scripts -->
+<script src="/static/js/jquery.min.js"></script>
+<script>
+average_star = "{{average_star}}";
+  feedback_no = "{{feedback_no}}";
+
+  fill_stars = Math.floor(average_star);
+  half_stars = average_star % 1;
+  empty_stars = Math.floor(5 - (fill_stars + half_stars))
+
+  // fill_stars = Math.floor(average_star);
+  // half_stars = Math.abs(average_star) - fill_stars;
+  // empty_stars = Math.floor(4 - (fill_stars + half_stars))
+
+  for (var i = 0; i < fill_stars; i++) {
+    $("#rating-{{doctor.user.id}}").append(`<i class="fas fa-star filled"></i>`)
+  }
+  for (var i = 0; i < half_stars; i++) {
+    $("#rating-{{doctor.user.id}}").append(`<i class="fas fa-star-half-alt filled"></i>`)
+  }
+  for (var i = 0; i < empty_stars; i++) {
+    $("#rating-{{doctor.user.id}}").append(`<i class="fas fa-star"></i>`)
+  }
+  $("#rating-{{doctor.user.id}}").append(' <small>({{ feedback_no }} Feedbacks)</small>')
+</script>

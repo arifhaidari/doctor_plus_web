@@ -1,0 +1,71 @@
+{% extends 'sidebar.html' %}
+{% load static %}
+{% block title %}
+Dashboard|Patient
+{% endblock title %}
+{% block breadcrumb %}
+  <div class="breadcrumb-bar">
+  <div class="container-fluid">
+    <div class="row align-items-center">
+      <div class="col">
+        <nav aria-label="breadcrumb" class="page-breadcrumb">
+          <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="{% url 'home:homepage' %}">Home</a></li>
+            <li class="breadcrumb-item active" aria-current="page">Dashboard</li>
+          </ol>
+        </nav>
+        <h2 class="breadcrumb-title">
+          Dashboard
+        </h2>
+      </div>
+    
+    </div>
+  </div>
+</div>
+{% endblock breadcrumb %}
+{% block content %}
+<div class="col-md-7 col-lg-8 col-xl-9">
+  <div class="card">
+    <div class="card-body pt-0">
+      <!-- Tab Menu -->
+      <nav class="user-tabs mb-4">
+        <ul class="nav nav-tabs nav-tabs-bottom nav-justified">
+          <li class="nav-item">
+            <a class="nav-link active" href="#pat_appointments" data-toggle="tab">Appointments</a>
+          </li>
+       
+          <li class="nav-item">
+            <a class="nav-link" href="#pat_medical_records" data-toggle="tab"><span class="med-records">Medical Records</span></a>
+          </li>
+        </ul>
+      </nav>
+      <!-- /Tab Menu -->
+      <!-- Tab Content -->
+      <div class="tab-content pt-0">
+        <!-- Appointment Tab -->
+        {% include "patient/dashboard/patient_appoinment.html" %}
+        <!-- Medical Records Tab -->
+        {% include "patient/dashboard/patient_medicalrecords.html" %}
+      </div>
+      <!-- Tab Content -->
+    </div>
+  </div>
+</div>
+{% endblock content %}
+{% block pagelevel_styles %}
+  <!-- medical record -->
+  <style type="text/css">
+    .error{color:red;}
+  </style>
+  <script src="/static/swtalert.js"></script>
+  <link rel="stylesheet" type="text/css" href="{% static 'medicalrecord/css/filesharing.css' %}">
+  <!-- /medical record -->
+{% endblock pagelevel_styles %}
+{% block script %}
+  <script type="text/javascript"> var csrftoken = '{{ csrf_token }}';</script>
+  <!-- medicalredord -->
+  <script src="/static/patient/dashboard/js/patient_medicalrecords.js"></script>
+  <!-- /medicalredord -->
+{% include 'patient/scripts/medical_record_script.html' %}
+{% include 'patient/scripts/appt_script.html' %}
+{% endblock script %}

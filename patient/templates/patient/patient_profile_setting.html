@@ -1,0 +1,184 @@
+{% extends 'sidebar.html' %}
+{% load static %}
+{% block title %}
+Profile Settings
+{% endblock title %}
+{% block content %}
+<style>
+  .image_area {
+       position: relative;
+     }
+
+     img {
+            display: block;
+            max-width: 100%;
+     }
+
+     .preview {
+            overflow: hidden;
+            width: 160px; 
+            height: 160px;
+            margin: 10px;
+            border: 1px solid red;
+     }
+
+     .modal-lg{
+            max-width: 1000px !important;
+     }
+
+
+     .image_area:hover .overlay {
+       height: 50%;
+       cursor: pointer;
+     }
+
+     </style>
+<div class="col-md-7 col-lg-8 col-xl-9">
+  <div class="card">
+    <div class="card-body">
+      <!-- Profile Settings Form -->
+      <form method="POST" id="patient_profile_form" data-districts-url="{% url 'user:ajax_load_districts' %}" enctype="multipart/form-data">
+        {% csrf_token %}
+        <div class="row form-row">
+          <div class="col-12 col-md-12">
+            <div class="form-group">
+              <div class="change-avatar">
+                <div class="profile-img">
+                  <img src="{% if request.user.avatar %}{{ request.user.avatar.url }}{% else %}{% if request.user.gender == 'Male' %}{% static 'img/male_profile.png' %}{% else %}{% static 'img/female_profile.png' %}{% endif %}{% endif %}" alt="User Image" id="uploaded_image" name="uploaded_image" class="img-responsive img-circle" />
+                </div>
+                <div class="upload-img">
+                  <div class="change-photo-btn">
+                    <span><i class="fa fa-upload"></i> Upload Photo</span>
+                    <input type="file" name="image" class="upload" id="upload_image" />
+                  </div>
+                  <small class="form-text text-muted">Allowed JPG, GIF or PNG. Max size of 2MB</small>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="col-12 col-md-6">
+            <div class="form-group">
+              <label>Full Name <span class="text-danger">*</span></label>
+              <input type="text" name="name" value="{% if request.user.full_name %}{{ request.user.full_name }}{% else %}{% endif %}" id="name" class="form-control">
+              <small id="name_error" style="display: none;color: red;"></small>
+            </div>
+          </div>
+          <div class="col-12 col-md-6">
+            <div class="form-group">
+              <label>Full Name (Farsi/Pashto) <span class="text-danger">*</span></label>
+              <input type="text" dir="rtl" name="rtl_name" value="{% if request.user.rtl_full_name %}{{ request.user.rtl_full_name }}{% else %}{% endif %}" id="rtl_name" class="form-control">
+              <small id="rtl_name_error" style="display: none;color: red;"></small>
+            </div>
+          </div>
+          <div class="col-12 col-md-6">
+            <div class="form-group">
+              <label>Phone Number <span class="text-danger">*</span></label>
+              <input type="number" value="{% if request.user.phone %}{{ request.user.phone }}{% else %}{% endif %}" disabled id="phone" name="phone" class="form-control">
+              <small id="phone_error" style="display: none;color: red;"></small>
+            </div>
+          </div>
+          <div class="col-12 col-md-6">
+            <div class="form-group">
+              <label>Date of Birth <span class="text-danger">*</span></label>
+              <input type="date" value="{{ request.user.string_birth_date }}" id="dob" name="dob" class="form-control">
+              <small id="dob_error" style="display: none;color: red;"></small>
+            </div>
+          </div>
+          <div class="col-12 col-md-6">
+            <div class="form-group">
+              <select name="blood_group" id="blood_group" class="form-control select">
+                <option value="">Select Blood Group <span class="text-danger">*</span></option>
+                {% for blood in bloods %}
+                <option value="{{ blood.id }}" {% if blood.id == selected_blood.id %}selected{% endif %}>
+                  {{ blood.name }}
+                </option>
+                {% endfor %}
+              </select>
+              <small id="blood_group_error" style="display: none;color: red;"></small>
+            </div>
+          </div>
+          <div class="col-12 col-md-6">
+            <div class="form-group">
+              <label>Gender <span class="text-danger">*</span></label><br>
+              <div class="form-check-inline">
+                <label class="form-check-label">
+                  <input type="radio" {% if request.user.gender == 'Male' or request.user.gender %}checked{% endif %} name="gender" value="Male" id="gender" class="form-check-input">Male
+                </label>
+              </div>
+              <div class="form-check-inline">
+                <label class="form-check-label">
+                  <input type="radio" {% if request.user.gender == 'Female' %}checked{% endif %} name="gender" value="Female" id="gender" class="form-check-input">Female
+                </label>
+              </div>
+            </div>
+          </div>
+          
+          <div class="col-12 col-md-6">
+            <div class="form-group">
+              <select name="city" id="city" class="form-control select">
+                <option value="">Select Province <span class="text-danger">*</span></option>
+                {% for city in cities %}
+                <option value="{{ city.id }}" {% if city.id == request.user.address.city.id %}selected{% endif %}>{{ city.name }} -
+                  {{ city.rtl_name }}</option>
+                {% endfor %}
+              </select>
+              <small id="city_error" style="display: none;color: red;"></small>
+            </div>
+          </div>
+          <div class="col-12 col-md-6">
+            <div class="form-group">
+              <select name="district" id="district" class="form-control select">
+                <option value="{{ request.user.address.district.id }}" {% if request.user.address.district %}selected{% endif %}>
+                  {% if request.user.address.district %}
+                  {{ request.user.address.district.name }} - {{ request.user.address.district.rtl_name }}
+                  {% else %}
+                  Select District <span class="text-danger">*</span>
+                  {% endif %}
+                </option>
+              </select>
+              <small id="district_error" style="display: none;color: red;"></small>
+            </div>
+          </div>
+        </div>
+        <div class="submit-section">
+          <button type="submit" id="submit_button" class="btn btn-primary submit-btn">Save Changes</button>
+        </div>
+      </form>
+      <!-- /Profile Settings Form -->
+    </div>
+  </div>
+</div>
+<!-- Model cropper -->
+<div class="modal fade" id="crop_model" tabindex="-1" role="dialog" aria-labelledby="modalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-lg" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">Crop Image Before Upload</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">×</span>
+        </button>
+      </div>
+      <div class="modal-body">
+        <div class="img-container">
+          <div class="row">
+            <div class="col-md-8">
+              <img src="" id="sample_image" />
+            </div>
+            <div class="col-md-4">
+              <div class="preview"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" id="crop" class="btn btn-primary">Crop</button>
+        <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock content %}
+
+{% block script %}
+{% include 'patient/scripts/patient_profile_script.html' %}
+{% endblock script %}

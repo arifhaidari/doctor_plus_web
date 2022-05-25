@@ -1,0 +1,218 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block title %}
+Register | Doctor
+{% endblock title %}
+{% block content %}
+<!-- Page Content -->
+<div class="content">
+  <div class="container-fluid">
+    <div class="row">
+      <div class="col-md-8 offset-md-2">
+        <!-- Register Content -->
+        <div class="account-content">
+          <div class="row align-items-center justify-content-center">
+            <div class="col-md-7 col-lg-6 login-left">
+              <img src="{% static 'img/login-banner.png' %}" class="img-fluid" alt="Doccure Register">
+            </div>
+            <div class="col-md-12 col-lg-6 login-right">
+              <div class="login-header">
+                <h3>Doctor Register <a href="{% url 'user:patient_register' %}">Not A Doctor?</a>
+                </h3>
+              </div>
+              <!-- Register Form -->
+              <form method="POST" id="doctor_form">
+                {% csrf_token %}
+                <div class="row">
+                  <div class="col-sm-6">
+                    <div class="form-group form-focus">
+                      <input type="text" name="name" id="name" class="form-control floating">
+                      <label class="focus-label">Name</label>
+                      <small id="name_error" style="display: none;color: red;"></small>
+                    </div>
+                  </div>
+                  <div class="col-sm-6">
+                    <div class="form-group form-focus">
+                      <input type="text" name="phone" id="phone" class="form-control floating">
+                      <label class="focus-label">Phone Number</label>
+                      <small id="phone_error" style="display: none;color: red;"></small>
+                    </div>
+                  </div>
+                </div>
+                <div class="row">
+                  <div class="col-sm-6">
+                    <div class="form-group">
+                      <select name="title" id="title" class="form-control" name="title">
+                        <option value="">Select Title</option>
+                        {% for title in doctor_titles %}
+                        <option value="{{ title.id }}">{{ title.title }} -
+                          {{ title.farsi_title }}</option>
+                        {% endfor %}
+                      </select>
+                      <small id="title_error" style="display: none;color: red;"></small>
+                    </div>
+                  </div>
+                  <div class="col-sm-6">
+                    <div class="form-group form-focus">
+                      <label class="gen-label">Gender <span class="text-danger">
+                          *</span></label><br>
+                      <div class="form-check-inline">
+                        <label class="form-check-label">
+                          <input type="radio" checked name="gender" id="gender" value="Male" class="form-check-input">Male
+                        </label>
+                      </div>
+                      <div class="form-check-inline">
+                        <label class="form-check-label">
+                          <input type="radio" name="gender" id="gender" value="Female" class="form-check-input">Female
+                        </label>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                <div class="row">
+                  <div class="col-md-12">
+                    <div class="form-group form-focus">
+                      <input type="email" id="email" name="email" class="form-control floating">
+                      <label class="focus-label">Email</label>
+                      <small id="email_error" style="display: none;color: red;"></small>
+                    </div>
+                  </div>
+                </div>
+                <div class="row">
+                  <div class="col-sm-6">
+                    <div class="form-group form-focus">
+                      <input type="password" name="password" id="password" class="form-control floating">
+                      <label class="focus-label">Password</label>
+                      <small id="password_error" style="display: none;color: red;"></small>
+                    </div>
+                  </div>
+                  <div class="col-sm-6">
+                    <div class="form-group form-focus">
+                      <input type="password" name="repeat_password" id="repeat_password" class="form-control floating">
+                      <label class="focus-label">Confirm Password</label>
+                      <small id="confirm_password_error" style="display: none;color: red;"></small>
+                    </div>
+                  </div>
+                </div>
+                <div class="text-right">
+                  <a class="forgot-link" href="{% url 'user:login' %}">Already have an account?</a>
+                </div>
+                <button class="btn btn-primary btn-block btn-lg login-btn" type="submit">Sign
+                  Up</button>
+                <div class="login-or">
+                  <span class="or-line"></span>
+                  <span class="span-or">or</span>
+                </div>
+                <div class="row form-row social-login">
+                  <div class="col-6">
+                    <a href="#" class="btn btn-facebook btn-block"><i class="fab fa-facebook-f mr-1"></i> Login</a>
+                  </div>
+                  <div class="col-6">
+                    <a href="#" class="btn btn-google btn-block"><i class="fab fa-google mr-1"></i>
+                      Login</a>
+                  </div>
+                </div>
+              </form>
+              <!-- /Register Form -->
+            </div>
+          </div>
+        </div>
+        <!-- /Register Content -->
+      </div>
+    </div>
+  </div>
+</div>
+<br><br><br>
+<!-- /Page Content -->
+{% endblock content %}
+{% block script %}
+<script>
+var isError = false;
+const doctor_form = document.getElementById('doctor_form')
+const name = document.getElementById('name');
+const phone = document.getElementById('phone');
+const email = document.getElementById('email');
+const title = document.getElementById('title');
+const password = document.getElementById('password');
+const repeat_password = document.getElementById('repeat_password');
+// Error displaying part
+const nameError = document.getElementById('name_error');
+const phoneError = document.getElementById('phone_error');
+const titleError = document.getElementById('title_error');
+const emailError = document.getElementById('email_error');
+const passwordError = document.getElementById('password_error');
+const confirmPasswordError = document.getElementById('confirm_password_error');
+
+
+doctor_form.addEventListener('submit', (e) => {
+
+  if (name.value.trim() === '' || name.value.trim() == null) {
+    setError(name, nameError, 'Name field is emtpy')
+  } else {
+    if (!isNaN(name.value.trim())) {
+      setError(name, nameError, 'Name must not be digits')
+    }
+  }
+  if (phone.value.trim() === '' || phone.value.trim() == null) {
+    setError(phone, phoneError, 'Phone number field is emtpy')
+  } else {
+    if (isNaN(phone.value)) {
+      setError(phone, phoneError, 'Mobile numbers should be digits only')
+    } else if (phone.value.length != 10) {
+      setError(phone, phoneError, 'Phone number should be 10 digits e.g. 077 xxxx xxx')
+    }
+  }
+
+  if (email.value.trim() === '' || email.value.trim() == null) {
+    setError(email, emailError, 'Email field is emtpy')
+  } else {
+    if (!isNaN(email.value.trim())) {
+      setError(email, emailError, 'Email must not be digits')
+    }
+    if (!validateEmail(email.value)) {
+      setError(email, emailError, 'Email is not valid')
+    }
+  }
+
+  if (title.value === '' || title.value == null) {
+    setError(title, titleError, 'Title is not selected')
+  }
+
+  if (password.value.trim() === '' || password.value.trim() == null) {
+    setError(password, passwordError, 'Password field is emtpy')
+  }
+
+  if (repeat_password.value.trim() === '' || repeat_password.value.trim() == null) {
+    setError(repeat_password, confirmPasswordError, 'Please confirm your password')
+  }
+
+  if (password.value.trim() !== '' && password.value.trim() != null && repeat_password.value.trim() !== '' && repeat_password.value.trim() != null) {
+    if (password.value.trim() !== repeat_password.value.trim()) {
+      setError(repeat_password, confirmPasswordError, 'Passwords do not match')
+    } else {
+      if (password.value.length < 4 || password.value.length > 20) {
+        setError(password, passwordError, 'Password must be between 4 and 20 characters')
+      }
+    }
+  }
+
+  if (isError) {
+    console.log('yes there is error')
+    e.preventDefault()
+    isError = false
+  }
+})
+
+function setError(inputField, errorArea, errorMessage) {
+  isError = true
+  inputField.style.border = 'dashed 2px red'
+  errorArea.innerHTML = errorMessage + "<br>"
+  errorArea.style.display = 'block'
+}
+
+function validateEmail(email) {
+  const re = /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
+  return re.test(String(email).toLowerCase());
+}
+</script>
+{% endblock script %}

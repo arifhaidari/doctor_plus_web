@@ -1,0 +1,203 @@
+{% extends "adminplus/adminp_dashboard.html" %}
+{% load static %}
+{% block content %}
+<div class="main-wrapper">
+  <!-- Page Wrapper -->
+  <div class="page-wrapper">
+    <div class="content container-fluid">
+      <!-- Page Header -->
+      <div class="page-header">
+        <div class="row">
+          <div class="col-sm-7 col-auto">
+            <h3 class="page-title">Review Requests</h3>
+            <ul class="breadcrumb">
+              <li class="breadcrumb-item"><a href="{% url 'adminplus:dashboard' %}">Dashboard</a></li>
+              <li class="breadcrumb-item"><a href="{% url 'adminplus:clinics' %}">Clinics</a></li>
+              <li class="breadcrumb-item active">Review Requests</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+      <!-- /Page Header -->
+      <div class="row">
+        <div class="col-sm-12">
+          <div class="card">
+            <div class="card-body">
+              <div class="table-responsive">
+                <table class="datatable table table-hover table-center mb-0">
+                  <thead>
+                    <tr>
+                      <th>Clinic</th>
+                      <th>Doctor No</th>
+                      <th>City</th>
+                      <th>District</th>
+                      <th>Address</th>
+                      <th></th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {% for clin in clinics %}
+                    <tr id="request_{{ clin.id }}">
+                      <td>
+                        <h2 class="table-avatar">
+                          <a href="#">{{ clin }}</a>
+                        </h2>
+                      </td>
+                      <td>{{ clin.doctor.all.count }}</td>
+                      <td>{{ clin.city }}</td>
+                      <td>{{ clin.district }}</td>
+                      <td data-toggle="tooltip" title="{{ clin.address }}">
+                        <span class="fa fa-map-marker"></span>
+                        &nbsp;&nbsp;Location
+                        <span class="d-none">{{ clin.address }}</span>
+                      </td>
+                      <td>
+                        <a href="javascript:void(0);" class="btn btn-sm bg-info-light" name="view" data-clin-id="{{ clin.id }}">
+                          <i class="fa fa-eye"></i> View
+                        </a>
+                        <a href="javascript:approve({{ clin.id }});" class="btn btn-sm bg-success-light">
+                          <i class="fa fa-check"></i> Approve
+                        </a>
+                        <a href="javascript:reject({{ clin.id }});" class="btn btn-sm bg-danger-light">
+                          <i class="fa fa-trash"></i> Reject
+                        </a>
+                      </td>
+                    </tr>
+                    <tr name="request_view" id="view_{{clin.id}}" class="d-none">
+                      <td colspan="6">
+                        <div class="card">
+                          <div class="card-header">
+                            <h4 class="card-title text-info">Clinic Review Request</h4>
+                          </div>
+                          <div class="card-body">
+                            <div>
+                              <table class="table table-bordered mb-0">
+                                <tbody>
+                                  <tr align="left">
+                                    <th>Name</th>
+                                    <td>{{ clin.clinic_name }}</td>
+                                  </tr>
+                                  <tr align="left">
+                                    <th>RTL Name</th>
+                                    <td>{{ clin.rtl_clinic_name }}</td>
+                                  </tr>
+                                  <tr align="left">
+                                    <th>City</th>
+                                    <td>{{ clin.city.with_rtl_name }}</td>
+                                  </tr>
+                                  <tr align="left">
+                                    <th>District</th>
+                                    <td>{{ clin.district.with_rtl_name }}</td>
+                                  </tr>
+                                  <tr align="left">
+                                    <th>Address</th>
+                                    <td>{{ clin.address }}</td>
+                                  </tr>
+                                  <tr align="left">
+                                    <th>RTL Address</th>
+                                    <td>{{ clin.rtl_address }}</td>
+                                  </tr>
+                                  <tr align="left">
+                                    <th>Created by</th>
+                                    {% if clin.created_by %}
+                                    <td>
+                                      <a href="{% url 'adminplus:doctor_profile' clin.created_by.user.id %}">
+                                        {{ clin.created_by }}
+                                      </a>
+                                    </td>
+                                    {% else %}
+                                    <td>System</td>
+                                    {% endif %}
+                                  </tr>
+                                </tbody>
+                              </table>
+                            </div>
+                          </div>
+                        </div>
+                      </td>
+                      <td class="d-none"></td>
+                      <td class="d-none"></td>
+                      <td class="d-none"></td>
+                      <td class="d-none"></td>
+                      <td class="d-none"></td>
+                    </tr>
+                    {% empty %}
+                    </tr>
+                    <tr>
+                      <td colspan="6">No Pending Requests.</td>
+                      <td class="d-none"></td>
+                      <td class="d-none"></td>
+                      <td class="d-none"></td>
+                      <td class="d-none"></td>
+                      <td class="d-none"></td>
+                    </tr>
+                    {% endfor %}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <!-- /Page Wrapper -->
+</div>
+{% endblock content %}
+{% block script %}
+<script>
+// click view
+$('a[name="view"]').click(function(event) {
+  let id = $(this).data("clin-id");
+  let content = $("#view_" + id).html();
+  Swal.fire({
+    html: content,
+    showConfirmButton: true,
+    showDenyButton: true,
+    showCancelButton: true,
+    confirmButtonText: '<i class="fa fa-check"></i> Approve!',
+    denyButtonText: '<i class="fa fa-trash"></i> Reject',
+    cancelButtonText: 'Cancel',
+    confirmButtonColor: ''
+  }).then((result) => {
+    console.log("the result is ", result)
+    if (result.isConfirmed) { approve(id = id); }
+    if (result.isDenied) { reject(id = id); }
+  })
+});
+
+// on approve
+function approve(id) {
+  let form = new FormData();
+  form.append("csrfmiddlewaretoken", "{{ csrf_token }}");
+  form.append('approve_clinic', id);
+  axios.post(".", form).then((response) => {
+    if (response.data.status == "success") {
+      Swal.fire(
+        'Approved!',
+        'Clinic has been successfully approved.',
+        'success'
+      )
+      $("#request_" + id).hide('slow');
+    }
+  }).catch((error) => {
+    console.error(error);
+  });
+};
+
+// on reject
+function reject(id) {
+  let form = new FormData();
+  form.append("csrfmiddlewaretoken", "{{ csrf_token }}");
+  form.append('reject_clinic', id);
+  axios.post(".", form).then((response) => {
+    if (response.data.status == "success") {
+      $("#request_" + id).hide('slow');
+    }
+  }).catch((error) => {
+    console.error(error);
+  });
+}
+
+</script>
+{% endblock script %}

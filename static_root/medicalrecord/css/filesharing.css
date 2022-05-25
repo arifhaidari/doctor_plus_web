@@ -1,0 +1,40 @@
+input[type=checkbox] {
+    visibility: hidden;
+  }
+  .checkbox-toggle {
+    width: 45px;
+    height: 26px;
+    background-color: #55ce63;
+    margin: 14px 10px;
+    position: relative;
+    border-radius: 50px;
+  }
+  .checkbox-toggle label {
+    display: block;
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    margin: 3px;
+    transition: all .5s ease;
+    cursor: pointer;
+    position: absolute;
+    top: 0px;
+    left: 1px;
+    background: #ffffff;
+  }
+  .checkbox-toggle input[type=checkbox]:checked + label {
+    left: 18px;
+  }
+
+  #div-avatars {
+    overflow-x: scroll;
+    scrollbar-width: none; /* for firefox */
+  }
+  #div-avatars::-webkit-scrollbar {
+    display: none;
+  }
+
+
+th {
+  cursor: pointer;
+}

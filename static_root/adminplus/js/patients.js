@@ -1,0 +1,128 @@
+// circle status switch
+$("div[name='account-status']").enhancedSwitch();
+$("div[name='account-status']").each(function(index, el) {
+  if ($(this).data("active") == "True") {
+    $(el).enhancedSwitch('setFalse');
+  } else {
+    $(el).enhancedSwitch('setTrue');
+  }
+});
+
+$("div[name='account-status']").click(function() {
+  var selectedSwitch = $(this);
+  selectedSwitch.enhancedSwitch('toggle');
+  let user_id = $(this).data('patient-id');
+  // change to true
+  if (selectedSwitch.enhancedSwitch('state')) {
+    let form = new FormData();
+    form.append('csrfmiddlewaretoken', csrf_token);
+    form.append('active_patient', user_id);
+    axios.post(".", form).then((response) => {}).catch((error) => {
+      console.error(error);
+    });
+  } else {
+    // changed to false
+    Swal.fire({
+      title: 'Suspend Account ?',
+      text: "Patient will not be able to login anymore.",
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonColor: '#3085d6',
+      cancelButtonColor: '#d33',
+      confirmButtonText: 'Yes, Continue!'
+    }).then((result) => {
+      if (result.isConfirmed) {
+        let form = new FormData();
+        form.append('csrfmiddlewaretoken', csrf_token);
+        form.append('deactive_patient', user_id);
+        axios.post(".", form).then((response) => {
+          Swal.fire(
+            'Patient Suspened!',
+            'The patient successfully suspend!',
+            'success'
+          )
+        }).catch((error) => {
+          console.error(error);
+        });
+      } else {
+        // if not confirmed toggle again
+        selectedSwitch.enhancedSwitch('toggle');
+      }
+    });
+  }
+});
+
+// on delete
+$("a[name='delete_patient']").click(function(event) {
+  Swal.fire({
+    title: 'Are you sure?',
+    text: "You won't be able to revert this!",
+    icon: 'warning',
+    showCancelButton: true,
+    confirmButtonColor: '#3085d6',
+    cancelButtonColor: '#d33',
+    confirmButtonText: 'Yes, delete it!'
+  }).then((result) => {
+    if (result.isConfirmed) {
+      let user_id = $(this).data("patient-id");
+      let form = new FormData();
+      form.append('csrfmiddlewaretoken', csrf_token)
+      form.append('delete_patient', user_id);
+      axios.post(".", form).then((response) => {
+        Swal.fire(
+          'Deleted!',
+          'Patient has been successfully deleted.',
+          'success'
+        );
+        $(this).closest("tr").hide('slow');;
+      }).catch((error) => {
+        console.error(error);
+      });
+    }
+  })
+});
+
+
+// -------  data tables customizations ------------
+
+$(".cdatatable").DataTable({
+  fixedColumns: true,
+  language: {
+    searchPanes: {
+      clearMessage: 'Clear Filters',
+      collapse: { 0: 'Search Filters', _: 'Active Filters (%d)' }
+    },
+  },
+  buttons: [{
+    extend: 'searchPanes',
+  }],
+  dom: 'Plfrtip',
+  // dom: 'Bfrtlip',
+  searchPanes: {
+    viewTotal: true,
+    show: true,
+    layout: 'columns-3',
+    columns: [9, 2, 8]
+  },
+  targets: [8],
+  columnDefs: [{
+      "visible": false,
+      // "searchable": false,
+      "searchable": true,
+      targets: [8, 9],
+    },
+    {
+      searchPanes: {
+        show: true,
+        // combiner: "and",
+      },
+      targets: [2, 8, 9]
+    },
+  ],
+});
+
+
+// styling dt-button
+let btn_sp = $(".dt-button");
+btn_sp.removeClass('dt-button');
+btn_sp.addClass('btn btn-info');

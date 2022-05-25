@@ -1,0 +1,86 @@
+{% load static %}
+
+<!-- Chat Left -->
+<div class="chat-cont-left">
+     <div class="chat-header">
+          <span>Chats</span>
+          <a href="javascript:void(0)" class="chat-compose">
+               <i class="material-icons">control_point</i>
+          </a>
+     </div>
+     <form class="chat-search">
+          <div class="input-group">
+               <div class="input-group-prepend">
+                    <i class="fas fa-search"></i>
+               </div>
+               <input type="text" class="form-control" placeholder="Search">
+          </div>
+     </form>
+     <div class="chat-users-list">
+          <div class="chat-scroll">
+               <a href="javascript:void(0);" class="media read-chat active">
+                    <div class="media-img-wrap">
+                         <div class="avatar avatar-online">
+                              <img src="{% if other_user.avatar %}{{ other_user.avatar.url }}{% else %}{% if other_user.gender == 'Male' %}{% static 'img/male_profile.png' %}{% else %}{% static 'img/female_profile.png' %}{% endif %}{% endif %}" alt="User Image" class="avatar-img rounded-circle">
+                         </div>
+                    </div>
+                    <div class="media-body">
+                         <div>
+                              <div class="user-name">{{ other_user.full_name }}</div>
+                              <div class="user-last-chat">Texting ...</div>
+                         </div>
+                         <div>
+                              <div class="last-chat-time block">8:01 PM</div>
+                         </div>
+                    </div>
+               </a>
+               {% for a_user in user_list %}
+               <a href="javascript:void(0);" class="media" >
+                   
+                    <div class="media-img-wrap">
+                         <div class="avatar avatar-away">
+                              <img src="{{ a_user.avatar }}" alt="User Image" class="avatar-img rounded-circle">
+                         </div>
+                    </div>
+                    <div class="media-body" onclick="launchUrl('{{ a_user.phone }}')">
+                         <div>
+                              <div class="user-name">{{ a_user.full_name }}</div>
+                              <div class="user-last-chat">
+                                  
+                                   {% if a_user.last_text.message_type == 'file_attachment' %}
+                                   File
+                                   {% elif a_user.last_text.message_type == 'voice' %}
+                                   Voice
+                                   {% else %}
+                                   {% if a_user.last_text.message_text == 'no_chat_yet' %}
+                                   There is no chat history
+                                   {% else %}
+                                   {{ a_user.last_text.message_text }}
+                                   {% endif %}
+                                   {% endif %}
+                              </div>
+                         </div>
+                         <div>
+                              <div class="last-chat-time block">{{ a_user.last_text.timestamp }}</div>
+                              {% if not a_user.last_text.seen and a_user.last_text.timestamp != '' %}
+                              <div class="badge badge-success badge-pill">New</div>
+                                   {% endif %}
+                              
+                         </div>
+                    </div>
+               </a>
+
+               {% endfor %}
+              
+          </div>
+     </div>
+</div>
+
+<script>
+    function launchUrl(phone) {
+         location.href = '/chat/' + phone
+    }
+
+     
+</script>
+<!-- /Chat Left -->

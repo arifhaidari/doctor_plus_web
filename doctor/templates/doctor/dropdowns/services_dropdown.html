@@ -1,0 +1,8 @@
+{% if ajax_services %}
+{% for ajax_service in ajax_services %}
+<option value="{{ ajax_service.id }}">{{ ajax_service.name }} -
+     {{ ajax_service.farsi_name }}</option>
+{% endfor %}
+{% endif %}
+
+

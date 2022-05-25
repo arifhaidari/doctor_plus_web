@@ -1,0 +1,739 @@
+{% extends "base.html" %}
+{% load static %}
+{% block title %}Chat{% endblock title %}
+
+{% block content %}
+
+<script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+
+
+<body class="chat-page">
+
+
+     <!-- Main Wrapper -->
+     <div class="main-wrapper">
+
+          <!-- Page Content -->
+          <div class="content">
+               <div class="container-fluid">
+                    <div class="row">
+                         <div class="col-xl-12">
+                              <div class="chat-window">
+                                   {% include "chat/chat_contact.html" with user_list=user_list other_user=other_user me=request.user %}
+
+<!-- Chat Right -->
+<div class="chat-cont-right">
+     <div class="chat-header">
+          <a id="back_user_list" href="javascript:void(0)" class="back-user-list">
+               <i class="material-icons">chevron_left</i>
+          </a>
+          <div class="media">
+               <div class="media-img-wrap">
+                    <div class="avatar avatar-online">
+                         <img src="{% if other_user.avatar %}{{ other_user.avatar.url }}{% else %}{% if other_user.gender == 'Male' %}{% static 'img/male_profile.png' %}{% else %}{% static 'img/female_profile.png' %}{% endif %}{% endif %}" alt="User Image"
+                              class="avatar-img rounded-circle">
+                    </div>
+               </div>
+               <div class="media-body">
+                    <div class="user-name">{{ other_user.full_name }}</div>
+                    <div class="user-status">online</div>
+               </div>
+          </div>
+          <div class="chat-options">
+               <a href="javascript:void(0)" data-toggle="modal" data-target="#voice_call_351_tackle">
+                    <i class="material-icons">local_phone</i>
+               </a>
+               <a href="javascript:void(0)" data-toggle="modal" data-target="#video_call_351_tackle">
+                    <i class="material-icons">videocam</i>
+               </a>
+               <a href="javascript:void(0)">
+                    <i class="material-icons">more_vert</i>
+               </a>
+          </div>
+     </div>
+     <!-- Chat Starts From Here -->
+     <div class="chat-body" id="chat-body">
+          <div class="chat-scroll">
+               <ul class="list-unstyled" id="chat-items">
+                    <br>
+                    <br>
+                    <br>
+                    <br>
+                    <br>
+                    <br>
+                    <br>
+                    <br>
+                    <br>
+                    <br>
+                    <br>
+                    {% for x in chatmessages %}
+                    {% if x.user.phone == request.user.phone %}
+                    <li class="media sent">
+                         <div class="media-body">
+                              {% if x.message %}
+                              <div class="msg-box">
+                                   <div>
+                                        <p>{{ x.message }} </p>
+                                        <ul class="chat-msg-info">
+                                             <li>
+                                                  <div class="chat-time">
+                                                       <span>{{ x.timestamp }}</span>
+                                                  </div>
+                                             </li>
+                                        </ul>
+                                   </div>
+                              </div>
+                              {% endif %}
+                              {% for img in x.multipleimage_set.all %}
+                              <div class="msg-box">
+                              <div>
+                                   <div class="chat-msg-attachments">
+                                   <div class="chat-attachment">
+                                   <img src="{{ img.image.url }}" alt="Attachment">
+                                   <div class="chat-attach-caption">Image</div>
+                                   <a href="{{ img.image.url }}" class="chat-attach-download">
+                                        <i class="fas fa-download"></i>
+                                   </a>
+                                   </div>
+                                   </div>
+                                   <ul class="chat-msg-info">
+                                   <li>
+                                   <div class="chat-time">
+                                        <span>{{ x.timestamp }}</span>
+                                   </div>
+                                   </li>
+                                   </ul>
+                              </div>
+                              </div>
+                              {% endfor %}
+                              {% for att in x.multipleattach.all %}
+                              <div class="msg-box">
+                              <div>
+                                   <div class="chat-msg-attachments">
+                                   <div class="chat-attachment">
+                                   <img src="/static/img/file.jpg" alt="Attachment">
+                                   <div class="chat-attach-caption">Attachment</div>
+                                   <a href="{{ att.attachment.url }}" class="chat-attach-download">
+                                        <i class="fas fa-download"></i>
+                                   </a>
+                                   </div>
+                                   </div>
+                                   <ul class="chat-msg-info">
+                                   <li>
+                                   <div class="chat-time">
+                                        <span>{{ x.timestamp }}</span>
+                                   </div>
+                                   </li>
+                                   </ul>
+                              </div>
+                              </div>
+                              {% endfor %}
+                              {% if x.voice %}
+                              <div class="msg-box">
+                                   <div>
+                                   <div class="chat-msg-attachments">
+                                        <audio controls>
+                                        <source src="{{ x.voice.url }}">
+                                        Your browser does not support the audio element.
+                                        </audio>
+                                   </div>
+                                   <ul class="chat-msg-info">
+                                   <li>
+                                        <div class="chat-time">
+                                        <span>{{ x.timestamp }}</span>
+                                        </div>
+                                   </li>
+                                   </ul>
+                                   </div>
+                              </div>
+                              {% endif %}
+                         </div>
+                    </li>
+                    {% elif x.user.phone == other_user.phone %}
+                    <li class="media received">
+                         <div class="avatar">
+                              <img src="{% if x.user.avatar %}{{ x.user.avatar.url }}{% else %}{% if x.user.gender == 'Male' %}{% static 'img/male_profile.png' %}{% else %}{% static 'img/female_profile.png' %}{% endif %}{% endif %}" alt="User Image"
+                                   class="avatar-img rounded-circle">
+                         </div>
+                         <div class="media-body">
+                              {% if x.message %}
+                              <div class="msg-box">
+                                   <div>
+                                        <p>{{ x.message }}</p>
+                                        <ul class="chat-msg-info">
+                                             <li>
+                                                  <div class="chat-time">
+                                                       <span>{{ x.timestamp }}</span>
+                                                  </div>
+                                             </li>
+                                        </ul>
+                                   </div>
+                              </div>
+                              {% endif %}
+                              {% for img in x.multipleimage_set.all %}
+                              <div class="msg-box">
+                              <div>
+                                   <div class="chat-msg-attachments">
+                                   <div class="chat-attachment">
+                                   <img src="{{ img.image.url }}" alt="Attachment">
+                                   <div class="chat-attach-caption">Image</div>
+                                   <a href="{{ img.image.url }}" class="chat-attach-download">
+                                        <i class="fas fa-download"></i>
+                                   </a>
+                                   </div>
+                                   </div>
+                                   <ul class="chat-msg-info">
+                                   <li>
+                                   <div class="chat-time">
+                                        <span>{{ x.timestamp }}</span>
+                                   </div>
+                                   </li>
+                                   </ul>
+                              </div>
+                              </div>
+                              {% endfor %}
+                              {% for att in x.multipleattach.all %}
+                              
+                              <div class="msg-box">
+                              <div>
+                                   <div class="chat-msg-attachments">
+                                   <div class="chat-attachment">
+                                   <img src="/static/img/file.jpg" alt="Attachment">
+                                   <div class="chat-attach-caption">Attachment</div>
+                                   <a href="{{ att.attachment.url }}" class="chat-attach-download">
+                                        <i class="fas fa-download"></i>
+                                   </a>
+                                   </div>
+                                   </div>
+                                   <ul class="chat-msg-info">
+                                   <li>
+                                   <div class="chat-time">
+                                        <span>{{ x.timestamp }}</span>
+                                   </div>
+                                   </li>
+                                   </ul>
+                              </div>
+                              </div>
+                              {% endfor %}
+                              {% if x.voice %}
+                              <div class="msg-box">
+                                   <div>
+                                   <div class="chat-msg-attachments">
+                                        <audio controls>
+                                        <source src="{{ x.voice.url }}">
+                                        Your browser does not support the audio element.
+                                        </audio>
+                                   </div>
+                                   <ul class="chat-msg-info">
+                                        <li>
+                                        <div class="chat-time">
+                                        <span>{{ x.timestamp }}</span>
+                                        </div>
+                                        </li>
+                                   </ul>
+                                   </div>
+                              </div>
+                              {% endif %}
+                         </div>
+                    </li>
+                    {% endif %}
+                    {% endfor %}
+               </ul>
+          </div>
+     </div>
+     <div class="chat-footer">
+          <form id="form-data" method="POST" enctype="multipart/form-data">
+               {% csrf_token %}
+               <div class="input-group">
+                    <input type="hidden" id="myUsername" value="{{ user.phone }}">
+          <div class="input-group-prepend">
+            <div class="btn-file btn">
+              <i class="fa fa-paperclip"></i>
+              <input type="file" multiple name="msg-file" id="chat-attachment">
+            </div>
+          </div>
+          <div class="input-group-prepend">
+            <div class="btn-file btn">
+              <i class="fa fa-image"></i>
+              <input type="file" multiple name="msg-img" id="chat-img">
+            </div>
+          </div>
+          <div class="input-group-prepend" id="audio-input">
+            <div class="btn-file btn" >
+              <i class="fa fa-microphone" id="icon-microphone"></i>
+              <input type="hidden">
+            </div>
+          </div>
+          <div class="input-group-prepend" id="btn-stop" style="display:none;">
+            <div class="btn-file btn" >
+              <i class="fa fa-pause"></i>
+              &nbsp;&nbsp;<span id="timer">00</span>
+              <input type="hidden">
+            </div>
+          </div>
+                    <input type="text" class="input-msg-send form-control" placeholder="Type something" id="id_message">
+                    <div class="input-group-append">
+                         <button type="button" class="btn msg-send-btn"><i class="fab fa-telegram-plane"
+                                   id="submit-btn"></i></button>
+                    </div>
+               </div>
+          </form>
+
+     </div>
+</div>
+<!-- /Chat Right -->
+
+
+
+</div>
+</div>
+</div>
+<!-- /Row -->
+</div>
+
+</div>
+<!-- /Page Content -->
+
+</div>
+<!-- /Main Wrapper -->
+
+{% include "chat/the_modals.html" %}
+</body>
+
+{{ request.user.phone|json_script:"user_phone" }}
+
+{% endblock content %}
+
+{% block script %}
+<script type="text/javascript"> var csrftoken = '{{ csrf_token }}';</script>
+<script type="text/javascript"> var userAvatar = "{% if other_user.avatar %}{{ other_user.avatar.url }}{% else %}{% if other_user.gender == 'Male' %}{% static 'img/male_profile.png' %}{% else %}{% static 'img/female_profile.png' %}{% endif %}{% endif %}";</script>
+<script>
+     const userPhone = JSON.parse(document.getElementById('user_phone').textContent);
+     console.log('value ro fuser_phone')
+     console.log(userPhone)
+     var loc = window.location;
+     var msg = $("#id_message");
+     var formData = $("#form-data");
+     var chatHolder = $("#chat-items");
+     var attachment = $("#chat-attachment");
+     var image = $("#chat-img")
+     //chat time
+     var time = new Date($.now());
+     var clear_time = time.toLocaleTimeString();
+     // 
+     var wsStart = "ws://";
+     // if (loc.protocol == "https:") {
+     //      wsStart = "wss://";
+     // }
+     var endpoint = wsStart + loc.host + '/ws' + loc.pathname;
+     console.log('value of endpoint')
+     console.log(endpoint)
+
+     const chatSocket = new WebSocket(endpoint);
+
+     chatSocket.onclose = function (e) {
+          console.error('Chat socket closed unexpectedly');
+     };
+
+     document.querySelector('#id_message').focus();
+     document.querySelector('#id_message').onkeyup = function (e) {
+          if (e.keyCode === 13) {  // enter, return
+               console.log('insdie the 13')
+               document.querySelector('#submit-btn').click();
+          }
+     };
+
+     document.querySelector('#submit-btn').onclick = function (e) {
+          console.log('insdie the sibt click')
+          const messageInputDom = document.querySelector('#id_message');
+          const message = messageInputDom.value;
+          chatSocket.send(JSON.stringify({
+               'message': message,
+               'user_phone': userPhone,
+          }));
+          messageInputDom.value = '';
+     };
+
+     // Image Section Starts
+     image.change(function() {
+     var img = image.prop("files");
+     var form = new FormData()
+     form.append("csrfmiddlewaretoken", csrftoken);
+     for (x of img) {
+     form.append("image", x)
+     }
+     axios.post(".", form).then(function(resp) {
+          console.log("resp : ", resp.data)
+          if (resp.data.status === "success") {
+               chatSocket.send(
+               JSON.stringify({
+               'message': "image-files",
+               'images': resp.data.imageNames,
+               'user_phone': userPhone,
+               })
+          );
+          }
+     })
+     .catch(function(err) {
+          alert("post err : ", err);
+     });
+     });
+     // Image Section Ends
+
+     // File Section Starts
+     attachment.change(function() {
+     var file = attachment.prop("files");
+     var form = new FormData()
+     form.append("csrfmiddlewaretoken", csrftoken);
+     for (x of file) {
+     console.log("file for ", x)
+     form.append("file", x)
+     }
+     console.log('value of form')
+     console.log(form)
+     axios.post(".", form).then(function(resp) {
+          console.log("resp 0909090909090 : ", resp)
+          if (resp.data.status === "success") {
+               console.log('wah ji success ')
+               chatSocket.send(
+               JSON.stringify({
+               'message': "attachment-files",
+               'files': resp.data.attachmentNames,
+               'user_phone': userPhone,
+               })
+          );
+          }
+     })
+     .catch(function(err) {
+          alert("post err : ", err);
+     });
+     });
+     // File Section Ends
+
+     // Audio Section Starts
+     var sec = 0;
+     var max_audio_time = 180 // sec
+     function startTimer() {
+     sec += eval(1)
+     if (sec < 10) {
+     $("#timer").text("0" + sec)
+     } else {
+     $("#timer").text(sec)
+     }
+     if (sec == max_audio_time) {
+     $("#btn-stop").click()
+     }
+     }
+
+     var isRecording = false;
+     var audioInput = $("#audio-input")
+     audioInput.click(function() {
+     navigator.mediaDevices.getUserMedia({
+          audio: true
+     })
+     .then(stream => {
+          const mediaRecorder = new MediaRecorder(stream);
+
+          mediaRecorder.start();
+          $("#btn-stop").show()
+          $("#audio-input").hide()
+          if (interval == undefined) {
+          sec = 0;
+          var interval = setInterval(function() {
+               startTimer()
+          }, 1000)
+          }
+
+          const audioChunks = [];
+          mediaRecorder.addEventListener("dataavailable", event => {
+          audioChunks.push(event.data);
+          });
+
+          mediaRecorder.addEventListener("stop", () => {
+          $("#btn-stop").hide()
+          $("#audio-input").show()
+          clearInterval(interval);
+          $("#timer").text("00")
+
+          const audioBlob = new Blob(audioChunks);
+          const audioUrl = URL.createObjectURL(audioBlob);
+          const audio = new Audio(audioUrl);
+          // audio.play();
+          console.log("audio,", audio)
+          console.log("audio size,", audioBlob.size)
+          var mform = new FormData();
+          mform.append("csrfmiddlewaretoken", csrftoken);
+          mform.append("audio", audioBlob)
+          axios.post(".", mform).then(function(resp) {
+               console.log('value of resp------')
+               console.log(resp)
+               if (resp.data.status === "success") {
+                    console.log('dude it is successfull')
+               chatSocket.send(
+                    JSON.stringify({
+                    'message': "voice-message",
+                    'voice': resp.data.voice,
+                    'user_phone': userPhone,
+                    })
+               );
+               }
+               })
+               .catch(function(err) {
+               alert("post err : ", err);
+               });
+          });
+
+          // stop recording trigger
+          var stop = $("#btn-stop").click(function() {
+          try {
+               mediaRecorder.stop()
+               stream.getTracks().forEach(function(track) {
+               if (track.readyState == 'live' && track.kind === 'audio') {
+               track.stop();
+               }
+               });
+          } catch (e) {
+               console.log("stopping media recorder faild! ", e)
+          }
+          })
+     }) // end then
+     .catch(function(err) {
+          console.log("audio err :", err)
+     }); // end catch
+     });
+     // Audio Section Ends
+
+     // Sending Message Section
+     chatSocket.onmessage = function (e) {
+          var chatDataMsg = JSON.parse(e.data);
+          var sentmsg_div = `<li class="media sent">
+					  <div class="media-body">
+					    <div class="msg-box">
+					      <div>
+					        <p>` + chatDataMsg.message + `</p>
+					        <ul class="chat-msg-info">
+					          <li>
+					            <div class="chat-time">
+					              <span>` + clear_time + `</span>
+					            </div>
+					          </li>
+					        </ul>
+					      </div>
+					    </div>
+					  </div>
+					</li>`;
+          var recmsg_div = `<li class="media received">
+			          <div class="avatar">
+			            <img src="` + userAvatar + `" alt="User Image" class="avatar-img rounded-circle">
+			          </div>
+			          <div class="media-body">
+			            <div class="msg-box">
+			              <div>
+			                <p>` + chatDataMsg.message + `</p>
+			                <ul class="chat-msg-info">
+			                  <li>
+			                    <div class="chat-time">
+			                      <span>` + clear_time + `</span>
+			                    </div>
+			                  </li>
+			                </ul>
+			              </div>
+			            </div>
+			          </div>
+			        </li>`;
+
+          if (chatDataMsg.user_phone == userPhone) {
+               if (chatDataMsg.media_type === "image") {
+               console.log("this is the media : ", chatDataMsg.images)
+               for (x of chatDataMsg.images) {
+               var sent_media = `<li class="media sent">
+                         <div class="media-body">
+                              <div class="msg-box">
+                              <div>
+                                   <div class="chat-msg-attachments">
+                                   <div class="chat-attachment">
+                                        <img src="` + x + `" alt="Attachment">
+                                        <div class="chat-attach-caption">Image</div>
+                                        <a href="` + x + `" class="chat-attach-download">
+                                        <i class="fas fa-download"></i>
+                                        </a>
+                                   </div>
+                                   </div>
+                                   <ul class="chat-msg-info">
+                                   <li>
+                                        <div class="chat-time">
+                                        <span>` + clear_time + `</span>
+                                        </div>
+                                   </li>
+                                   </ul>
+                              </div>
+                              </div>
+                         </div>
+                         </li>`
+               chatHolder.append(sent_media);
+               }
+          } 
+          else if (chatDataMsg.media_type === "attachement") {
+               console.log('attachement is true ======')
+          for (x of chatDataMsg.attachments) {
+               var sent_media = `<li class="media sent">
+                         <div class="media-body">
+                              <div class="msg-box">
+                              <div>
+                                   <div class="chat-msg-attachments">
+                                   <div class="chat-attachment">
+                                        <img src="/static/img/file.jpg" alt="Attachment">
+                                        <div class="chat-attach-caption">Attachment</div>
+                                        <a href="` + x + `" class="chat-attach-download">
+                                        <i class="fas fa-download"></i>
+                                        </a>
+                                   </div>
+                                   </div>
+                                   <ul class="chat-msg-info">
+                                   <li>
+                                        <div class="chat-time">
+                                        <span>` + clear_time + `</span>
+                                        </div>
+                                   </li>
+                                   </ul>
+                              </div>
+                              </div>
+                         </div>
+                         </li>`
+               chatHolder.append(sent_media);
+               }
+          } else if (chatDataMsg.media_type === "voice") {
+               var voice_media = `
+                    <li class="media sent">
+                         <div class="media-body">
+                              <div class="msg-box">
+                              <div>
+                              <div class="chat-msg-attachments">
+                                   <audio controls>
+                                        <source src="` + chatDataMsg.voice + `">
+                                        Your browser does not support the audio element.
+                                   </audio>
+                              </div>
+                              <ul class="chat-msg-info">
+                                   <li>
+                                   <div class="chat-time">
+                                        <span>` + clear_time + `</span>
+                                   </div>
+                                   </li>
+                              </ul>
+                              </div>
+                              </div>
+                              <div>
+                         </li>`
+               chatHolder.append(voice_media);
+          }
+               else {
+               chatHolder.append(sentmsg_div);
+          }
+          } // you recieve the message
+           else {
+               console.log('receive the message')
+               if (chatDataMsg.media_type === "image") {
+               for (x of chatDataMsg.images) {
+               var receive_media = `<li class="media received">
+                         <div class="avatar">
+                              <img src="` + userAvatar + `" alt="User Image" class="avatar-img rounded-circle">
+                         </div>
+                         <div class="media-body">
+                              <div class="msg-box">
+                              <div>
+                                   <div class="chat-msg-attachments">
+                                   <div class="chat-attachment">
+                                        <img src="` + x + `" alt="Attachment">
+                                        <div class="chat-attach-caption">Imagefile</div>
+                                        <a href="` + x + `" class="chat-attach-download">
+                                        <i class="fas fa-download"></i>
+                                        </a>
+                                   </div>
+                                   </div>
+                                   <ul class="chat-msg-info">
+                                   <li>
+                                        <div class="chat-time">
+                                        <span>` + clear_time + `</span>
+                                        </div>
+                                   </li>
+                                   </ul>
+                              </div>
+                              </div>
+                         </div>
+                         </li>`
+               chatHolder.append(receive_media);
+               }
+          } else if (chatDataMsg.media_type === "attachement") {
+               console.log('attachment is true on receive side ++++++++++++++++')
+               for (x of chatDataMsg.attachments) {
+               var receive_media = `<li class="media received">
+                         <div class="avatar">
+                              <img src="` + userAvatar + `" alt="User Image" class="avatar-img rounded-circle">
+                         </div>
+                         <div class="media-body">
+                              <div class="msg-box">
+                              <div>
+                                   <div class="chat-msg-attachments">
+                                   <div class="chat-attachment">
+                                        <img src="/static/img/file.jpg" alt="Attachment">
+                                        <div class="chat-attach-caption">Attachment</div>
+                                        <a href="` + x + `" class="chat-attach-download">
+                                        <i class="fas fa-download"></i>
+                                        </a>
+                                   </div>
+                                   </div>
+                                   <ul class="chat-msg-info">
+                                   <li>
+                                        <div class="chat-time">
+                                        <span>` + clear_time + `</span>
+                                        </div>
+                                   </li>
+                                   </ul>
+                              </div>
+                              </div>
+                         </div>
+                         </li>`
+               chatHolder.append(receive_media);
+               }
+          } else if (chatDataMsg.media_type === "voice") {
+               var voice_media = `<li class="media received">
+                         <div class="avatar">
+                              <img src="` + userAvatar + `" alt="User Image" class="avatar-img rounded-circle">
+                         </div>
+                         <div class="media-body">
+                              <div class="msg-box">
+                              <div>
+                              <div class="chat-msg-attachments">
+                                   <audio controls>
+                                        <source src="` + chatDataMsg.voice + `">
+                                        Your browser does not support the audio element.
+                                   </audio>
+                              </div>
+                              <ul class="chat-msg-info">
+                                   <li>
+                                   <div class="chat-time">
+                                        <span>` + clear_time + `</span>
+                                   </div>
+                                   </li>
+                              </ul>
+                              </div>
+                              </div>
+                              <div>
+                         </li>`
+               chatHolder.append(voice_media);
+          }
+               else {
+               chatHolder.append(recmsg_div);
+          }
+               
+          }
+     };
+
+
+
+
+
+
+</script>
+{% endblock script %}

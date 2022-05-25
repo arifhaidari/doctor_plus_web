@@ -1,0 +1,634 @@
+{% extends "base.html" %}
+{% block title %}
+Dashboard
+{% endblock title %}
+{% block breadcrumb %}
+<div class="breadcrumb-bar">
+  <div class="container-fluid">
+    <div class="row align-items-center">
+      <div class="col">
+        <nav aria-label="breadcrumb" class="page-breadcrumb">
+          <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="{% url 'home:homepage' %}">Home</a></li>
+            <li class="breadcrumb-item"><a href="{% url 'blog:dashboard' %}">Dashboard</a></li>
+          </ol>
+        </nav>
+        <h2 class="breadcrumb-title">
+          Dashboard
+        </h2>
+      </div>
+      <div class="col-auto text-right float-right ml-auto">
+        <a href="{% url 'blog:add' %}" class="btn btn-primary btn-sm"><i class="fas fa-plus-circle"> </i> New Post</a>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock breadcrumb %}
+{% block content %}
+<!-- Page Content -->
+<div class="content">
+  <div class="container-fluid">
+    <div class="row">
+      <div class="col-md-5 col-lg-4 col-xl-3 theiaStickySidebar">
+        <!-- Profile Sidebar -->
+        {% include "blog/dashboard_components/blog_dashboard_sidebar.html" %}
+        <!-- /Profile Sidebar -->
+      </div>
+      <div class="col-md-7 col-lg-8 col-xl-9">
+        {% block main %}
+        <div class="row">
+          <div class="col-md-12">
+            <div class="card dash-card">
+              <div class="card-body">
+                <div class="row">
+                  <div class="col-md-12 col-lg-4">
+                    <div class="dash-widget dct-border-rht">
+                      <div class="circle-bar circle-bar1">
+                        <div class="circle-graph1" data-percent="75">
+                          <img src="/static/img/bar.png" class="img-fluid w-50 h-50" alt="patient">
+                        </div>
+                      </div>
+                      <div class="dash-widget-info">
+                        <h6>Total Posts</h6>
+                        <h3>{{ total_posts }}</h3>
+                        <p class="text-muted">Till Today</p>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="col-md-12 col-lg-4">
+                    <div class="dash-widget dct-border-rht">
+                      <div class="circle-bar circle-bar2">
+                        <div class="circle-graph2" data-percent="65">
+                          <img src="/static/img/bar3.png" class="img-fluid w-50 h-50" alt="Patient">
+                        </div>
+                      </div>
+                      <div class="dash-widget-info">
+                        <h6>This Month Posts</h6>
+                        <h3>{{ total_posts }}</h3>
+                        <p class="text-muted">{% now "01, M. Y" %}</p>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="col-md-12 col-lg-4">
+                    <div class="dash-widget">
+                      <div class="circle-bar circle-bar3">
+                        <div class="circle-graph3" data-percent="50">
+                          <img src="/static/img/bar2.jpg" class="img-fluid" height="57%" width="57%" alt="Patient">
+                        </div>
+                      </div>
+                      <div class="dash-widget-info">
+                        <h6>This Week Posts</h6>
+                        <h3>{{ total_posts }}</h3>
+                        <p class="text-muted">Week {% now "W" %}, {% now "Y" %}</p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="row">
+          <div class="col-md-12">
+            <h4 class="mb-4">Main Dashboard</h4>
+            <div class="appointment-tab">
+              <!-- Tabs -->
+              <ul class="nav nav-tabs nav-tabs-solid nav-tabs-rounded">
+                <li class="nav-item">
+                  <a class="nav-link active" href="#all_posts" data-toggle="tab">All Posts</a>
+                </li>
+                <li class="nav-item">
+                  <a class="nav-link" href="#eng_posts" data-toggle="tab">English Posts</a>
+                </li>
+                <li class="nav-item">
+                  <a class="nav-link" href="#fa_posts" data-toggle="tab">Persian Posts</a>
+                </li>
+                <li class="nav-item">
+                  <a class="nav-link" href="#ps_posts" data-toggle="tab">Pashto Posts</a>
+                </li>
+              </ul>
+              <!-- Tabs -->
+              <div class="tab-content">
+                <div class="tab-pane show active" id="all_posts">
+                  <div class="card card-table mb-0">
+                    <div class="card-body p-4">
+                      <dvi class="row">
+                        <div class="col-md-6 col-sm-12">
+                          <h3>Yearly Posts</h3>
+                          <canvas id="myChart2" width="400" height="400"></canvas>
+                        </div>
+                        <div class="col-md-6 col-sm-12">
+                          <h3>This Year Posts</h3>
+                          <canvas id="myChart" width="400" height="400"></canvas>
+                        </div>
+                      </dvi>
+                    </div>
+                  </div>
+                </div>
+                <div class="tab-pane" id="eng_posts">
+                  <div class="card card-table mb-0">
+                    <div class="card-body p-4">
+                      <dvi class="row">
+                        <div class="col-md-6 col-sm-12">
+                          <h3>Yearly Posts</h3>
+                          <canvas id="myChart3" width="400" height="400"></canvas>
+                        </div>
+                        <div class="col-md-6 col-sm-12">
+                          <h3>This Year Posts</h3>
+                          <canvas id="myChart3_1" width="400" height="400"></canvas>
+                        </div>
+                      </dvi>
+                    </div>
+                  </div>
+                </div>
+                <div class="tab-pane" id="fa_posts">
+                  <div class="card card-table mb-0">
+                    <div class="card-body p-4">
+                      <dvi class="row">
+                        <div class="col-md-6 col-sm-12">
+                          <h3>Yearly Posts</h3>
+                          <canvas id="myChart4" width="400" height="400"></canvas>
+                        </div>
+                        <div class="col-md-6 col-sm-12">
+                          <h3>This Year Posts</h3>
+                          <canvas id="myChart4_1" width="400" height="400"></canvas>
+                        </div>
+                      </dvi>
+                    </div>
+                  </div>
+                </div>
+                <div class="tab-pane" id="ps_posts">
+                  <div class="card card-table mb-0">
+                    <div class="card-body p-4">
+                      <dvi class="row">
+                        <div class="col-md-6 col-sm-12">
+                          <h3>Yearly Posts</h3>
+                          <canvas id="myChart5" width="400" height="400"></canvas>
+                        </div>
+                        <div class="col-md-6 col-sm-12">
+                          <h3>This Year Posts</h3>
+                          <canvas id="myChart5_1" width="400" height="400"></canvas>
+                        </div>
+                      </dvi>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        {% endblock main %}
+      </div>
+    </div>
+  </div>
+</div>
+<!-- /Page Content -->
+{% endblock content %}
+{% block pagelevel_styles %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js@2.9.4/dist/Chart.min.js"></script>
+{% endblock pagelevel_styles %}
+{% block script %}
+<script>
+let endpoint = "/blog/data/";
+axios.get(endpoint).then((response) => {
+  console.log("resp.data :", response.data)
+
+  var ctx = document.getElementById('myChart').getContext('2d');
+  var myChart = new Chart(ctx, {
+    type: 'polarArea',
+    data: {
+      labels: response.data.months,
+      datasets: [{
+        label: '# of Votes',
+        data: response.data.this_year_post_counts,
+        backgroundColor: [
+          'rgba(220,20,60, 0.8)',
+          'rgba(255,99,71, 0.8)',
+          'rgba(255,160,122, 0.8)',
+          'rgba(138,43,226, 0.8)',
+          'rgba(245,25,250, 0.8)',
+          'rgba(147,112,219, 0.8)',
+          'rgba(128,0,128, 0.8)',
+          'rgba(32,178,170, 0.8)',
+          'rgba(47,79,79, 0.8)',
+          'rgba(0,255,255, 0.8)',
+          'rgba(95,158,160, 0.8)',
+          'rgba(70,130,180, 0.8)',
+          'rgba(100,149,237, 0.8)',
+          'rgba(25,25,112, 0.8)',
+          'rgba(210,105,30, 0.8)',
+          'rgba(244,164,96, 0.8)',
+          'rgba(188,143,143, 0.8)',
+          'rgba(50,205,50, 0.8)',
+          'rgba(255,69,0, 0.8)',
+          'rgba(85,107,47, 0.8)',
+          'rgba(205,92,92, 0.8)',
+          'rgba(255,140,0, 0.8)',
+          'rgba(154,205,50, 0.8)',
+          'rgba(135,206,250, 0.8)',
+          'rgba(176,196,222, 0.8)',
+          'rgba(255,215,0, 0.8)',
+          'rgba(255,20,147, 0.8)',
+          'rgba(250,235,215, 0.8)',
+          'rgba(0,250,154, 0.8)',
+          'rgba(0,255,127, 0.8)',
+          'rgba(46,139,87, 0.8)',
+        ],
+      }]
+    },
+    options: {
+      scales: {
+        yAxes: [{
+          ticks: {
+            beginAtZero: true
+          }
+        }]
+      }
+    }
+  });
+    var ctx = document.getElementById('myChart2').getContext('2d');
+  var myChart2 = new Chart(ctx, {
+    // type: 'pie',
+    type: 'bar',
+    data: {
+      labels: response.data.yearly_posts_label,
+      datasets: [{
+        label: '# of Votes',
+        data: response.data.yearly_posts_data,
+        backgroundColor: [
+          'rgba(220,20,60, 0.8)',
+          'rgba(255,99,71, 0.8)',
+          'rgba(255,160,122, 0.8)',
+          'rgba(138,43,226, 0.8)',
+          'rgba(245,25,250, 0.8)',
+          'rgba(147,112,219, 0.8)',
+          'rgba(128,0,128, 0.8)',
+          'rgba(32,178,170, 0.8)',
+          'rgba(47,79,79, 0.8)',
+          'rgba(0,255,255, 0.8)',
+          'rgba(95,158,160, 0.8)',
+          'rgba(70,130,180, 0.8)',
+          'rgba(100,149,237, 0.8)',
+          'rgba(25,25,112, 0.8)',
+          'rgba(210,105,30, 0.8)',
+          'rgba(244,164,96, 0.8)',
+          'rgba(188,143,143, 0.8)',
+          'rgba(50,205,50, 0.8)',
+          'rgba(255,69,0, 0.8)',
+          'rgba(85,107,47, 0.8)',
+          'rgba(205,92,92, 0.8)',
+          'rgba(255,140,0, 0.8)',
+          'rgba(154,205,50, 0.8)',
+          'rgba(135,206,250, 0.8)',
+          'rgba(176,196,222, 0.8)',
+          'rgba(255,215,0, 0.8)',
+          'rgba(255,20,147, 0.8)',
+          'rgba(250,235,215, 0.8)',
+          'rgba(0,250,154, 0.8)',
+          'rgba(0,255,127, 0.8)',
+          'rgba(46,139,87, 0.8)',
+        ],
+      }]
+    },
+    options: {
+      scales: {
+        yAxes: [{
+          ticks: {
+            beginAtZero: true
+          }
+        }]
+      }
+    }
+  });
+  // eng tab
+    var ctx = document.getElementById('myChart3').getContext('2d');
+  var myChart3 = new Chart(ctx, {
+    type: 'polarArea',
+    data: {
+      labels: response.data.months,
+      datasets: [{
+        label: '# of Votes',
+        data: response.data.this_year_post_counts_eng,
+        backgroundColor: [
+          'rgba(220,20,60, 0.8)',
+          'rgba(255,99,71, 0.8)',
+          'rgba(255,160,122, 0.8)',
+          'rgba(138,43,226, 0.8)',
+          'rgba(245,25,250, 0.8)',
+          'rgba(147,112,219, 0.8)',
+          'rgba(128,0,128, 0.8)',
+          'rgba(32,178,170, 0.8)',
+          'rgba(47,79,79, 0.8)',
+          'rgba(0,255,255, 0.8)',
+          'rgba(95,158,160, 0.8)',
+          'rgba(70,130,180, 0.8)',
+          'rgba(100,149,237, 0.8)',
+          'rgba(25,25,112, 0.8)',
+          'rgba(210,105,30, 0.8)',
+          'rgba(244,164,96, 0.8)',
+          'rgba(188,143,143, 0.8)',
+          'rgba(50,205,50, 0.8)',
+          'rgba(255,69,0, 0.8)',
+          'rgba(85,107,47, 0.8)',
+          'rgba(205,92,92, 0.8)',
+          'rgba(255,140,0, 0.8)',
+          'rgba(154,205,50, 0.8)',
+          'rgba(135,206,250, 0.8)',
+          'rgba(176,196,222, 0.8)',
+          'rgba(255,215,0, 0.8)',
+          'rgba(255,20,147, 0.8)',
+          'rgba(250,235,215, 0.8)',
+          'rgba(0,250,154, 0.8)',
+          'rgba(0,255,127, 0.8)',
+          'rgba(46,139,87, 0.8)',
+        ],
+      }]
+    },
+    options: {
+      scales: {
+        yAxes: [{
+          ticks: {
+            beginAtZero: true
+          }
+        }]
+      }
+    }
+  });
+  var ctx = document.getElementById('myChart3_1').getContext('2d');
+  var myChart3_1 = new Chart(ctx, {
+    // type: 'pie',
+    type: 'bar',
+    data: {
+      labels: response.data.yearly_posts_label,
+      datasets: [{
+        label: '# of Votes',
+        data: response.data.yearly_posts_data_eng,
+        backgroundColor: [
+          'rgba(220,20,60, 0.8)',
+          'rgba(255,99,71, 0.8)',
+          'rgba(255,160,122, 0.8)',
+          'rgba(138,43,226, 0.8)',
+          'rgba(245,25,250, 0.8)',
+          'rgba(147,112,219, 0.8)',
+          'rgba(128,0,128, 0.8)',
+          'rgba(32,178,170, 0.8)',
+          'rgba(47,79,79, 0.8)',
+          'rgba(0,255,255, 0.8)',
+          'rgba(95,158,160, 0.8)',
+          'rgba(70,130,180, 0.8)',
+          'rgba(100,149,237, 0.8)',
+          'rgba(25,25,112, 0.8)',
+          'rgba(210,105,30, 0.8)',
+          'rgba(244,164,96, 0.8)',
+          'rgba(188,143,143, 0.8)',
+          'rgba(50,205,50, 0.8)',
+          'rgba(255,69,0, 0.8)',
+          'rgba(85,107,47, 0.8)',
+          'rgba(205,92,92, 0.8)',
+          'rgba(255,140,0, 0.8)',
+          'rgba(154,205,50, 0.8)',
+          'rgba(135,206,250, 0.8)',
+          'rgba(176,196,222, 0.8)',
+          'rgba(255,215,0, 0.8)',
+          'rgba(255,20,147, 0.8)',
+          'rgba(250,235,215, 0.8)',
+          'rgba(0,250,154, 0.8)',
+          'rgba(0,255,127, 0.8)',
+          'rgba(46,139,87, 0.8)',
+        ],
+      }]
+    },
+    options: {
+      scales: {
+        yAxes: [{
+          ticks: {
+            beginAtZero: true
+          }
+        }]
+      }
+    }
+  });
+
+  // tab fa
+  var ctx = document.getElementById('myChart4').getContext('2d');
+  var myChart4 = new Chart(ctx, {
+    type: 'polarArea',
+    data: {
+      labels: response.data.months,
+      datasets: [{
+        label: '# of Votes',
+        data: response.data.this_year_post_counts_fa,
+        backgroundColor: [
+          'rgba(220,20,60, 0.8)',
+          'rgba(255,99,71, 0.8)',
+          'rgba(255,160,122, 0.8)',
+          'rgba(138,43,226, 0.8)',
+          'rgba(245,25,250, 0.8)',
+          'rgba(147,112,219, 0.8)',
+          'rgba(128,0,128, 0.8)',
+          'rgba(32,178,170, 0.8)',
+          'rgba(47,79,79, 0.8)',
+          'rgba(0,255,255, 0.8)',
+          'rgba(95,158,160, 0.8)',
+          'rgba(70,130,180, 0.8)',
+          'rgba(100,149,237, 0.8)',
+          'rgba(25,25,112, 0.8)',
+          'rgba(210,105,30, 0.8)',
+          'rgba(244,164,96, 0.8)',
+          'rgba(188,143,143, 0.8)',
+          'rgba(50,205,50, 0.8)',
+          'rgba(255,69,0, 0.8)',
+          'rgba(85,107,47, 0.8)',
+          'rgba(205,92,92, 0.8)',
+          'rgba(255,140,0, 0.8)',
+          'rgba(154,205,50, 0.8)',
+          'rgba(135,206,250, 0.8)',
+          'rgba(176,196,222, 0.8)',
+          'rgba(255,215,0, 0.8)',
+          'rgba(255,20,147, 0.8)',
+          'rgba(250,235,215, 0.8)',
+          'rgba(0,250,154, 0.8)',
+          'rgba(0,255,127, 0.8)',
+          'rgba(46,139,87, 0.8)',
+        ],
+      }]
+    },
+    options: {
+      scales: {
+        yAxes: [{
+          ticks: {
+            beginAtZero: true
+          }
+        }]
+      }
+    }
+  });
+  var ctx = document.getElementById('myChart4_1').getContext('2d');
+  var myChart4_1 = new Chart(ctx, {
+    // type: 'pie',
+    type: 'bar',
+    data: {
+      labels: response.data.yearly_posts_label,
+      datasets: [{
+        label: '# of Votes',
+        data: response.data.yearly_posts_data_fa,
+        backgroundColor: [
+          'rgba(220,20,60, 0.8)',
+          'rgba(255,99,71, 0.8)',
+          'rgba(255,160,122, 0.8)',
+          'rgba(138,43,226, 0.8)',
+          'rgba(245,25,250, 0.8)',
+          'rgba(147,112,219, 0.8)',
+          'rgba(128,0,128, 0.8)',
+          'rgba(32,178,170, 0.8)',
+          'rgba(47,79,79, 0.8)',
+          'rgba(0,255,255, 0.8)',
+          'rgba(95,158,160, 0.8)',
+          'rgba(70,130,180, 0.8)',
+          'rgba(100,149,237, 0.8)',
+          'rgba(25,25,112, 0.8)',
+          'rgba(210,105,30, 0.8)',
+          'rgba(244,164,96, 0.8)',
+          'rgba(188,143,143, 0.8)',
+          'rgba(50,205,50, 0.8)',
+          'rgba(255,69,0, 0.8)',
+          'rgba(85,107,47, 0.8)',
+          'rgba(205,92,92, 0.8)',
+          'rgba(255,140,0, 0.8)',
+          'rgba(154,205,50, 0.8)',
+          'rgba(135,206,250, 0.8)',
+          'rgba(176,196,222, 0.8)',
+          'rgba(255,215,0, 0.8)',
+          'rgba(255,20,147, 0.8)',
+          'rgba(250,235,215, 0.8)',
+          'rgba(0,250,154, 0.8)',
+          'rgba(0,255,127, 0.8)',
+          'rgba(46,139,87, 0.8)',
+        ],
+      }]
+    },
+    options: {
+      scales: {
+        yAxes: [{
+          ticks: {
+            beginAtZero: true
+          }
+        }]
+      }
+    }
+  });
+
+  // tab ps
+  var ctx = document.getElementById('myChart5').getContext('2d');
+  var myChart5 = new Chart(ctx, {
+    type: 'polarArea',
+    data: {
+      labels: response.data.months,
+      datasets: [{
+        label: '# of Votes',
+        data: response.data.this_year_post_counts_ps,
+        backgroundColor: [
+          'rgba(220,20,60, 0.8)',
+          'rgba(255,99,71, 0.8)',
+          'rgba(255,160,122, 0.8)',
+          'rgba(138,43,226, 0.8)',
+          'rgba(245,25,250, 0.8)',
+          'rgba(147,112,219, 0.8)',
+          'rgba(128,0,128, 0.8)',
+          'rgba(32,178,170, 0.8)',
+          'rgba(47,79,79, 0.8)',
+          'rgba(0,255,255, 0.8)',
+          'rgba(95,158,160, 0.8)',
+          'rgba(70,130,180, 0.8)',
+          'rgba(100,149,237, 0.8)',
+          'rgba(25,25,112, 0.8)',
+          'rgba(210,105,30, 0.8)',
+          'rgba(244,164,96, 0.8)',
+          'rgba(188,143,143, 0.8)',
+          'rgba(50,205,50, 0.8)',
+          'rgba(255,69,0, 0.8)',
+          'rgba(85,107,47, 0.8)',
+          'rgba(205,92,92, 0.8)',
+          'rgba(255,140,0, 0.8)',
+          'rgba(154,205,50, 0.8)',
+          'rgba(135,206,250, 0.8)',
+          'rgba(176,196,222, 0.8)',
+          'rgba(255,215,0, 0.8)',
+          'rgba(255,20,147, 0.8)',
+          'rgba(250,235,215, 0.8)',
+          'rgba(0,250,154, 0.8)',
+          'rgba(0,255,127, 0.8)',
+          'rgba(46,139,87, 0.8)',
+        ],
+      }]
+    },
+    options: {
+      scales: {
+        yAxes: [{
+          ticks: {
+            beginAtZero: true
+          }
+        }]
+      }
+    }
+  });
+  var ctx = document.getElementById('myChart5_1').getContext('2d');
+  var myChart5_1 = new Chart(ctx, {
+    // type: 'pie',
+    type: 'bar',
+    data: {
+      labels: response.data.yearly_posts_label,
+      datasets: [{
+        label: '# of Votes',
+        data: response.data.yearly_posts_data_ps,
+        backgroundColor: [
+          'rgba(220,20,60, 0.8)',
+          'rgba(255,99,71, 0.8)',
+          'rgba(255,160,122, 0.8)',
+          'rgba(138,43,226, 0.8)',
+          'rgba(245,25,250, 0.8)',
+          'rgba(147,112,219, 0.8)',
+          'rgba(128,0,128, 0.8)',
+          'rgba(32,178,170, 0.8)',
+          'rgba(47,79,79, 0.8)',
+          'rgba(0,255,255, 0.8)',
+          'rgba(95,158,160, 0.8)',
+          'rgba(70,130,180, 0.8)',
+          'rgba(100,149,237, 0.8)',
+          'rgba(25,25,112, 0.8)',
+          'rgba(210,105,30, 0.8)',
+          'rgba(244,164,96, 0.8)',
+          'rgba(188,143,143, 0.8)',
+          'rgba(50,205,50, 0.8)',
+          'rgba(255,69,0, 0.8)',
+          'rgba(85,107,47, 0.8)',
+          'rgba(205,92,92, 0.8)',
+          'rgba(255,140,0, 0.8)',
+          'rgba(154,205,50, 0.8)',
+          'rgba(135,206,250, 0.8)',
+          'rgba(176,196,222, 0.8)',
+          'rgba(255,215,0, 0.8)',
+          'rgba(255,20,147, 0.8)',
+          'rgba(250,235,215, 0.8)',
+          'rgba(0,250,154, 0.8)',
+          'rgba(0,255,127, 0.8)',
+          'rgba(46,139,87, 0.8)',
+        ],
+      }]
+    },
+    options: {
+      scales: {
+        yAxes: [{
+          ticks: {
+            beginAtZero: true
+          }
+        }]
+      }
+    }
+  });
+
+}).catch((error) => {
+  console.error(error);
+});
+</script>
+{% endblock script %}

@@ -1,0 +1,360 @@
+{% extends "base.html" %}
+{% load mathfilters %}
+{% load static %}
+{% load doctor_tags %}
+{% block title %}
+Doctor Profile
+{% endblock title %}
+{% block breadcrumb %}
+<div class="breadcrumb-bar">
+  <div class="container-fluid">
+    <div class="row align-items-center">
+      <div class="col">
+        <nav aria-label="breadcrumb" class="page-breadcrumb">
+          <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="{% url 'home:homepage' %}">Home</a></li>
+            <li class="breadcrumb-item"><a href="#">Doctor Profile</a></li>
+          </ol>
+        </nav>
+        <h2 class="breadcrumb-title">
+          Doctor Profile
+        </h2>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock breadcrumb %}
+{% block content %}
+<!-- Page Content -->
+<div class="content">
+  <div class="container">
+    <!-- Doctor Widget -->
+    <div class="card">
+      <div class="card-body">
+        <div class="doctor-widget">
+          <div class="doc-info-left">
+            <div class="doctor-img">
+              <img src="{% if doctor.user.avatar %}{{ doctor.user.avatar.url }}{% else %}{% if doctor.user.gender == 'Male' %}{% static 'img/male_profile.png' %}{% else %}{% static 'img/female_profile.png' %}{% endif %}{% endif %}" class="img-fluid" alt="User Image">
+            </div>
+            <div class="doc-info-cont">
+              <br>
+              <h4 class="doc-name">{{ doctor.title }} {{ doctor.user.get_full_name }}</h4>
+              <p class="doc-speciality">
+                {% if doctor.speciality.all %}
+                {% for sp in doctor.speciality.all %}{{ sp }}{% if forloop.last %}{% else %},&nbsp;{% endif %}{% endfor %}
+                {% else %}
+                --- , ---
+                {% endif %}
+              </p>
+              {% doctor_rating doctor %}
+              <div class="clinic-services">
+                {% for service in doctor.service.all %}
+                <span class="mb-1 ml-1">{{ service }}</span>
+                {% endfor %}
+              </div>
+            </div>
+          </div>
+          <div class="doc-info-right">
+            <div class="clini-infos">
+              <ul>
+                {% for clin in doctor.clinic_set.all %}
+                <li><i class="fas fa-map-marker-alt"></i> {{clin.address}}</li>
+                {% endfor %}
+                <li><i class="far fa-money-bill-alt"></i> {{ doctor.fee }}, AFN </li>
+              </ul>
+            </div>
+            <div class="doctor-action">
+              {% if is_your_fav_doc %}
+              <a href="javascript:rm_from_fav({{doctor.id}})" class="btn btn-white fav-btn">
+                <i class="far fa-heart"></i>
+              </a>
+              {% else %}
+              {% if request.user.is_authenticated %}
+              <a href="javascript:add_to_fav({{doctor.id}})" class="btn btn-white fav-btn">
+                <i class="far fa-heart"></i>
+              </a>
+              {% endif %}
+              {% endif %}
+            </div>
+            <div class="clinic-booking">
+              <a class="apt-btn" href="{% url 'appointment:public_time_slot' doctor.user.id %}">Book Appointment</a>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <!-- /Doctor Widget -->
+
+    <!-- Doctor Details Tab -->
+    <div class="card">
+      <div class="card-body pt-0">
+        <!-- Tab Menu -->
+        <nav class="user-tabs mb-4">
+          <ul class="nav nav-tabs nav-tabs-bottom nav-justified col-md-6 col-sm-6">
+            <li class="nav-item">
+              <a class="nav-link active" href="#doc_overview" data-toggle="tab">Overview</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="#doc_locations" data-toggle="tab">Locations</a>
+            </li>
+          </ul>
+        </nav>
+        <!-- /Tab Menu -->
+        <!-- Tab Content -->
+        <div class="tab-content pt-0">
+          <!-- Overview Content -->
+          <div role="tabpanel" id="doc_overview" class="tab-pane fade show active">
+            <div class="row">
+              <div class="col-md-12 col-lg-9">
+                <!-- About Details -->
+                <div class="widget about-widget">
+                  <h4 class="widget-title">About Me</h4>
+                  <p>{{ doctor.bio|default:"No Bio." }}</p>
+                </div>
+                <!-- /About Details -->
+                <!-- Education Details -->
+                <div class="widget education-widget">
+                  <h4 class="widget-title">Education</h4>
+                  <div class="experience-box">
+                    <ul class="experience-list">
+                      {% for edu in doctor.education_set.all %}
+                      <li>
+                        <div class="experience-user">
+                          <div class="before-circle"></div>
+                        </div>
+                        <div class="experience-content">
+                          <div class="timeline-content">
+                            <a href="#/" class="name">{{ edu.school_name }}</a>
+                            <div>{{ edu.degree }}</div>
+                            <span class="time">{{ edu.start_date }} to {{ edu.end_date|default:"Now" }}</span>
+                          </div>
+                        </div>
+                      </li>
+                      {% empty %}
+                      <li>
+                        <div class="experience-content">
+                            <span class="time">No Educations Registered.</span>
+                        </div>
+                      </li>
+                      {% endfor %}
+                    </ul>
+                  </div>
+                </div>
+                <!-- /Education Details -->
+                <!-- Experience Details -->
+                <div class="widget experience-widget">
+                  <h4 class="widget-title">Work & Experience</h4>
+                  <div class="experience-box">
+                    <ul class="experience-list">
+                      {% for work in doctor.experience_set.all %}
+                      <li>
+                        <div class="experience-user">
+                          <div class="before-circle"></div>
+                        </div>
+                        <div class="experience-content">
+                          <div class="timeline-content">
+                            <a href="#/" class="name">{{ work.hospital_name }}</a>
+                            <span class="time">{{ work.designation }}</span>
+                            <span class="time">{{ work.start_date }} to {{ work.end_date|default:"Now" }} ({{ work.start_date|timesince:work.end_date }})</span>
+                          </div>
+                        </div>
+                      </li>
+                      {% empty %}
+                      <li>
+                        <div class="experience-content">
+                            <span class="time">No Work & Experience Registered.</span>
+                        </div>
+                      </li>
+                      {% endfor %}
+                    </ul>
+                  </div>
+                </div>
+                <!-- /Experience Details -->
+                <!-- Awards Details -->
+                <div class="widget awards-widget">
+                  <h4 class="widget-title">Awards</h4>
+                  <div class="experience-box">
+                    <ul class="experience-list">
+                      {% for awr in doctor.award_set.all %}
+                      <li>
+                        <div class="experience-user">
+                          <div class="before-circle"></div>
+                        </div>
+                        <div class="experience-content">
+                          <div class="timeline-content">
+                            <p class="exp-year">{{ awr.award_year|date:"M Y" }}</p>
+                            <h4 class="exp-title">{{ awr.award_name }}</h4>
+                            <p>{{ awr.award_description|default:"No description." }}</p>
+                          </div>
+                        </div>
+                      </li>
+                      {% empty %}
+                      <li>
+                        <div class="experience-content">
+                            <span class="time">No Awards Registered.</span>
+                        </div>
+                      </li>
+                      {% endfor %}
+                    </ul>
+                  </div>
+                </div>
+                <!-- /Awards Details -->
+                <!-- Specializations List -->
+                <div class="service-list">
+                  <h4>Specializations</h4>
+                  <ul class="clearfix">
+                    {% for sp in doctor.speciality.all %}
+                    <li>{{ sp }}</li>
+                    {% empty %}
+                    <li>No Specializations registered yet.</li>
+                    {% endfor %}
+                  </ul>
+                </div>
+                <!-- /Specializations List -->
+                <!-- Conditions List -->
+                <div class="service-list">
+                  <h4>Conditions</h4>
+                  <ul class="clearfix">
+                    {% for condition in doctor.speciality.all %}
+                    <li>{{ condition }}</li>
+                    {% empty %}
+                    <li>No Conditions registered yet.</li>
+                    {% endfor %}
+                  </ul>
+                </div>
+                <!-- /Conditions List -->
+                <!-- Services List -->
+                <div class="service-list">
+                  <h4>Services</h4>
+                  <ul class="clearfix">
+                    {% for service in doctor.service.all %}
+                    <li>{{ service }}</li>
+                    {% empty %}
+                    <li>No service registered yet.</li>
+                    {% endfor %}
+                  </ul>
+                </div>
+                <!-- /Services List -->
+              </div>
+            </div>
+          </div>
+          <!-- /Overview Content -->
+          <!-- Locations Content -->
+          <div role="tabpanel" id="doc_locations" class="tab-pane fade">
+            <!-- Location List -->
+            {% for clinic in doctor.clinic_set.all %}
+            <div class="location-list">
+              <div class="row">
+                <!-- Clinic Content -->
+                <div class="col-md-6">
+                  <div class="clinic-content">
+                    <h4 class="clinic-name"><a href="#"><b>{{ clinic.clinic_name }}</b></a></h4>
+                    <div class="clinic-details mb-0 mt-2">
+                      <h5 class="clinic-direction"> <i class="fas fa-map-marker-alt"></i>&nbsp; {{clinic.city}}, {{ clinic.district }} - {{ clinic.address }}</h5>
+                    </div>
+                  </div>
+                </div>
+                <!-- /Clinic Content -->
+                <!-- Clinic Timing -->
+                <div class="col-md-4">
+                  <div class="clinic-timing">
+                    <div>
+                      <div class="widget business-widget">
+                        <div class="widget-content">
+                          <div class="listing-hours">
+                            <div class="listing-day current">
+                              <div class="time-items">
+                                Business Hours
+                              </div>
+                            </div>
+                            {% for day in clinic.dayschedulepattern_set.all|doctor_related_dayschedulepattern:doctor %}
+                            <div class="listing-day">
+                              <div class="day">{{ day }}</div>
+                              {% if day.active %}
+                              <div class="time-items">
+                                <span class="time">{{ day.start_day_time }} AM - {{ day.end_day_time }} PM</span>
+                              </div>
+                              {% else %}
+                                <div class="time-items">
+                                  {# <span class="time"> This day is deactive.</span> #}
+                                  <span class="badge badge-pill badge-warning">This day is deactive.</span>
+                                </div>
+                              {% endif %}
+                            </div>
+                            {% empty %}
+                            Not set yet.
+                            {% endfor %}
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                <!-- /Clinic Timing -->
+              </div>
+            </div>
+            {% endfor %}
+            <!-- /Location List -->
+          </div>
+          <!-- /Locations Content -->
+        </div>
+      </div>
+    </div>
+    <!-- /Doctor Details Tab -->
+  </div>
+</div>
+<!-- /Page Content -->
+{% endblock content %}
+{% block pagelevel_styles %}
+{% endblock pagelevel_styles %}
+{% block script %}
+<script src="/static/swtalert.js"></script>
+<script>
+// add/remove doc to fav
+function add_to_fav(doc_id) {
+  let form = new FormData();
+  form.append("csrfmiddlewaretoken", '{{ csrf_token }}');
+  form.append('add_to_fav', doc_id)
+  axios.post(".", form).then((response) => {
+    if (response.data.status == "success") {
+      Swal.fire({
+        icon: 'success',
+        title: 'Bookmarked!',
+        text: 'Doctor Add to your favourites!\n\n',
+        showCloseButton: false,
+        showCancelButton: false,
+        showConfirmButton: false,
+        timer: 1500,
+        footer: `<br>`
+      });
+    }
+    location.reload();
+  }).catch((error) => {
+    console.error(error);
+  });
+}
+
+function rm_from_fav(doc_id) {
+  let form = new FormData();
+  form.append("csrfmiddlewaretoken", '{{ csrf_token }}');
+  form.append('rm_from_fav', doc_id)
+  axios.post(".", form).then((response) => {
+    if (response.data.status == "success") {
+      Swal.fire({
+        icon: 'success',
+        title: 'Bookmarked Removed!',
+        text: 'Doctor removed from your favourites!\n\n',
+        showCloseButton: false,
+        showCancelButton: false,
+        showConfirmButton: false,
+        timer: 1500,
+        footer: `<br>`
+      });
+    }
+    location.reload();
+  }).catch((error) => {
+    console.error(error);
+  });
+}
+</script>
+{% endblock script %}

@@ -1,0 +1,665 @@
+{% extends 'doctor_sidebar.html' %}
+{% load static %}
+{% block title %}
+Profile | Doctor
+{% endblock title %}
+{% block content %}
+<style>
+  .image_area {
+    position: relative;
+  }
+
+  img {
+    display: block;
+    max-width: 100%;
+  }
+
+  .preview {
+    overflow: hidden;
+    width: 160px;
+    height: 160px;
+    margin: 10px;
+    border: 1px solid red;
+  }
+
+  .modal-lg {
+    max-width: 1000px !important;
+  }
+
+
+  .image_area:hover .overlay {
+    height: 50%;
+    cursor: pointer;
+  }
+
+</style>
+<div class="col-md-7 col-lg-8 col-xl-9">
+  <form method="POST" id="doctor_profile_form" data-districts-url="{% url 'user:ajax_load_districts' %}" data-services-url="{% url 'doctor:ajax_load_services' %}" data-conditions-url="{% url 'doctor:ajax_load_conditions' %}"
+    enctype="multipart/form-data">
+    {% csrf_token %}
+    <!-- Basic Information -->
+    <div class="card">
+      <div class="card-body">
+        <h4 class="card-title">Basic Information</h4>
+        <div class="row form-row">
+          <div class="col-md-12">
+            <div class="form-group">
+              <div class="change-avatar">
+                <div class="profile-img">
+                  <img src="{% if request.user.avatar %}{{ request.user.avatar.url }}{% else %}{% if request.user.gender == 'Male' %}{% static 'img/male_profile.png' %}{% else %}{% static 'img/female_profile.png' %}{% endif %}{% endif %}" alt="User Image" id="uploaded_image" name="uploaded_image" class="img-responsive img-circle" />
+                </div>
+                <div class="upload-img">
+                  <div class="change-photo-btn">
+                    <span><i class="fa fa-upload"></i> Upload Photo</span>
+                    <input type="file" name="image" class="upload" id="upload_image" {% if doctor_object.professional_status %}disabled{% endif %}/>
+                  </div>
+                  <small class="form-text text-muted">Allowed JPG, GIF or PNG. Max size of 2MB</small>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="col-md-6">
+            <div class="form-group">
+              <label>Full Name <span class="text-danger">*</span></label>
+              <input type="text" name="name" id="name" value="{% if request.user.full_name %}{{ request.user.full_name }}{% else %}{% endif %}" class="form-control" {% if doctor_object.professional_status %}disabled{% endif %}>
+              <small id="name_error" style="display: none;color: red;"></small>
+            </div>
+          </div>
+          <div class="col-md-6">
+            <div class="form-group">
+              <label>Phone Number <span class="text-danger">*</span></label>
+              <input type="number" name="phone" id="phone" value="{% if request.user.phone %}{{ request.user.phone }}{% else %}{% endif %}" class="form-control" disabled>
+              <small id="phone_error" style="display: none;color: red;"></small>
+            </div>
+          </div>
+          <div class="col-md-6">
+            <div class="form-group">
+              <label>Full Name (Farsi/Pashto)<span class="text-danger">*</span></label>
+              <input type="text" dir="rtl" name="rtl_name" id="rtl_name" value="{% if request.user.rtl_full_name %}{{ request.user.rtl_full_name }}{% else %}{% endif %}" class="form-control" {% if doctor_object.professional_status %}disabled{% endif %}>
+              <small id="rtl_name_error" style="display: none;color: red;"></small>
+            </div>
+          </div>
+          <div class="col-md-6">
+            <div class="form-group">
+              <label>Email</label>
+              <input type="text" name="email" id="email" value="{% if request.user.email %}{{ request.user.email }}{% else %}{% endif %}" class="form-control" {% if doctor_object.professional_status %}disabled{% endif %}>
+              <small id="email_error" style="display: none;color: red;"></small>
+            </div>
+          </div>
+          <div class="col-md-6">
+            <div class="form-group">
+              <select id="title" name="title" class="form-control select" {% if doctor_object.professional_status %}disabled{% endif %}>
+                <option value="">Select Title <span class="text-danger">*</span></option>
+                {% for title in titles %}
+                <option value="{{ title.id }}" {% if title.id == doctor_object.title.id %}selected{% endif %}>
+                  {{ title.title }} - {{ title.farsi_title }}
+                </option>
+                {% endfor %}
+              </select>
+              <small id="title_error" style="display: none;color: red;"></small>
+            </div>
+          </div>
+          <div class="col-md-6">
+            <div class="form-group">
+              <label>Gender <span class="text-danger">*</span></label><br>
+              <div class="form-check-inline">
+                <label class="form-check-label">
+                  <input type="radio" {% if request.user.gender == 'Male' or request.user.gender == '' %}checked{% endif %} name="gender" value="Male" id="gender" class="form-check-input" {% if doctor_object.professional_status %}disabled{% endif %}>Male
+                </label>
+              </div>
+              <div class="form-check-inline">
+                <label class="form-check-label">
+                  <input type="radio" {% if request.user.gender == 'Female' %}checked{% endif %} name="gender" value="Female" id="gender" class="form-check-input" {% if doctor_object.professional_status %}disabled{% endif %}>Female
+                </label>
+              </div>
+            </div>
+          </div>
+          <div class="col-md-6">
+            <div class="form-group">
+              <label>License No <span class="text-danger">*</span></label>
+              <input id="license_no" name="license_no" value="{% if doctor_object.doc_license_no %}{{ doctor_object.doc_license_no }}{% else %}{% endif %}" type="text" class="form-control" {% if doctor_object.professional_status %}disabled{% endif %}>
+              <small id="license_no_error" style="display: none;color: red;"></small>
+            </div>
+          </div>
+          <div class="col-md-6">
+            <div class="form-group">
+              <label>Date of Birth <span class="text-danger">*</span></label>
+              <input type="date" id="dob" value="{{ request.user.string_birth_date }}" name="dob" class="form-control" {% if doctor_object.professional_status %}disabled{% endif %}>
+              <small id="dob_error" style="display: none;color: red;"></small>
+            </div>
+          </div>
+          <div class="col-md-6">
+            <div class="form-group">
+              <select name="city" id="city" class="form-control select" {% if doctor_object.professional_status %}disabled{% endif %}>
+                <option value="">Select Province <span class="text-danger">*</span></option>
+                {% for city in cities %}
+                <option value="{{ city.id }}" {% if city.id == request.user.address.city.id %}selected{% endif %}>{{ city.name }} -
+                  {{ city.rtl_name }}
+                </option>
+                {% endfor %}
+              </select>
+              <small id="city_error" style="display: none;color: red;"></small>
+            </div>
+          </div>
+          <div class="col-md-6">
+            <div class="form-group">
+              <select name="district" id="district" class="form-control select" {% if doctor_object.professional_status %}disabled{% endif %}>
+                <option value="{{ request.user.address.district.id }}" {% if request.user.address.district %}selected{% endif %}>
+                  {% if request.user.address.district %}
+                  {{ request.user.address.district.name }} - {{ request.user.address.district.rtl_name }}
+                  {% else %}
+                  Select District <span class="text-danger">*</span>
+                  {% endif %}
+                </option>
+              </select>
+              <small id="district_error" style="display: none;color: red;"></small>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <!-- /Basic Information -->
+    <!-- About Me -->
+    <div class="card">
+      <div class="card-body">
+        <h4 class="card-title">About Me</h4>
+        <div class="form-group">
+          <label>Biography <span class="text-danger">*</span></label>
+          <textarea id="bio" name="bio" placeholder="Write a short bio of yourself ... " class="form-control" rows="5" {% if doctor_object.professional_status %}disabled{% endif %}>{% if doctor_object.bio %}{{ doctor_object.bio }}{% else %}{% endif %}</textarea>
+          <small id="bio_error" style="display: none;color: red;"></small>
+        </div>
+        <div class="form-group">
+          <label>Biography (Farsi)</label>
+          <textarea id="bio_farsi" dir="rtl" name="bio_farsi" placeholder="Write a short bio of yourself Farsi ... " class="form-control" rows="5" {% if doctor_object.professional_status %}disabled{% endif %}>{% if doctor_object.pashto_bio %}{{ doctor_object.farsi_bio }}{% else %}{% endif %}</textarea>
+          <small id="bio_farsi_error" style="display: none;color: red;"></small>
+        </div>
+        <div class="form-group">
+          <label>Biography (Pashto)</label>
+          <textarea id="bio_pashto" dir="rtl" name="bio_pashto" placeholder="Write a short bio of yourself in Pashto ... " class="form-control" rows="5" {% if doctor_object.professional_status %}disabled{% endif %}>{% if doctor_object.pashto_bio %}{{ doctor_object.pashto_bio }}{% else %}{% endif %}</textarea>
+          <small id="bio_pashto_error" style="display: none;color: red;"></small>
+        </div>
+      </div>
+    </div>
+    <!-- /About Me -->
+    <!-- Clinic Info -->
+    <div class="card">
+      <div class="card-body">
+        <h4 class="card-title">Clinic Info</h4>
+        <div class="clinic-info">
+          <div class="row form-row clinic-cont">
+            <div class="col-12 col-md-10 col-lg-11">
+              <div class="row form-row">
+                <div class="col-md-12">
+                  <label>Select an existing clinics</label>
+                  <select name="registered_clinics" id="registered_clinics" class="form-control select" multiple {% if doctor_object.professional_status %}disabled{% endif %}>
+                    {% for clinic in clinics %}
+                    {% if not clinic in doctor_object.created_by.all %}
+                    <option value="{{ clinic.id }}" {% if clinic in doctor_object.clinic_set.all %}selected{% endif %}>{{ clinic.clinic_name }} -
+                      {{ clinic.rtl_clinic_name }}
+                    </option>
+                    {% endif %}
+                    {% endfor %}
+                  </select>
+                  <small id="specialization_error" style="display: none;color: red;"></small>
+                </div>
+              </div>
+            </div>
+          </div>
+          <hr>
+          <h4 class="card-title">Register New Clinic</h4>
+          <!-- loop it from here -->
+          {% if doctor_object.created_by.all %}
+          {% for clinic_object in doctor_object.created_by.all %}
+          {% if doctor_object in clinic_object.doctor.all %}
+          <div class="row form-row clinic-cont">
+            <div class="col-12 col-md-10 col-lg-11">
+              <div class="row form-row">
+                <div class="col-md-6">
+                  <div class="form-group">
+                    <label>Clinic Name <span class="text-danger">*</span></label>
+                    <input type="text" name="clinic_name" id="clinic_name" value="{{ clinic_object.clinic_name }}" class="form-control" {% if doctor_object.professional_status %}disabled{% endif %}>
+                    <input type="hidden" name="clinic_id_list" id="clinic_id_list" value="{{ clinic_object.id }}" class="form-control">
+                    <small id="clinic_name_error" name="clinic_name_error" style="display: none;color: red;"></small>
+                  </div>
+                </div>
+                <div class="col-md-6">
+                  <div class="form-group">
+                    <label>Clinic Name (Farsi/Pashto)<span class="text-danger">*</span></label>
+                    <input type="text" dir="rtl" name="rtl_clinic_name" id="rtl_clinic_name" value="{{ clinic_object.rtl_clinic_name }}" class="form-control" {% if doctor_object.professional_status %}disabled{% endif %}>
+                    <small id="rtl_clinic_name_error" name="rtl_clinic_name_error" style="display: none;color: red;"></small>
+                  </div>
+                </div>
+                <div class="col-md-6">
+                  <div class="form-group">
+                    <label>Clinic Address <span class="text-danger">*</span></label>
+                    <input type="text" class="form-control" id="clinic_address" value="{{ clinic_object.address }}" name="clinic_address" {% if doctor_object.professional_status %}disabled{% endif %}>
+                    <small id="clinic_address_error" name="clinic_address_error" style="display: none;color: red;"></small>
+                  </div>
+                </div>
+                <div class="col-md-6">
+                  <div class="form-group">
+                    <label>Clinic Address (Farsi/Pashto)<span class="text-danger">*</span></label>
+                    <input type="text" dir="rtl" class="form-control" id="rtl_clinic_address" value="{{ clinic_object.rtl_address }}" name="rtl_clinic_address" {% if doctor_object.professional_status %}disabled{% endif %}>
+                    <small id="rtl_clinic_address_error" name="rtl_clinic_address_error" style="display: none;color: red;"></small>
+                  </div>
+                </div>
+                <div class="col-md-6">
+                  <div class="form-group">
+                    <select name="clinic_city" onchange="mySelectFunc('{{ forloop.counter0 }}')" id="clinic_city" class="form-control select" {% if doctor_object.professional_status %}disabled{% endif %}>
+                      <option value="">Select Province <span class="text-danger">*</span></option>
+                      {% for city in cities %}
+                      <option value="{{ city.id }}" {% if city.id == clinic_object.city.id %}selected{% endif %}>{{ city.name }} -
+                        {{ city.rtl_name }}
+                      </option>
+                      {% endfor %}
+                    </select>
+                    <small id="clinic_city_error" name="clinic_city_error" style="display: none;color: red;"></small>
+                  </div>
+                </div>
+                <div class="col-md-6">
+                  <div class="form-group">
+                    <select name="clinic_district" id="clinic_district" class="form-control select" {% if doctor_object.professional_status %}disabled{% endif %}>
+                      <option value="{{ clinic_object.district.id }}" {% if clinic_object.district %}selected{% endif %}>
+                        {% if clinic_object.district %}
+                        {{ clinic_object.district.name }} - {{ clinic_object.district.rtl_name }}
+                        {% else %}
+                        Select District <span class="text-danger">*</span>
+                        {% endif %}
+                      </option>
+                    </select>
+                    <small id="clinic_district_error" name="clinic_district_error" style="display: none;color: red;"></small>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div class="col-12 col-md-2 col-lg-1"><label class="d-md-block d-sm-none d-none">&nbsp;</label><a href="#" style="{% if doctor_object.professional_status %}pointer-events:none;cursor:default;{% endif %}" class="btn btn-danger trash"><i class="far fa-trash-alt"></i></a></div>
+          </div>
+          <hr>
+          {% endif %}
+          {% endfor %}
+          {% endif %}
+        </div>
+        <div class="add-more">
+          <a href="javascript:void(0);" id="add_more_clinic" class="add-clinic" style="{% if doctor_object.professional_status %}pointer-events:none;cursor:default;{% endif %}"><i class="fa fa-plus-circle"></i> Add Clinic</a>
+          <small id="add_more_clinic_error" style="display: none;color: red;"></small>
+        </div>
+      </div>
+    </div>
+    
+    <!-- /Clinic Info -->
+    
+    <!-- Pricing -->
+    <div class="card">
+      <div class="card-body">
+        <h4 class="card-title">Fee</h4>
+        <div class="row custom_price_cont" id="custom_price_cont" style="display: block;">
+          <div class="col-md-4">
+            <input type="number" class="form-control" id="fee" name="fee" value="{{ doctor_object.fee|default:'' }}" {% if doctor_object.professional_status %}disabled{% endif %}>
+            <small id="fee_error" style="display: none;color: red;"></small>
+          </div>
+        </div>
+      </div>
+    </div>
+    <!-- /Pricing -->
+    <!-- Services, Specialization and Condition -->
+    <div class="card services-card">
+      <div class="card-body">
+        <h4 class="card-title">Specialization, Services and Conditions</h4>
+        <div class="form-group">
+          <div class="form-group">
+            <label>Specializations</label>
+            <select name="specialist" id="specialist" class="form-control select" multiple {% if doctor_object.professional_status %}disabled{% endif %}>
+              {% for speciality in specialities %}
+              <option value="{{ speciality.id }}" {% if speciality in doctor_object.speciality.all %}selected{% endif %}>{{ speciality.name }} -
+                {{ speciality.farsi_name }}
+              </option>
+              {% endfor %}
+            </select>
+            <small id="specialization_error" style="display: none;color: red;"></small>
+          </div>
+          <div class="form-group">
+            <label>Services</label>
+            <select name="services" id="services" class="form-control select" multiple {% if doctor_object.professional_status %}disabled{% endif %}>
+              {% for service in doctor_object.service.all %}
+              <option value="{{ service.id }}" {% if service in doctor_object.service.all %}selected{% endif %}>{{ service.name }} -
+                {{ service.farsi_name }}
+              </option>
+              {% endfor %}
+            </select>
+            <small id="service_error" style="display: none;color: red;"></small>
+          </div>
+          <div class="form-group">
+            <label>Conditions</label>
+            <select name="conditions" id="conditions" class="form-control select" multiple {% if doctor_object.professional_status %}disabled{% endif %}>
+              {% for condition in doctor_object.condition.all %}
+              <option value="{{ condition.id }}" {% if condition in doctor_object.condition.all %}selected{% endif %}>{{ condition.name }} -
+                {{ condition.farsi_name }}
+              </option>
+              {% endfor %}
+            </select>
+            <small id="condition_error" style="display: none;color: red;"></small>
+          </div>
+        </div>
+      </div>
+    </div>
+    <!-- /Services and Specialization -->
+    <!-- Education -->
+    <div class="card">
+      <div class="card-body">
+        <h4 class="card-title">Education</h4>
+        <div class="education-info">
+          {% if doctor_object.education_set.all %}
+          {% for education_object in doctor_object.education_set.all %}
+          
+          <div class="row form-row education-cont">
+            <div class="col-12 col-md-10 col-lg-11">
+              <div class="row form-row">
+                <div class="col-12 col-md-6 col-lg-4">
+                  <div class="form-group">
+                    <label>Degree</label>
+                    <select name="degree" id="degree" onchange="selectDegreeFunc('{{ forloop.counter0 }}')" class="form-control select" {% if doctor_object.professional_status %}disabled{% endif %}>
+                      <option value="">Select Degree <span class="text-danger">*</span></option>
+                      {% for degree in degrees %}
+                      <option value="{{ degree.id }}" {% if degree.id == education_object.degree.degree_type.id %}selected{% endif %}>{{ degree.name }} -
+                        {{ degree.farsi_name }}
+                      </option>
+                      {% endfor %}
+                    </select>
+                    <small id="degree_error" name="degree_error" style="display: none;color: red;"></small>
+                  </div>
+                </div>
+                <input id="education_id_list" name="education_id_list" value="{{ education_object.id }}" type="hidden" class="form-control">
+                <div class="col-12 col-md-6 col-lg-4">
+                  <div class="form-group">
+                    <label>Degree Name</label>
+                    <select name="degree_name" id="degree_name" class="form-control select" {% if doctor_object.professional_status %}disabled{% endif %}>
+                      <option value="{{ education_object.degree.id }}" {% if education_object.degree.id %}selected{% endif %}>
+                        {% if education_object.degree.id %}
+                        {{ education_object.degree.name }} - {{ education_object.degree.farsi_name }}
+                        {% else %}
+                        Select Degree Name <span class="text-danger">*</span>
+                        {% endif %}
+                      </option>
+                    </select>
+                    <small id="degree_name_error" style="display: none;color: red;"></small>
+                  </div>
+                </div>
+                <div class="col-12 col-md-6 col-lg-4">
+                  <div class="form-group">
+                    <label>College/Institute</label>
+                    <input id="school_name" name="school_name" value="{{ education_object.school_name }}" type="text" class="form-control" {% if doctor_object.professional_status %}disabled{% endif %}>
+                    <small id="school_name_error" name="school_name_error" style="display: none;color: red;"></small>
+                  </div>
+                </div>
+                <div class="col-12 col-md-6 col-lg-4">
+                  <div class="form-group">
+                    <label>College/Institute (Farsi/Pashto)</label>
+                    <input id="rtl_school_name" dir="rtl" name="rtl_school_name" value="{{ education_object.rtl_school_name }}" type="text" class="form-control" {% if doctor_object.professional_status %}disabled{% endif %}>
+                    <small id="rtl_school_name_error" name="rtl_school_name_error" style="display: none;color: red;"></small>
+                  </div>
+                </div>
+                <div class="col-12 col-md-6 col-lg-4">
+                  <div class="form-group">
+                    <label>Start Date</label>
+                    <input id="school_start_date" name="school_start_date" value="{{ education_object.string_start_date }}" type="date" class="form-control" {% if doctor_object.professional_status %}disabled{% endif %}>
+                    <small id="school_start_date_error" name="school_start_date_error" style="display: none;color: red;"></small>
+                  </div>
+                </div>
+                <div class="col-12 col-md-6 col-lg-4">
+                  <div class="form-group">
+                    <label>End Date</label>
+                    <input id="school_end_date" name="school_end_date" value="{{ education_object.string_end_date }}" type="date" class="form-control" {% if doctor_object.professional_status %}disabled{% endif %}>
+                    <small id="school_end_date_error" name="school_end_date_error" style="display: none;color: red;"></small>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div class="col-12 col-md-2 col-lg-1"><label class="d-md-block d-sm-none d-none">&nbsp;</label><a href="#" style="{% if doctor_object.professional_status %}pointer-events:none;cursor:default;{% endif %}" class="btn btn-danger trash"><i class="far fa-trash-alt"></i></a></div>
+          </div>
+          <hr>
+          {% endfor %}
+          {% else %}
+          <div class="row form-row education-cont">
+            <div class="col-12 col-md-10 col-lg-11">
+              <div class="row form-row">
+                <div class="col-12 col-md-6 col-lg-4">
+                  <div class="form-group">
+                    <label>Degree</label>
+                    <select name="degree" id="degree"  onchange="selectDegreeFunc('0')" class="form-control select" {% if doctor_object.professional_status %}disabled{% endif %}>
+                      <option value="">Select Degree <span class="text-danger">*</span></option>
+                      {% for degree in degrees %}
+                      <option value="{{ degree.id }}">{{ degree.name }} -
+                        {{ degree.farsi_name }}
+                      </option>
+                      {% endfor %}
+                    </select>
+                    <small id="degree_error" name="degree_error" style="display: none;color: red;"></small>
+                  </div>
+                </div>
+                <div class="col-12 col-md-6 col-lg-4">
+                  <div class="form-group">
+                    <label>Degree Name</label>
+                    <select name="degree_name" id="degree_name" class="form-control select" {% if doctor_object.professional_status %}disabled{% endif %}>
+                      <option value="">
+                        Select Degree Name <span class="text-danger">*</span>
+                      </option>
+                    </select>
+                    <small id="degree_name_error" style="display: none;color: red;"></small>
+                  </div>
+                </div>
+                <div class="col-12 col-md-6 col-lg-4">
+                  <div class="form-group">
+                    <label>College/Institute</label>
+                    <input id="school_name" name="school_name" type="text" class="form-control" {% if doctor_object.professional_status %}disabled{% endif %}>
+                    <small id="school_name_error" name="school_name_error" style="display: none;color: red;"></small>
+                  </div>
+                </div>
+                <div class="col-12 col-md-6 col-lg-4">
+                  <div class="form-group">
+                    <label>College/Institute (Farsi/Pashto)</label>
+                    <input id="rtl_school_name" dir="rtl" name="rtl_school_name" type="text" class="form-control" {% if doctor_object.professional_status %}disabled{% endif %}>
+                    <small id="rtl_school_name_error" name="rtl_school_name_error" style="display: none;color: red;"></small>
+                  </div>
+                </div>
+                <div class="col-12 col-md-6 col-lg-4">
+                  <div class="form-group">
+                    <label>Start Date</label>
+                    <input id="school_start_date" name="school_start_date" type="date" class="form-control" {% if doctor_object.professional_status %}disabled{% endif %}>
+                    <small id="school_start_date_error" name="school_start_date_error" style="display: none;color: red;"></small>
+                  </div>
+                </div>
+                <div class="col-12 col-md-6 col-lg-4">
+                  <div class="form-group">
+                    <label>End Date</label>
+                    <input id="school_end_date" name="school_end_date" type="date" class="form-control" {% if doctor_object.professional_status %}disabled{% endif %}>
+                    <small id="school_end_date_error" name="school_end_date_error" style="display: none;color: red;"></small>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div class="col-12 col-md-2 col-lg-1"><label class="d-md-block d-sm-none d-none">&nbsp;</label><a href="#" style="{% if doctor_object.professional_status %}pointer-events:none;cursor:default;{% endif %}" class="btn btn-danger trash"><i class="far fa-trash-alt"></i></a></div>
+          </div>
+          <hr>
+          {% endif %}
+        </div>
+        <div class="add-more">
+          <a href="javascript:void(0);" id="add_more_education" class="add-education" style="{% if doctor_object.professional_status %}pointer-events:none;cursor:default;{% endif %}"><i class="fa fa-plus-circle"></i> Add Education</a>
+          <small id="add_more_education_error" style="display: none;color: red;"></small>
+        </div>
+      </div>
+    </div>
+    <!-- /Education -->
+    <!-- Experience -->
+    <div class="card">
+      <div class="card-body">
+        <h4 class="card-title">Experience</h4>
+        <div class="experience-info">
+          {% if doctor_object.experience_set.all %}
+          {% for experience_object in doctor_object.experience_set.all %}
+          <div class="row form-row experience-cont">
+            <div class="col-12 col-md-10 col-lg-11">
+              <div class="row form-row">
+                <div class="col-12 col-md-6 col-lg-4">
+                  <div class="form-group">
+                    <label>Hospital Name</label>
+                    <input id="hospital_name" value="{{ experience_object.hospital_name }}" name="hospital_name" type="text" class="form-control" {% if doctor_object.professional_status %}disabled{% endif %}>
+                    <input id="experience_id_list" value="{{ experience_object.id }}" name="experience_id_list" type="hidden" class="form-control">
+                    <small id="hospital_name_error" name="hospital_name_error" style="display: none;color: red;"></small>
+                  </div>
+                </div>
+                <div class="col-12 col-md-6 col-lg-4">
+                  <div class="form-group">
+                    <label>Hospital Name (Farsi/Pashto)</label>
+                    <input id="rtl_hospital_name" dir="rtl" value="{{ experience_object.rtl_hospital_name }}" name="rtl_hospital_name" type="text" class="form-control" {% if doctor_object.professional_status %}disabled{% endif %}>
+                    <small id="rtl_hospital_name_error" name="rtl_hospital_name_error" style="display: none;color: red;"></small>
+                  </div>
+                </div>
+                <div class="col-12 col-md-6 col-lg-4">
+                  <div class="form-group">
+                    <label>Designation</label>
+                    <input id="designation" value="{{ experience_object.designation }}" name="designation" type="text" class="form-control" {% if doctor_object.professional_status %}disabled{% endif %}>
+                    <small id="designation_error" name="designation_error" style="display: none;color: red;"></small>
+                  </div>
+                </div>
+                <div class="col-12 col-md-6 col-lg-4">
+                  <div class="form-group">
+                    <label>Designation (Farsi/Pashto)</label>
+                    <input id="rtl_designation" dir="rtl" value="{{ experience_object.rtl_designation }}" name="rtl_designation" type="text" class="form-control" {% if doctor_object.professional_status %}disabled{% endif %}>
+                    <small id="rtl_designation_error" name="rtl_designation_error" style="display: none;color: red;"></small>
+                  </div>
+                </div>
+                <div class="col-12 col-md-6 col-lg-4">
+                  <div class="form-group">
+                    <label>From</label>
+                    <input id="experience_start_date" value="{{ experience_object.experience_start_date }}" name="experience_start_date" type="date" class="form-control" {% if doctor_object.professional_status %}disabled{% endif %}>
+                    <small id="experience_start_date_error" name="experience_start_date_error" style="display: none;color: red;"></small>
+                  </div>
+                </div>
+                <div class="col-12 col-md-6 col-lg-4">
+                  <div class="form-group">
+                    <label>To</label>
+                    <input id="experience_end_date" value="{{ experience_object.experience_end_date }}" name="experience_end_date" type="date" class="form-control" {% if doctor_object.professional_status %}disabled{% endif %}>
+                    <small id="experience_end_date_error" name="experience_end_date_error" style="display: none;color: red;"></small>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div class="col-12 col-md-2 col-lg-1"><label class="d-md-block d-sm-none d-none">&nbsp;</label><a href="#" style="{% if doctor_object.professional_status %}pointer-events:none;cursor:default;{% endif %}" class="btn btn-danger trash"><i class="far fa-trash-alt"></i></a></div>
+          </div>
+          <hr>
+          {% endfor %}
+          {% endif %}
+        </div>
+        <div class="add-more">
+          <a href="javascript:void(0);" id="add_more_experience" class="add-experience" style="{% if doctor_object.professional_status %}pointer-events:none;cursor:default;{% endif %}"><i class="fa fa-plus-circle"></i> Add Experience</a>
+          <small id="add_more_experience_error" style="display: none;color: red;"></small>
+        </div>
+      </div>
+    </div>
+    <!-- /Experience -->
+    <!-- Awards -->
+    <div class="card">
+      <div class="card-body">
+        <h4 class="card-title">Awards</h4>
+        <div class="awards-info">
+          {% if doctor_object.award_set.all %}
+          {% for award_object in doctor_object.award_set.all %}
+          <div class="row form-row awards-cont">
+            <div class="col-12 col-md-10 col-lg-11">
+              <div class="row form-row">
+                <div class="col-12 col-md-6 col-lg-4">
+                  <div class="form-group">
+                    <label>Award</label>
+                    <input id="award" value="{{ award_object.award_name }}" name="award" type="text" class="form-control" {% if doctor_object.professional_status %}disabled{% endif %}>
+                    <input id="award_id_list" value="{{ award_object.id }}" name="award_id_list" type="hidden" class="form-control">
+                    <small id="award_error" name="award_error" style="display: none;color: red;"></small>
+                  </div>
+                </div>
+                <div class="col-12 col-md-6 col-lg-4">
+                  <div class="form-group">
+                    <label>Award (Farsi/Pashto)</label>
+                    <input id="rtl_award" dir="rtl" value="{{ award_object.rtl_award_name }}" name="rtl_award" type="text" class="form-control" {% if doctor_object.professional_status %}disabled{% endif %}>
+                    <small id="rtl_award_error" name="rtl_award_error" style="display: none;color: red;"></small>
+                  </div>
+                </div>
+                <div class="col-12 col-md-6 col-lg-4">
+                  <div class="form-group">
+                    <label>Date</label>
+                    <input id="award_year" value="{{ award_object.string_award_year }}" name="award_year" type="date" class="form-control" {% if doctor_object.professional_status %}disabled{% endif %}>
+                    <small id="award_year_error" name="award_year_error" style="display: none;color: red;"></small>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div class="col-12 col-md-2 col-lg-1"><label class="d-md-block d-sm-none d-none">&nbsp;</label><a href="#" style="{% if doctor_object.professional_status %}pointer-events:none;cursor:default;{% endif %}" class="btn btn-danger trash"><i class="far fa-trash-alt"></i></a></div>
+          </div>
+          <hr>
+          {% endfor %}
+          {% endif %}
+        </div>
+        <div class="add-more">
+          <a href="javascript:void(0);" id="add_more_award" class="add-award" style="{% if doctor_object.professional_status %}pointer-events:none;cursor:default;{% endif %}"><i class="fa fa-plus-circle"></i> Add Award</a>
+          <small id="add_more_award_error" style="display: none;color: red;"></small>
+        </div>
+      </div>
+    </div>
+    <!-- operation -->
+    <input type="hidden" id="operation" name="operation">
+    <!-- /Awards -->
+    <div class="submit-section text-right submit-btn-bottom">
+     
+      {% if not doctor_object.professional_status and not doctor_object.is_profile_on_progress %}
+      <button type="submit" id="save_change_button" class="btn btn-secondary submit-btn save_changes" data-val="save_changes">Save Changes</button>
+      <button type="submit" id="submit_for_review" class="btn btn-primary submit-btn submit_for_review" data-val="submit_for_review">Submit For Review</button>
+      {% elif not doctor_object.professional_status and doctor_object.is_profile_on_progress %}
+      <button type="submit" id="save_change_button" class="btn btn-primary submit-btn submit_for_review" data-val="submit_for_review">Resubmit For Review <small>(Pending now)</small></button>
+      {% elif doctor_object.professional_status and not doctor_object.is_profile_on_progress %}
+      <button type="submit" id="save_change_button" class="btn btn-info submit-btn request_for_update" data-val="request_for_update">Request For Update</button>
+      {% endif %}
+    </div>
+  </form>
+</div>
+<!-- Model cropper -->
+<div class="modal fade" id="crop_model" tabindex="-1" role="dialog" aria-labelledby="modalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-lg" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">Crop Image Before Upload</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">×</span>
+        </button>
+      </div>
+      <div class="modal-body">
+        <div class="img-container">
+          <div class="row">
+            <div class="col-md-8">
+              <img src="" id="sample_image" />
+            </div>
+            <div class="col-md-4">
+              <div class="preview"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" id="crop" class="btn btn-primary">Crop</button>
+        <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock content %}
+{% block script %}
+<script> var profesionalStatus = "{{ doctor_object.professional_status }}";</script>
+<script> var isProfileOnProgress = "{{ doctor_object.is_profile_on_progress }}";</script>
+<script>
+
+  console.log('value oof isProfileOnProgress')
+  console.log(isProfileOnProgress)
+  console.log(profesionalStatus)
+
+ 
+
+</script>
+{% include 'doctor/script/profile_setting_script.html' %}
+{% endblock script %}

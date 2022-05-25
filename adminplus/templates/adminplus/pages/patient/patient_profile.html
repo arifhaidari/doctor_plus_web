@@ -1,0 +1,186 @@
+{% extends "adminplus/adminp_dashboard.html" %}
+{% load static %}
+{% load patient_tags %}
+{% block content %}
+<!-- Page Wrapper -->
+<div class="page-wrapper">
+  <div class="content container-fluid">
+    <!-- Page Header -->
+    <div class="page-header">
+      <div class="row">
+        <div class="col">
+          <h3 class="page-title">Profile</h3>
+          <ul class="breadcrumb">
+            <li class="breadcrumb-item"><a href="{% url 'adminplus:dashboard' %}">Dashboard</a></li>
+            <li class="breadcrumb-item active">Profile</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+    <!-- /Page Header -->
+    <div class="row">
+      <div class="col-md-12">
+        <div class="profile-header">
+          <div align="right">
+            <button class="btn btn-sm btn-danger" onclick="delete_patient()"><span class="fa fa-trash"></span> &nbsp;Delete</button>
+            <button class="d-none btn btn-sm btn-info" id="btn-active"><span class="fa fa-pause"></span> &nbsp;Active Doctor</button>
+            <button class="d-none btn btn-sm btn-warning" id="btn-deactive"><span class="fa fa-pause"></span> &nbsp;Suspend</button>
+          </div>
+          <div class="row align-items-center">
+            <div class="col-auto profile-image">
+              <a href="#">
+                <img class="rounded-circle" alt="User Image" src="{% if patient.user.avatar %}{{ patient.user.avatar.url }}{% else %}{% if patient.user.gender == 'Male' %}{% static 'img/male_profile.png' %}{% else %}{% static 'img/female_profile.png' %}{% endif %}{% endif %}">
+              </a>
+            </div>
+            <div class="col ml-md-n2 profile-user-info">
+              <h4 class="user-name mb-0">{{ patient }}</h4>
+              <br>
+              <h6 class="text-muted"><span class="fa fa-mobile"></span> &nbsp;{{ patient.user.phone }}</h6>
+              <h6 class="text-muted"><span class="fa fa-heart"></span> &nbsp;Blood Group ({{ patient.blood_group }})</h6>
+              <h6 class="text-muted">
+                <span class="fa fa-map-marker text-muted"></span> 
+                &nbsp;{{ patient.user.address.city.name }},
+                {{ patient.user.address.district.name }}
+              </h6>
+            </div>
+          </div>
+        </div>
+   
+        <div class="tab-content profile-tab-cont">
+          <!-- Personal Details Tab -->
+          <div class="tab-pane fade show active" id="per_details_tab">
+            <!-- Personal Details -->
+            <div class="row">
+              <div class="col-lg-12">
+                <div class="card">
+                  <div class="card-body">
+                    <h5 class="card-title d-flex justify-content-between">
+                      <span>Personal Details</span>
+                    </h5>
+                    <div class="row">
+                      <p class="col-sm-2 text-muted text-sm-right mb-0 mb-sm-3">Name</p>
+                      <p class="col-sm-10">{{ patient }}</p>
+                    </div>
+                    <div class="row">
+                      <p class="col-sm-2 text-muted text-sm-right mb-0 mb-sm-3">Date of Birth</p>
+                      <p class="col-sm-10">{{ patient.user.date_of_birth|date:"d, M. Y"|default:"Not set." }} &nbsp;({{ patient.user.user_age|default:"Unknown" }}, years old)</p>
+                    </div>
+                    <div class="row">
+                      <p class="col-sm-2 text-muted text-sm-right mb-0 mb-sm-3">Email ID</p>
+                      <p class="col-sm-10">{{ patient.user.email|default:"Not set." }}</p>
+                    </div>
+                    <div class="row">
+                      <p class="col-sm-2 text-muted text-sm-right mb-0 mb-sm-3">Mobile</p>
+                      <p class="col-sm-10">{{ patient.user.phone }}</p>
+                    </div>
+                    <div class="row">
+                      <p class="col-sm-2 text-muted text-sm-right mb-0 mb-sm-3">Relatives</p>
+                      <p class="col-sm-10">
+                        {% for rel in patient.relative.all %}
+                        * {{ rel }}, {{ rel.rel }} <br>
+                        {% empty %}
+                        * No Relatives Added Yet.
+                        {% endfor %}
+                      </p>
+                    </div>
+                    <div class="row">
+                      <p class="col-sm-2 text-muted text-sm-right mb-0 mb-sm-3">Compeleted Appointments</p>
+                      <p class="col-sm-10">
+                        {% for app in patient.appointment_set.all %}
+                        * {{ app.doctor }},&nbsp;&nbsp; {{ app.clinic }},&nbsp;&nbsp; {{ app.appt_date }} <br>
+                        {% empty %}
+                        * No Compeleted Appointments Added Yet.
+                        {% endfor %}
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <!-- /Personal Details -->
+          </div>
+          <!-- /Personal Details Tab -->
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+<!-- /Page Wrapper -->
+{% endblock content %}
+{% block pagelevel_styles %}
+{% endblock pagelevel_styles %}
+{% block script %}
+<script>
+let active = "{{ patient.user.suspend }}"
+
+function set_active_suspend() {
+  console.log("active : ", active);
+  if (active == "False") {
+    $("#btn-active").addClass('d-none');
+    $("#btn-deactive").removeClass('d-none');
+  } else {
+    $("#btn-active").removeClass('d-none');
+    $("#btn-deactive").addClass('d-none');
+  }
+}
+set_active_suspend();
+
+$("#btn-active").click(function(event) {
+  let form = new FormData();
+  form.append('csrfmiddlewaretoken', '{{ csrf_token }}');
+  form.append('active_patient', 1);
+  axios.post(".", form).then((response) => {
+    if (response.data.status == "success") {
+      active = "False";
+      set_active_suspend();
+    }
+  }).catch((error) => {
+    console.error(error);
+  });
+});
+$('#btn-deactive').click(function(event) {
+  let form = new FormData();
+  form.append('csrfmiddlewaretoken', '{{ csrf_token }}');
+  form.append('active_patient', 0);
+  axios.post(".", form).then((response) => {
+    if (response.data.status == "success") {
+      active = "True";
+      set_active_suspend();
+    }
+  }).catch((error) => {
+    console.error(error);
+  })
+});
+
+// delete patient
+function delete_patient() {
+  Swal.fire({
+    title: 'Are you sure?',
+    text: "You won't be able to revert this!",
+    icon: 'warning',
+    showCancelButton: true,
+    confirmButtonColor: '#3085d6',
+    cancelButtonColor: '#d33',
+    confirmButtonText: 'Yes, delete it!'
+  }).then((result) => {
+    if (result.isConfirmed) {
+      let form = new FormData();
+      form.append("csrfmiddlewaretoken", "{{ csrf_token }}");
+      form.append('delete_patient', 1);
+      axios.post(".", form).then((response) => {
+        if (response.data.status == "success") {
+          Swal.fire(
+            'Deleted!',
+            'Your file has been deleted.',
+            'success'
+          )
+          location.href = "{% url 'adminplus:patients' %}"
+        }
+      }).catch((error) => {
+        console.error(error);
+      })
+    }
+  })
+}
+</script>
+{% endblock script %}

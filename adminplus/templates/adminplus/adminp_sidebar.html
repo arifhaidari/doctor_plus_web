@@ -1,0 +1,118 @@
+<!-- Sidebar -->
+<div class="sidebar" id="sidebar">
+  <div class="sidebar-inner slimscroll">
+    <div id="sidebar-menu" class="sidebar-menu">
+      <ul>
+        <li class="menu-title">
+          <span>Main</span>
+        </li>
+        <li name="menu-item">
+          <a href="{% url 'adminplus:dashboard' %}">
+            <i class="fe fe-home"></i>
+            <span>Dashboard</span>
+          </a>
+        </li>
+        <li class="submenu">
+          <a href="#"><i class="fa fa-user-md"></i>
+            <span> Doctors</span>
+            <span class="menu-arrow">
+              <i class="fa fa-angle-right"></i>
+            </span>
+          </a>
+          <ul>
+            <li name="submenu-item">
+              <a href="{% url 'adminplus:doctors' %}">
+                <i class="fa fa-user-md"></i>
+                <span>Doctors</span>
+              </a>
+            </li>
+            <li name="submenu-item">
+              <a href="{% url 'adminplus:doctor_reviews' %}">
+                <i class="fa fa-inbox"></i>
+                <span> &nbsp;&nbsp;Review Requests</span>
+              </a>
+            </li>
+          </ul>
+        </li>
+        <li name="menu-item">
+          <a href="{% url 'adminplus:patients' %}">
+            <i class="fa fa-address-card"></i>
+            <span>Patients</span>
+          </a>
+        </li>
+ 
+        <li class="submenu">
+          <a href="#"><i class="fa fa-user-md"></i>
+            <span> Clinic</span>
+            <span class="menu-arrow">
+              <i class="fa fa-angle-right"></i>
+            </span>
+          </a>
+          <ul>
+            <li name="submenu-item">
+              <a href="{% url 'adminplus:clinics' %}">
+                <i class="fe fe-building"></i>
+                <span>Clinics</span>
+              </a>
+            </li>
+            <li name="submenu-item">
+              <a href="{% url 'adminplus:clinic_reviews' %}">
+                <i class="fe fe-building"></i>
+                <span>Review Requests</span>
+              </a>
+            </li>
+          </ul>
+        </li>
+      
+        <li class="menu-title">
+          <span>User</span>
+        </li>
+        <li>
+          <a href="{% url 'adminplus:adminprofile' %}">
+            <i class="fa fa-user"></i>
+            <span>My Profile</span>
+          </a>
+        </li>
+        <li class="menu-title">
+          <span>System</span>
+        </li>
+        <li>
+          <a href="{% url 'logout' %}">
+            <i class="fe fe-logout"></i>
+            <span>Logout</span>
+          </a>
+        </li>
+      </ul>
+    </div>
+  </div>
+</div>
+<!-- /Sidebar -->
+<script>
+  function sidebar_active_item() {
+    // for menu items
+    let active_item = $("li[name='menu-item']");
+    for (let x of active_item) {
+      if ($(x).find('a').attr('href') == location.pathname) {
+        $(x).addClass('active');
+      };
+    };
+    // for submens
+    let submenu_items = $("li[name='submenu-item']")
+    submenu_items.each(function(index, el) {
+      // console.log("index : ", $(el).find('a').attr('href'))
+      if ($(el).find('a').attr('href') == location.pathname) {
+        // console.log("this is that one", $(el).find('a').attr('href'))
+        $(el).addClass('bg-info');
+        $(el).closest('.submenu').find('a').addClass('subdrop');
+        $(el).closest('.submenu').find('ul').css('display', 'block');
+      }
+    });
+  };
+  sidebar_active_item();
+
+
+  $(".fa").css({
+    'font-size': '1.4vw'
+  });
+
+</script>

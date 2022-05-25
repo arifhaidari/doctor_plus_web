@@ -1,0 +1,81 @@
+{% extends "blog/blog_dashboard.html" %}
+{% load static %}
+{% block title %}
+Blog | Add Post
+{% endblock title %}
+{% block main %}
+<div class="card">
+  <div class="card-body">
+    <h3>Add Blog Post</h3>
+    <br>
+    <form method="post" enctype="multipart/form-data" id="addform">
+      {% csrf_token %}
+      <div class="row">
+        <div class="col-md-6 col-sm-12">
+          <div class="col-md-12 col-sm-12">{{ form.language.label }}</div>
+          <div class="col-md-12 col-sm-12">{{ form.language }}</div>
+          <div class="col-md-12 col-sm-12">{{ form.language.errors }}</div>
+          <br>
+        </div>
+        <div class="col-md-12 col-sm-12">
+          <div class="col-md-12 col-sm-6">{{ form.title.label }}</div>
+          <div class="col-md-12 col-sm-6">{{ form.title }}</div>
+          <div class="col-md-12 col-sm-12">{{ form.title.errors }}</div>
+          <br>
+        </div>
+        <div class="col-md-12 col-sm-12">
+          <div class="col-md-12 col-sm-6">{{ form.body.label }}</div>
+          <div class="col-md-12 col-sm-6">{{ form.body }}</div>
+          <div class="col-md-12 col-sm-12">{{ form.body.errors }}</div>
+          <br>
+        </div>
+        <div class="col-md-12 col-sm-12">
+          <div class="col-md-12 col-sm-12">
+            <div>{{ form.category.label }}</div>
+            <div>{{ form.category }}</div>
+            <div>{{ form.category.errors }}</div>
+          </div>
+        </div>
+        <div class="col-md-12 col-sm-12">
+          <div class="col-md-12 col-sm-12">
+            <br>
+            <div class="row">
+              {{ images_form.management_form }}
+              {% for field in images_form %}
+              <div class="col-md-3 col-sm-6">
+                <img src="{{ field.image.value.url|default:'/static/img/Photo-icon.png' }}" class="w-100" alt="image">
+                {{ field }} <br>
+              </div>
+              {% endfor %}
+            </div>
+          </div>
+          <br>
+        </div>
+      </div>
+      <br>
+      <div class="col-md-6 col-sm-12">
+        <div class="col-md-12 col-sm-6">
+          <div class="row row-sm align-items-center">
+            <div class="col-6 col-sm-4 col-md-2 col-xl mb-3 mb-xl-0">
+              <button type="submit" class="btn btn-block btn-outline-primary" id="submit-editform">Save</button>
+            </div>
+            <div class="col-6 col-sm-4 col-md-2 col-xl mb-3 mb-xl-0">
+              <button type="button" class="btn btn-block btn-outline-secondary">Cancel</button>
+            </div>
+          </div>
+        </div>
+      </div>
+  </div>
+  </form>
+</div>
+</div>
+{% endblock main %}
+{% block script %}
+<script>
+jQuery(document).ready(function($) {
+  $("#id_category").addClass('form-control');
+  $("#id_category").select2();
+
+});
+</script>
+{% endblock script %}

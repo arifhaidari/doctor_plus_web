@@ -1,0 +1,9 @@
+<option value="">Select District <span class="text-danger">*</span></option>
+{% if districts %}
+{% for district in districts %}
+<option value="{{ district.id }}">{{ district.name }} -
+     {{ district.rtl_name }}</option>
+{% endfor %}
+{% endif %}
+
+

@@ -1,0 +1,97 @@
+{% extends "adminplus/adminp_dashboard.html" %}
+{% load static %}
+{% load adminplus_tags %}
+{% block content %}
+<!-- Page Wrapper -->
+<div class="page-wrapper">
+  <div class="content container-fluid">
+    <!-- Page Header -->
+    <div class="page-header">
+      <div class="row">
+        <div class="col-sm-12">
+          <h3 class="page-title">List of Patient</h3>
+          <ul class="breadcrumb">
+            <li class="breadcrumb-item"><a href="index.html">Dashboard</a></li>
+            <li class="breadcrumb-item"><a href="javascript:(0);">Users</a></li>
+            <li class="breadcrumb-item active">Patient</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+    <!-- /Page Header -->
+    <div class="row">
+      <div class="col-sm-12">
+        <div class="card">
+          <div class="card-body">
+            <div class="table-responsive">
+              <div class="table-responsive">
+                <table class="cdatatable table table-hover table-center mb-0">
+                  <thead>
+                    <tr>
+                      <th>Patient</th>
+                      <th>Age</th>
+                      <th>Blood Group</th>
+                      <th>Phone</th>
+                      <th>Last Visit</th>
+                      <th></th>
+                      <th>Status</th>
+                      <th></th>
+                      <th>Provinces</th>
+                      <th>Gender</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {% for patient in patients %}
+                    <tr>
+                      <td>
+                        <h2 class="table-avatar">
+                          <a href="{% url 'adminplus:patient_profile' patient.user.id %}" class="avatar avatar-sm mr-2"><img class="avatar-img rounded-circle" src="{% if patient.user.avatar %}{{ patient.user.avatar.url }}{% else %}{% if patient.user.gender == 'Male' %}{% static 'img/male_profile.png' %}{% else %}{% static 'img/female_profile.png' %}{% endif %}{% endif %}" alt="User Image"></a>
+                          <a href="{% url 'adminplus:patient_profile' patient.user.id %}">{{ patient }} </a>
+                        </h2>
+                      </td>
+                      <td>{{ patient.user.user_age|default:'Unknown' }}</td>
+                      <td>{{ patient.blood_group|default:'Not set.' }}</td>
+                      <td>{{ patient.user.phone }}</td>
+                      <td>{% patient_last_compeleted_appointment patient %}</td>
+                      <td></td>
+                      <td>
+                        <div class="status-toggle">
+                          <div name="account-status" data-patient-id="{{ patient.user.id }}" data-active='{{ patient.user.suspend }}'></div>
+                        </div>
+                      </td>
+                      <td>
+                        <a href="javascript:void(0);" class="btn btn-sm bg-danger-light" name="delete_patient" data-patient-id="{{ patient.user.id }}">
+                          <i class="fa fa-trash"></i> Delete
+                        </a>
+                      </td>
+                      <td>{{ patient.user.address.city.name|default:"Unknown" }}</td>
+                      <td>{{ patient.user.gender }}</td>
+                    </tr>
+                    {% endfor %}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+<!-- /Page Wrapper -->
+{% endblock content %}
+{% block pagelevel_styles %}
+<link rel="stylesheet" href="/static/plugins/enhanced-switch-control/css/jquery.enhanced-switch-circle.css">
+<link rel="stylesheet" href="https://cdn.datatables.net/searchpanes/1.2.1/css/searchPanes.dataTables.min.css">
+<link rel="stylesheet" href="https://cdn.datatables.net/select/1.3.3/css/select.dataTables.min.css">
+<link rel="stylesheet" href="https://cdn.datatables.net/buttons/1.7.0/css/buttons.dataTables.min.css">
+{% endblock pagelevel_styles %}
+{% block script %}
+<script>
+let csrf_token = '{{ csrf_token }}';
+</script>
+<script src="https://cdn.datatables.net/searchpanes/1.2.1/js/dataTables.searchPanes.min.js"></script>
+<script src="https://cdn.datatables.net/select/1.3.3/js/dataTables.select.min.js"></script>
+<script src="https://cdn.datatables.net/buttons/1.7.0/js/dataTables.buttons.min.js"></script>
+{% include 'adminplus/script/patient_list_script.html' %}
+{% endblock script %}

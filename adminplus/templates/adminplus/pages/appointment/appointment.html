@@ -1,0 +1,93 @@
+{% extends "adminplus/adminp_dashboard.html" %}
+{% load static %}
+{% load i18n %}
+{% block content %}
+  <!-- Page Wrapper -->
+  <div class="page-wrapper">
+    <div class="content container-fluid">
+      <!-- Page Header -->
+      <div class="page-header">
+        <div class="row">
+          <div class="col-sm-12">
+            <h3 class="page-title">Appointments</h3>
+            <ul class="breadcrumb">
+              <li class="breadcrumb-item"><a href="index.html">Dashboard</a></li>
+              <li class="breadcrumb-item active">Appointments</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+      <!-- /Page Header -->
+      <div class="row">
+        <div class="col-md-12">
+          <!-- Recent Orders -->
+          <div class="card">
+            <div class="card-body">
+              <div class="table-responsive">
+                <table class="datatable table table-hover table-center mb-0">
+                  <thead>
+                    <tr>
+                      <th>Doctor Name</th>
+                      <th>Speciality</th>
+                      <th>Patient Name</th>
+                      <th>Apointment Time</th>
+                      <th>Status</th>
+                      <th class="text-right">Amount</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {% for appointment in object_list %}
+                    <tr>
+                      <td>
+                        <h2 class="table-avatar">
+                          <a href="" class="avatar avatar-sm mr-2"><img class="avatar-img rounded-circle" src="{% if appointment.doctor.user.avatar %}{{ appointment.doctor.user.avatar.url }}{% else %}{% if appointment.doctor.user.gender == 'Male' %}{% static 'img/male_profile.png' %}{% else %}{% static 'img/female_profile.png' %}{% endif %}{% endif %}" alt="User Image"></a>
+                          <a href="">{{ appointment.doctor }}</a>
+                        </h2>
+                      </td>
+                      <td>
+                        <div class="dropdown">
+                          <a class="dropdown-toggle text-dark" href="#" role="button" data-toggle="dropdown" aria-expanded="false"> {{ appointment.doctor.speciality.last }} </a>
+                          <div class="dropdown-menu" x-placement="top-start">
+                            {% for sp in appointment.doctor.speciality.all %}
+                              <a class="dropdown-item">{{ sp }}</a>
+                            {% endfor %}
+                          </div>
+                        </div>
+                      </td>
+                      <td>
+                        {% if appointment.relative %}
+                        <h2 class="table-avatar">
+                          <a href="" class="avatar avatar-sm mr-2"><img class="avatar-img rounded-circle" src="{% if appointment.doctor.user.avatar %}{{ appointment.doctor.user.avatar.url }}{% else %}{% if appointment.doctor.user.gender == 'Male' %}{% static 'img/male_profile.png' %}{% else %}{% static 'img/female_profile.png' %}{% endif %}{% endif %}" alt="User Image"></a>
+                          <a href="">{{ appointment.relative }} </a>
+                        </h2>
+                        {% elif not appointment.relative %}
+                        <h2 class="table-avatar">
+                          <a href="" class="avatar avatar-sm mr-2"><img class="avatar-img rounded-circle" src="{% if appointment.doctor.user.avatar %}{{ appointment.doctor.user.avatar.url }}{% else %}{% if appointment.doctor.user.gender == 'Male' %}{% static 'img/male_profile.png' %}{% else %}{% static 'img/female_profile.png' %}{% endif %}{% endif %}" alt="User Image"></a>
+                          <a href="">{{ appointment.patient }}</a>
+                        </h2>
+                        {% endif %}
+                      </td>
+                      <td>{{ appointment.appt_date|date:"d, M. Y" }} <span class="text-primary d-block">{{ appointment.start_appt_time }} - {{ appointment.end_appt_time }}</span></td>
+                      <td>
+                        <div class="status-toggle">
+                          <input type="checkbox" id="status_1" class="check" checked>
+                          <label for="status_1" class="checktoggle">checkbox</label>
+                        </div>
+                      </td>
+                      <td class="text-right">
+                        $ {{ appointment.doctor.fee }}
+                      </td>
+                    </tr>
+                    {% endfor %}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+          <!-- /Recent Orders -->
+        </div>
+      </div>
+    </div>
+  </div>
+  <!-- /Page Wrapper -->
+{% endblock content %}

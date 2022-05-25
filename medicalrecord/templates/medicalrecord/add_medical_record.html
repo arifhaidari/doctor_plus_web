@@ -1,0 +1,132 @@
+{% extends 'sidebar.html' %}
+{% load static %}
+{% block title %}
+Add Medical Record
+{% endblock title %}
+{% block content %}
+
+<div class="col-md-7 col-lg-8 col-xl-9">
+     <div class="card">
+       <div class="card-body">
+         <!-- Profile Settings Form -->
+         <form method="POST" id="medical_record_form" enctype="multipart/form-data">
+           {% csrf_token %}
+        <!-- Clinic Info -->
+     <div class="card">
+          <div class="card-body">
+               <h4 class="card-title">Medical Reocord Info</h4>
+               <div class="row form-row">
+                    
+                    <div class="col-12 col-md-12">
+                    <div class="form-group">
+                         <label>Title</label>
+                         <input type="text" name="title" id="title" class="form-control">
+                         <small id="title_error" style="display: none;color: red;"></small>
+                    </div>
+                    </div>
+                   
+                    <div  class="col-12 col-md-6">
+                         <div class="form-group">
+                              <select name="patient" id="patient" class="form-control select">
+                                <option value="">Select Patient <span class="text-danger">*</span></option>
+                                <option value="{{ request.user.id }}">{{ request.user.full_name }} <span class="text-danger"></span></option>
+                                {% for relative in relatives %}
+                                <option value="{{ relative.user.id }}">{{ relative.user.full_name }}</option>
+                                {% endfor %}
+                              </select>
+                              <small id="patient_error" style="display: none;color: red;"></small>
+                            </div>
+                    </div>
+
+                    <div  class="col-12 col-md-6">
+                         <div class="form-group">
+                              <select name="related_doctor" id="related_doctor" class="form-control select">
+                                <option value="">Select Related Doctor <span class="text-danger">*</span></option>
+                                {% for doc in doctors %}
+                                <option value="{{ doc.id }}">{{ doc.full_name }}</option>
+                                {% endfor %}
+                              </select>
+                              <small id="related_doctor_error" style="display: none;color: red;"></small>
+                            </div>
+                    </div>
+                    <div class="col-md-12">
+                         <div class="form-group">
+                              <label>Medical Documents</label>
+                              <div class="upload-img">
+                                   <div class="change-photo-btn">
+                                        <span><i class="fa fa-upload"></i> Upload File</span>
+                                        <input id="medical_documents" name="medical_documents" type="file" multiple accept="image/*,.pdf" onchange="readURL(this);" class="upload">
+                                   </div>
+                                   <small class="form-text text-muted">All Image Types Are Allowed, Plus PDF Files</small>
+                                   <small id="medical_documents_error" style="display: none;color: red;"></small>
+                              </div>
+                         </div>
+                         <div class="upload-wrap" id="documets_wrapper">
+                              
+                         </div>
+                    </div>
+               </div>
+          </div>
+         
+     </div>
+     <!-- /Clinic Info -->
+
+ 
+     <!-- Pricing -->
+     <div class="card">
+          <div class="card-body">
+               <h4 class="card-title">Sharing Medical Documents With Doctors</h4>
+               
+               <div class="form-group mb-0">
+                    <div id="pricing_select">
+                         <div class="custom-control custom-radio custom-control-inline">
+                              <input type="radio" id="share_with_all" name="sharing_policy" class="custom-control-input" value="share_with_all" checked>
+                              <label class="custom-control-label" for="share_with_all">Share With All Of My Doctors</label>
+                         </div>
+                         <div class="custom-control custom-radio custom-control-inline">
+                              <input type="radio" id="share_with_selected" value="share_with_selected"  name="sharing_policy" class="custom-control-input">
+                              <label class="custom-control-label" for="share_with_selected">Share With Selected Doctors</label>
+                         </div>
+                    </div>
+
+               </div>
+               
+            
+               
+          </div>
+     </div>
+     <!-- /Pricing -->
+     
+     <!-- Services and Specialization -->
+     <div class="card services-card">
+          <div class="card-body">
+               <h4 class="card-title">Share With Doctors</h4>
+               
+               <div class="form-group">
+                    <select name="shared_with" id="shared_with" class="form-control select" multiple>
+                      {% for doctor in doctors %}
+                      <option value="{{ doctor.id }}">{{ doctor.full_name }}</option>
+                      {% endfor %}
+                    </select>
+                    <small id="shared_with_error" style="display: none;color: red;"></small>
+                  </div> 
+          </div>              
+     </div>
+     <!-- /Services and Specialization -->
+
+   
+           <div class="submit-section">
+             <button type="submit" id="medical_submit_button" class="btn btn-primary submit-btn">Save Changes</button>
+           </div>
+         </form>
+         <!-- /Profile Settings Form -->
+       </div>
+     </div>
+   </div>
+
+
+{% endblock content %}
+<!--  -->
+{% block script %}
+{% include 'medicalrecord/js_file/medical_script.html' %}
+{% endblock script %}

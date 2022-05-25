@@ -1,0 +1,25 @@
+{% extends 'doctor_sidebar.html' %}
+{% load static %}
+{% block title %}
+Socialmedia | Doctor
+{% endblock title %}
+{% block content %}
+<div class="col-md-7 col-lg-8 col-xl-9">
+  <div class="card">
+    <div class="card-body">
+      <!-- Social Form -->
+      <form method="post">
+        {% csrf_token %}
+        {{ form }}
+        <br>
+        <div class="submit-section">
+          <button type="submit" class="btn btn-primary submit-btn">Save Changes</button>
+        </div>
+      </form>
+      <!-- /Social Form -->
+    </div>
+  </div>
+</div>
+{% endblock content %}
+{% block script %}
+{% endblock script %}

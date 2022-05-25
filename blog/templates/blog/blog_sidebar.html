@@ -1,0 +1,47 @@
+{% url 'blog:list' as blog_posts %}
+{% url 'blog:search' as blog_search %}
+{% url 'blog:dashboard_posts' as blog_dashboard_posts %}
+{% url 'blog:dashboard_search' as blog_dashboard_search %}
+{% load blog_tags %}
+<!-- Blog Sidebar -->
+<div class="col-lg-4 col-md-12 sidebar-right theiaStickySidebar">
+  <!-- Search -->
+  <div class="card search-widget">
+    <div class="card-body">
+      {% if request.path == blog_posts or request.path == blog_search %}
+      <form class="search-form" method="get" action="{% url 'blog:search' %}">
+      {% elif request.path == blog_dashboard_posts or request.path == blog_dashboard_search %}
+      <form class="search-form" method="get" action="{% url 'blog:dashboard_search' %}">
+      {% endif %}
+        <div class="input-group">
+          <input type="text" placeholder="Search..." class="form-control" name="q">
+          <div class="input-group-append">
+            <button type="submit" class="btn btn-primary"><i class="fa fa-search"></i></button>
+          </div>
+        </div>
+      </form>
+    </div>
+  </div>
+  <!-- /Search -->
+  <!-- Latest Posts -->
+  <div class="card post-widget">
+    <div class="card-header">
+      <h4 class="card-title">Latest Posts {% recent_posts %}</h4>
+    </div>
+    <div class="card-body">
+      {% show_latest_posts 3 %}
+    </div>
+  </div>
+  <!-- /Latest Posts -->
+  <!-- Categories -->
+  <div class="card category-widget">
+    <div class="card-header">
+      <h4 class="card-title">Blog Categories</h4>
+    </div>
+    <div class="card-body">
+      {% show_categories %}
+    </div>
+  </div>
+  <!-- /Categories -->
+</div>
+<!-- /Blog Sidebar -->

@@ -1,0 +1,26 @@
+<ul class="categories">
+  {% for cat in categories %}
+  <li name="cat" id="cat_{{cat.id}}"><a href="javascript:blog_category_selected({{cat.id}}, '{{cat}}')">{{ cat }} </a></li>
+  {% endfor %}
+</ul>
+<form class="search-form d-none" method="get" id="hidden-cat-form">
+  <div class="input-group">
+    <input type="text" placeholder="Search..." class="form-control" name="q">
+    <div class="input-group-append">
+      <button type="submit" class="btn btn-primary"><i class="fa fa-search"></i></button>
+    </div>
+  </div>
+</form>
+<script src='/static/js/jquery.min.js'></script>
+<script>
+function blog_category_selected(cat_id, cat) {
+  let path = window.location.pathname;
+  if (path.includes('dashboard')) {
+    $("#hidden-cat-form").attr('action', '/blog/dashboard/search/');
+  } else {
+    $("#hidden-cat-form").attr('action', '/blog/search/');
+  }
+  $("input[name='q']").val(cat)
+  $("#hidden-cat-form").submit();
+}
+</script>

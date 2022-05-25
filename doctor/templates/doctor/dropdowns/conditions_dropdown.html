@@ -1,0 +1,7 @@
+{% if ajax_conditions %}
+{% for ajax_condition in ajax_conditions %}
+<option value="{{ ajax_condition.id }}">{{ ajax_condition.name }} - {{ ajax_condition.farsi_name }}</option>
+{% endfor %}
+{% endif %}
+
+

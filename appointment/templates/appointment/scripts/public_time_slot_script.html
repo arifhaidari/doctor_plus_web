@@ -1,0 +1,266 @@
+<script>
+var globalClinicId = '';
+var globalApptSlotId = '';
+var cancelApptSlotId = '';
+var globalDoctorUserId = '';
+
+function bookApptSlot(clinicId, apptSlotId, bookedClinicId, bookedApptSlotId, doctorUserId) {
+  if (bookedClinicId == 'no_clinic_selected' &&
+    bookedApptSlotId == 'no_appt_selected' &&
+    globalClinicId == '' && globalApptSlotId == ''
+  ) {
+    console.log('condition 1 is true');
+    $('#booking_slot_general_error').css('display', 'none');
+    bookApptSlotAjax(clinicId, apptSlotId, globalClinicId, globalApptSlotId, bookedClinicId, bookedApptSlotId, doctorUserId);
+    globalClinicId = clinicId;
+    globalApptSlotId = apptSlotId;
+  } else if (bookedClinicId != 'no_clinic_selected' &&
+    bookedApptSlotId != 'no_appt_selected' &&
+    globalClinicId != '' && globalApptSlotId != '') {
+    console.log('condition 2 is true');
+    $('#booking_slot_general_error').css('display', 'none');
+    if (apptSlotId == globalApptSlotId) {
+      cancelApptSlotId = apptSlotId;
+      globalDoctorUserId = doctorUserId;
+      $('#cancel_appt_modal').appendTo("body").modal('show');
+    } else {
+      bookApptSlotAjax(clinicId, apptSlotId, globalClinicId, globalApptSlotId, bookedClinicId, bookedApptSlotId, doctorUserId);
+    }
+    globalClinicId = clinicId;
+    globalApptSlotId = apptSlotId;
+  } else if (bookedClinicId == 'no_clinic_selected' &&
+    bookedApptSlotId == 'no_appt_selected' &&
+    globalClinicId != '' && globalApptSlotId != '') {
+    console.log('condition 3 is true');
+    $('#booking_slot_general_error').css('display', 'none');
+    if (apptSlotId == globalApptSlotId) {
+      cancelApptSlotId = apptSlotId;
+      globalDoctorUserId = doctorUserId;
+      $('#cancel_appt_modal').appendTo("body").modal('show');
+    } else {
+      bookApptSlotAjax(clinicId, apptSlotId, globalClinicId, globalApptSlotId, bookedClinicId, bookedApptSlotId, doctorUserId);
+    }
+    globalClinicId = clinicId;
+    globalApptSlotId = apptSlotId;
+  } else if (bookedClinicId != 'no_clinic_selected' &&
+    bookedApptSlotId != 'no_appt_selected' &&
+    globalClinicId == '' && globalApptSlotId == '') {
+    console.log('condition 4 is true');
+    $('#booking_slot_general_error').css('display', 'none');
+    if (apptSlotId == bookedApptSlotId) {
+      cancelApptSlotId = apptSlotId;
+      globalDoctorUserId = doctorUserId;
+      $('#cancel_appt_modal').appendTo("body").modal('show');
+    } else {
+      bookApptSlotAjax(clinicId, apptSlotId, bookedClinicId, bookedApptSlotId, bookedClinicId, bookedApptSlotId, doctorUserId);
+    }
+    globalClinicId = clinicId;
+    globalApptSlotId = apptSlotId;
+  } else {
+    //
+  }
+}
+
+function submitCancelAppt() {
+  const csrf = document.getElementsByName('csrfmiddlewaretoken');
+  const fd = new FormData();
+  fd.append('csrfmiddlewaretoken', csrf[0].value);
+  fd.append('cancel_appt_slot_id', cancelApptSlotId);
+  fd.append('doctor_user_id', globalDoctorUserId);
+  $.ajax({
+    type: 'POST',
+    url: '{% url "appointment:cancel_appt_by_patient" %}',
+    data: fd,
+    success: function(response) {
+      if (response['response_error'] == '') {
+        $('#' + response['clinic_id'] + '_' + cancelApptSlotId).html(
+          '' + response['appt_start_time'] + '' + ' - ' + response['appt_end_time'] + '' +
+          '<a href="javascript:void(0)" onclick="bookApptSlot(\'' + response['clinic_id'] + '\', \'' + cancelApptSlotId + '\', \'' + '' + '\', \'' + '' + '\', \'' + globalDoctorUserId + '\')">' +
+          '<i class="fa fa-check-circle fa-lg"></i>' +
+          '</a>'
+        );
+        $('#' + response['clinic_id'] + '_' + cancelApptSlotId).removeClass('bg-dark');
+        $('#' + response['clinic_id'] + '_' + cancelApptSlotId).addClass('bg-secondary');
+        $('#cancel_appt_modal').appendTo("body").modal('hide');
+      }
+
+    },
+    error: function(error) {
+      console.log('error submitting by modal ================', error);
+      $('#cancel_appt_modal').appendTo("body").modal('hide');
+    },
+    cache: false,
+    contentType: false,
+    processData: false,
+  });
+}
+
+function bookApptSlotAjax(activeClinicId, activeSlotId, deactiveClinicId, deactiveSlotId, bookedClinicId, bookedSlotId, doctorUserId) {
+  const csrf = document.getElementsByName('csrfmiddlewaretoken');
+  const fd = new FormData();
+  fd.append('csrfmiddlewaretoken', csrf[0].value);
+  fd.append('active_slot_id', activeSlotId);
+  fd.append('deactive_slot_id', deactiveSlotId);
+  fd.append('doctor_user_id', doctorUserId);
+  {% comment %}
+  // $.ajax({
+  //   type: 'POST',
+  //   url: '{% url "appointment:booking_by_patient" %}',
+  //   data: fd,
+  //   success: function(response) {
+  //     if (response['response_error'] != '') {
+  //       console.log('response_error condtion is true ');
+  //       showError(response['response_error']);
+  //     } else {
+  //       if (deactiveClinicId != '') {
+  //         activateApptSlotAjax(response, activeClinicId, activeSlotId, bookedClinicId, bookedSlotId, doctorUserId);
+  //         $('#' + deactiveClinicId + '_' + deactiveSlotId).html(
+  //           '' + response['deactive_start_time'] + '' + ' - ' + response['deactive_end_time'] + '' +
+  //           '<a href="javascript:void(0)" onclick="bookApptSlot(\'' + deactiveClinicId + '\', \'' + deactiveSlotId + '\', \'' + bookedClinicId + '\', \'' + bookedSlotId + '\', \'' + doctorUserId + '\')">' +
+  //           '<i class="fa fa-check-circle fa-lg"></i>' +
+  //           '</a>'
+  //         );
+  //         $('#' + deactiveClinicId + '_' + deactiveSlotId).removeClass('bg-dark');
+  //         $('#' + deactiveClinicId + '_' + deactiveSlotId).addClass('bg-secondary');
+  //       } else {
+  //         activateApptSlotAjax(response, activeClinicId, activeSlotId, deactiveClinicId, deactiveSlotId, bookedClinicId, bookedSlotId);
+  //       }
+  //     }
+
+  //   },
+  //   error: function(error) {
+  //     console.log('error submitting by modal ================', error);
+  //   },
+  //   cache: false,
+  //   contentType: false,
+  //   processData: false,
+  // });
+  {% endcomment %}
+};
+
+function activateApptSlotAjax(response, activeClinicId, activeSlotId, bookedClinicId, bookedSlotId, doctorUserId) {
+  $('#' + activeClinicId + '_' + activeSlotId).html(
+    '' + response['active_start_time'] + '' + ' - ' + response['active_end_time'] + '' +
+    '<a href="javascript:void(0)" onclick="bookApptSlot(\'' + activeClinicId + '\', \'' + activeSlotId + '\', \'' + bookedClinicId + '\', \'' + bookedSlotId + '\', \'' + doctorUserId + '\')">' +
+    '<i class="fa fa-check-circle fa-lg" style="color:yellow"></i>' +
+    '</a>'
+  );
+  $('#' + activeClinicId + '_' + activeSlotId).removeClass('bg-secondary');
+  $('#' + activeClinicId + '_' + activeSlotId).addClass('bg-dark');
+};
+
+function showError(errorMessage) {
+  $('#booking_slot_general_error').text(errorMessage);
+  $('#booking_slot_general_error').css('display', 'block');
+}
+
+
+// -------------- my custom js (Ali) ---------------------
+
+
+$("#submit-proceed-btn").click(function(event) {
+  let app_slots = $("a[name='active_slot']");
+  let appointment_patient = $('select[name="appointment-paitent"]').val();
+  let selected_flag = false;
+
+  // for your self
+  if (appointment_patient == "Self") {
+    $.each(app_slots, function(index, val) {
+      if ($(val).parent().attr('class').includes("bg-dark")) {
+        selected_flag = true;
+        let data = $(val).data('app').split(",");
+        let clinic_id = data[0]
+        let app_slot_id = data[1] // new app id
+        let booked_clinic_id = data[2]
+        let book_appointment_slot_id = data[3] // old app id  
+        let doctor_user_id = data[4]
+        // submit appointment
+        let form = new FormData();
+        form.append('csrfmiddlewaretoken', "{{ csrf_token }}")
+        form.append('clinic_id', clinic_id)
+        form.append('new_app', app_slot_id)
+        form.append('patient', "{{ request.user.id }}")
+        // form.append('old_app', book_appointment_slot_id)
+
+        axios.post('{% url "appointment:book_appointment" %}', form).then((response) => {
+          server_responses(response);
+        }).catch((error) => {
+          console.error(" err ", error);
+        });
+      }
+    });
+  } else {
+    // for your relative
+    $.each(app_slots, function(index, val) {
+      if ($(val).parent().attr('class').includes("bg-dark")) {
+        selected_flag = true;
+        let data = $(val).data('app').split(",");
+        let clinic_id = data[0]
+        let app_slot_id = data[1] // new app id
+        let booked_clinic_id = data[2]
+        let book_appointment_slot_id = data[3] // old app id  
+        let doctor_user_id = data[4]
+        // submit appointment
+        let form = new FormData();
+        form.append('csrfmiddlewaretoken', "{{ csrf_token }}");
+        form.append('clinic_id', clinic_id);
+        form.append('new_app', app_slot_id);
+        form.append('patient', "{{ request.user.id }}");
+        form.append('relative', appointment_patient);
+        form.append("reschedule", 0);
+
+        axios.post('{% url "appointment:book_appointment" %}', form).then((response) => {
+          server_responses(response);
+        }).catch((error) => {
+          console.error(" err ", error);
+        });
+      }
+    });
+  }
+  // if no appointment is selected
+  if (!selected_flag) {
+    Swal.fire(
+      'Select an appointment!',
+      'Please select an appointment and proceed to book.',
+      'info'
+    )};
+
+  // responses
+  function server_responses(response) {
+    console.log("the server response : ", response)
+    if (response.data.status == "already-booked") {
+      Swal.fire(
+      'Already Booked Appointment!',
+      'You have already book an appointment with this doctor today. Cancel your pervious apppointment so that you could book the new one! or try booking with a new doctor.',
+      'info'
+    );
+    } else if (response.data.status == "success"){
+    //   Swal.fire(
+    //   'Appointment Successfully Booked!',
+    //   'You have successfully booked the appointment.',
+    //   'info'
+    // );
+    location.href = "{% url 'appointment:book_succeed' 0 %}".replace("0", response.data.appid.toString());
+    }
+
+  }
+
+});
+
+
+// active deactive slots
+$("a[name='active_slot']").click(function(event) {
+  let selected_flag = $(this).parent().attr('class').includes("bg-dark")
+  // remove other slots marks
+  $("a[name='active_slot']").parent().removeClass('bg-dark');
+  $("a[name='active_slot']").css('color', '#e48784');
+
+  if (!selected_flag) {
+    $(this).parent().addClass('bg-dark');
+    $(this).css('color', 'yellow');
+  } else {
+    console.log("appointment dis selected!")
+  }
+
+});
+</script>

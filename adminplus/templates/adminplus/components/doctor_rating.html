@@ -1,0 +1,24 @@
+<div class="rating">
+  <!-- Ratings ({{ star_av|default:"No Rating Yet." }})&nbsp; -->
+  <div name="rating-stars" id="rating-{{doctor.user.id}}"></div>
+</div>
+<!-- scripts -->
+<script src="/static/js/jquery.min.js"></script>
+<script>
+ 
+  rate = "{{star_av}}";
+  rate = (rate * 10) / 25;
+  fill_stars = Math.floor(rate);
+  half_stars = Math.abs(rate) - fill_stars;
+  empty_stars = Math.floor(4 - (fill_stars + half_stars))
+    for (var i = 0; i < fill_stars; i++) {
+    $("#rating-{{doctor.user.id}}").append(`<i class="fa fa-star text-warning"></i>`)
+  }
+  for (var i = 0; i < half_stars; i++) {
+    $("#rating-{{doctor.user.id}}").append(`<i class="fa fa-star-half-alt text-warning"></i>`)
+  }
+  for (var i = 0; i < empty_stars; i++) {
+    $("#rating-{{doctor.user.id}}").append(`<i class="fa fa-star text-secondary"></i>`)
+  }
+
+</script>

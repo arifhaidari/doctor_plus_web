@@ -1,0 +1,189 @@
+{% extends "adminplus/adminp_dashboard.html" %}
+{% block title %}
+Specialities
+{% endblock title %}
+{% block content %}
+<div class="main-wrapper">
+  <!-- Page Wrapper -->
+  <div class="page-wrapper">
+    <div class="content container-fluid">
+      <!-- Page Header -->
+      <div class="page-header">
+        <div class="row">
+          <div class="col-sm-7 col-auto">
+            <h3 class="page-title">Specialities</h3>
+            <ul class="breadcrumb">
+              <li class="breadcrumb-item"><a href="index.html">Dashboard</a></li>
+              <li class="breadcrumb-item active">Specialities</li>
+            </ul>
+          </div>
+          <div class="col-sm-5 col">
+            <a href="#Add_Specialities_details" data-toggle="modal" class="btn btn-primary float-right mt-2">Add</a>
+          </div>
+        </div>
+      </div>
+      <!-- /Page Header -->
+      <div class="row">
+        <div class="col-sm-12">
+          <div class="card">
+            <div class="card-body">
+              <div class="table-responsive">
+                <table class="datatable table table-hover table-center mb-0">
+                  <thead>
+                    <tr>
+                      <th>#</th>
+                      <th>Specialities</th>
+                      <th>Category</th>
+                      <th class="text-right">Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {% for sp in object_list %}
+                    <div name="new-added-sp"></div>
+                    <tr>
+                      <td>#SP{{ sp.id }}</td>
+                      <td>
+                        <h2 class="table-avatar">
+                          <a href="profile.html" class="avatar avatar-sm mr-2">
+                            <img class="avatar-img" src="{{ sp.speciality_category.icon.url }}">
+                          </a>
+                          <a href="profile.html">{{ sp|title }}</a>
+                        </h2>
+                      </td>
+                      <td>{{ sp.speciality_category|title }}</td>
+                      <td class="text-right">
+                        <div class="actions">
+                          <a class="btn btn-sm bg-success-light" href="{% url 'adminplus:edit_speciality' sp.id %}" name="edit">
+                            <i class="fe fe-pencil"></i> Edit
+                          </a>
+                          <a data-toggle="modal" href="#delete_modal" data-spid="{{ sp.id }}" class="btn btn-sm bg-danger-light" name="delete">
+                            <i class="fe fe-trash"></i> Delete
+                          </a>
+                        </div>
+                      </td>
+                    </tr>
+                    {% endfor %}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <!-- /Page Wrapper -->
+  <!-- Add Modal -->
+  <div class="modal fade" id="Add_Specialities_details" aria-hidden="true" role="dialog">
+    <div class="modal-dialog modal-dialog-centered" role="document">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title">Add Specialities</h5>
+          <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+          </button>
+        </div>
+        <div class="modal-body">
+          <form id="submit-speciality-form" method="post" enctype="multipart/form-data">
+            {% csrf_token %}
+            <div class="row form-row">
+              {% for field in add_speciality_form %}
+              {% if field == add_speciality_form.conditions or field == add_speciality_form.services %}
+              <div class="col-12 col-sm-12">
+                <div class="form-group">
+                  <label>{{ field.label }}</label>
+                  {{ field }}
+                </div>
+              </div>
+              {% else %}
+              <div class="col-12 col-sm-6">
+                <div class="form-group">
+                  <label>{{ field.label }}</label>
+                  {{ field }}
+                </div>
+              </div>
+              {% endif %}
+              {% endfor %}
+            </div>
+            <button onclick="submit" class="btn btn-primary btn-block">Save Changes</button>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+  <!-- /ADD Modal -->
+  <!-- Delete Modal -->
+  <div class="modal fade" id="delete_modal" aria-hidden="true" role="dialog">
+    <div class="modal-dialog modal-dialog-centered" role="document">
+      <div class="modal-content">
+        <div class="modal-body">
+          <div class="form-content p-2">
+            <h4 class="modal-title">Delete</h4>
+            <p class="mb-4">Are you sure want to delete?</p>
+            <button type="button" class="btn btn-info" id="confirm-delete">Delete </button>
+            <button type="button" class="btn btn-danger" data-dismiss="modal">Close</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <!-- /Delete Modal -->
+</div>
+{% endblock content %}
+{% block script %}
+<script>
+  jQuery(document).ready(function($) {
+    // new speciailty form validation
+    $("#submit-speciality-form").validate({
+      submitHandler: function(form) {
+        submit_new_speciality();
+      },
+      rules: {
+        "name": "required",
+        "farsi_name": "required",
+        "pashto_name": "required",
+        "speciality_category": "required",
+        "icon": {
+          required: true,
+          extension: "png|jpg|jpeg|svg",
+          maxsize: 1 * 1000000, // in MB
+        },
+      }
+    });
+    // submit submit form
+    function submit_new_speciality(argument) {
+      let form = new FormData($("#submit-speciality-form")[0]);
+      form.append('new_speciality', 1);
+      axios.post(".", form).then((response) => {
+        if (response.data.add_status == "success") {
+          location.reload();
+        }
+      }).catch((error) => {
+        console.error(error);
+      });
+    }
+    // delete speciality
+    $('a[name="delete"]').click(function(event) {
+      let spid = $(this).data("spid");
+      window.delete_id = spid;
+    });
+    // confirm delete
+    $('#confirm-delete').click(function(event) {
+      console.log("window.spid : ", delete_id)
+      let form = new FormData();
+      form.append('csrfmiddlewaretoken', "{{ csrf_token }}");
+      form.append('delete_id', delete_id);
+      form.append('delete_speciality', 1);
+      axios.post(".", form).then((response) => {
+        if (response.data.delete == "success") {
+          location.reload();
+        }
+      }).catch((error) => {
+        console.error(error);
+      });
+    });
+
+  }); // end document.ready function
+
+</script>
+{% endblock script %}

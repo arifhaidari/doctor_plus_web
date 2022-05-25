@@ -1,0 +1,333 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block title %}
+Family Member
+{% endblock title %}
+{% block breadcrumb %}
+<div class="breadcrumb-bar">
+  <div class="container-fluid">
+    <div class="row align-items-center">
+      <div class="col">
+        <nav aria-label="breadcrumb" class="page-breadcrumb">
+          <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="{% url 'patient:patient_dashboard_view' %}">Dashboard</a></li>
+            <li class="breadcrumb-item"><a href="{% url 'relative:list' %}">Family Members</a></li>
+          </ol>
+        </nav>
+        <h2 class="breadcrumb-title">
+          {{ relative.user|title }} - <small>Family Member</small>
+        </h2>
+      </div>
+      <div class="col-auto text-right float-right ml-auto">
+        <a href="#" class="btn btn-primary btn-sm" onclick="edit_family_member()"><i class="fas fa-user-plus"></i> Edit Family Member</a>
+        <a href="#" class="btn btn-danger btn-sm" onclick="delete_family_member()"><i class="fas fa-trash"></i> Delete </a>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock breadcrumb %}
+{% block content %}
+<div class="content">
+  <div class="container-fluid">
+    <div class="row">
+      <div class="col-md-5 col-lg-4 col-xl-3 theiaStickySidebar dct-dashbd-lft">
+        
+        <!-- Profile Widget -->
+        <div class="card widget-profile pat-widget-profile">
+          <div class="card-body">
+            <div class="pro-widget-content">
+              <div class="profile-info-widget">
+                <a href="#" class="booking-doc-img">
+                  <img src="{% if relative.user.avatar %}{{ relative.user.avatar.url }}{% else %}{% if relative.user.gender == 'Male' %}{% static 'img/male_profile.png' %}{% else %}{% static 'img/female_profile.png' %}{% endif %}{% endif %}" alt="User Image">
+                </a>
+                <div class="profile-det-info">
+                  <h3>{{ relative.user.get_full_name }}</h3>
+                  <div class="patient-details">
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div class="patient-info">
+              <ul>
+                <li>Phone <span>{{ relative.user.phone }}</span></li>
+                <li>Age <span>{{ relative.user.user_age|default:"--" }} Years, {{ relative.user.gender }}</span></li>
+                <li>Blood Group <span>{{ relative.blood_group }}</span></li>
+              </ul>
+            </div>
+          </div>
+        </div>
+        <!-- /Profile Widget -->
+        <!-- Last Booking -->
+        <div class="card">
+          <div class="card-header">
+            <h4 class="card-title">Last Booking</h4>
+          </div>
+          <ul class="list-group list-group-flush">
+            {% for ap in appointments|dictsortreversed:"appt_date"|slice:"3" %}
+            <li class="list-group-item">
+              <div class="media align-items-center">
+                <div class="mr-3">
+                  <img alt="Image placeholder" src="{% if ap.doctor.user.avatar %}{{ ap.doctor.user.avatar.url }}{% else %}{% if ap.doctor.user.gender == 'Male' %}{% static 'img/male_profile.png' %}{% else %}{% static 'img/female_profile.png' %}{% endif %}{% endif %}" class="avatar  rounded-circle">
+                </div>
+                <div class="media-body">
+                  <h5 class="d-block mb-0"><a href="{% url 'home:doctor_public_profile' ap.doctor.user.id %}">{{ap.doctor.title}} {{ap.doctor.user.get_full_name}}</a></h5>
+                  <span class="d-block text-sm text-muted">{{ ap.clinic }}</span>
+                  <span class="d-block text-sm text-muted">{{ ap.appt_date }}</span>
+                </div>
+              </div>
+            </li>
+            {% endfor %}
+        </div>
+        <!-- /Last Booking -->
+      </div>
+      <div class="col-md-7 col-lg-8 col-xl-9">
+        <div id="edit_family_member">
+          <div class="card">
+            <div class="card-body">
+              <h3>Add Family Member</h3>
+              <br>
+              <form method="post" , action="." enctype="multipart/form-data" id="myform">
+                {% csrf_token %}
+                <div class="row form-row">
+                <input type="hidden" value="edit_form_data" name="edit_form_data">
+                  <div class="col-12 col-md-6">
+                    <div class="form-group">
+                      <label>Full Name <span class="text-danger">*</span></label>
+                      <input type="text" name="name" id="name" value="{{ relative.user.full_name }}" class="form-control">
+                      <small id="name_error" style="display: none;color: red;"></small>
+                    </div>
+                  </div>
+                  <div class="col-12 col-md-6">
+                    <div class="form-group">
+                      <label>Full Name (Farsi/Pashto) <span class="text-danger">*</span></label>
+                      <input type="text" dir="rtl" name="rtl_name"  id="rtl_name" value="{{ relative.user.rtl_full_name }}" class="form-control">
+                      <small id="rtl_name_error" style="display: none;color: red;"></small>
+                    </div>
+                  </div>
+                  <div class="col-12 col-md-6">
+                    <div class="form-group">
+                      <label>Phone Number <span class="text-danger">*</span></label>
+                      <input type="number" id="phone" name="phone" value="{{ relative.user.phone }}" class="form-control">
+                      <small id="phone_error" style="display: none;color: red;"></small>
+                    </div>
+                  </div>
+                  <div class="col-12 col-md-6">
+                    <div class="form-group">
+                      <label>Date of Birth <span class="text-danger">*</span></label>
+                      <input type="date" id="dob" name="dob" value="{{ relative.user.string_birth_date }}" class="form-control">
+                      <small id="dob_error" style="display: none;color: red;"></small>
+                    </div>
+                  </div>
+                  <div class="col-12 col-md-6">
+                    <div class="form-group">
+                      <input type="file" name="avatar"  id="avatar" class="form-control">
+                    </div>
+                  </div>
+                  
+                  <div class="col-12 col-md-6">
+                    <div class="form-group">
+                      <label>Gender <span class="text-danger">*</span></label><br>
+                      <div class="form-check-inline">
+                        <label class="form-check-label">
+                          <input type="radio" {% if relative.user.gender == 'Male' %}checked{% endif %} name="gender" value="Male" id="gender" class="form-check-input">Male
+                        </label>
+                      </div>
+                      <div class="form-check-inline">
+                        <label class="form-check-label">
+                          <input type="radio" {% if relative.user.gender == 'Female' %}checked{% endif %}  name="gender" value="Female" id="gender" class="form-check-input">Female
+                        </label>
+                      </div>
+                    </div>
+                  </div>
+      
+                  <div class="col-12 col-md-6">
+                    <div class="form-group">
+                      <select name="blood_group" id="blood_group" class="form-control select">
+                        <option value="">Select Blood Group <span class="text-danger">*</span></option>
+                        {% for blood in bloods %}
+                        <option value="{{ blood.id }}" {% if blood.id == relative.blood_group.id %}selected{% endif %}>
+                          {{ blood.name }}
+                        </option>
+                        {% endfor %}
+                      </select>
+                      <small id="blood_group_error" style="display: none;color: red;"></small>
+                    </div>
+                  </div>
+                  
+                  <div class="col-12 col-md-6">
+                    <div class="form-group">
+                      <select name="city" id="city" class="form-control select">
+                        <option value="">Select Province <span class="text-danger">*</span></option>
+                        {% for city in cities %}
+                        <option value="{{ city.id }}" {% if city.id == relative.user.address.city.id %}selected{% endif %}>{{ city.name }} -
+                          {{ city.rtl_name }}</option>
+                        {% endfor %}
+                      </select>
+                      <small id="city_error" style="display: none;color: red;"></small>
+                    </div>
+                  </div>
+                  <div class="col-12 col-md-6">
+                    <div class="form-group">
+                      <select name="district" id="district" class="form-control select">
+                        <option value="">Select District  <span class="text-danger">*</span></option>
+                        <option value="{{ relative.user.address.district.name }}" selected>{{ relative.user.address.district.name }} - {{ relative.user.address.district.rtl_name }}</option>
+                      </select>
+                      <small id="district_error" style="display: none;color: red;"></small>
+                    </div>
+                  </div>
+                  <div class="col-12 col-md-6">
+                    <div class="form-group">
+                      <select name="relation" id="relation" class="form-control select">
+                        <option value="">Select Relation <span class="text-danger">*</span></option>
+                        {% for relation in relations %}
+                        <option value="{{ relation.id }}" {% if relative.relation.id == relation.id %}selected{% endif %}>{{ relation.relation }} -
+                          {{ relation.farsi_relation }}</option>
+                        {% endfor %}
+                      </select>
+                      <small id="relation_error" style="display: none;color: red;"></small>
+                    </div>
+                  </div>
+                 
+                  <div class="col-12 col-md-6">
+                      <div class="row row-sm align-items-center">
+                        <div class="col-xl mb-3 mb-xl-0">
+                          <button type="button" onclick="edit_family_member()" class="btn btn-block btn-outline-secondary">Cancel</button>
+                        </div>
+                        <div class="col-xl mb-3 mb-xl-0">
+                          <button type="submit" class="btn btn-block btn-outline-primary">Save</button>
+                        </div>
+                      </div>
+                  </div>
+                  <div class="col-12 col-md-6">
+                    <p id="response_error" style="display: none;color: red;"></p>
+                </div>
+                </div>
+              </form>
+            </div>
+         
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-body pt-0">
+            <!-- Tab Menu -->
+            <nav class="user-tabs mb-4">
+              <ul class="nav nav-tabs nav-tabs-bottom nav-justified">
+                <li class="nav-item">
+                  <a class="nav-link active" href="#pat_appointments" data-toggle="tab">Appointments</a>
+                </li>
+                <li class="nav-item">
+                  <a class="nav-link" href="#pat_medical_records" data-toggle="tab"><span class="med-records">Medical Records</span></a>
+                </li>
+              </ul>
+            </nav>
+            <!-- /Tab Menu -->
+            <!-- Tab Content -->
+            <div class="tab-content pt-0">
+              <!-- Appointment Tab -->
+              <div id="pat_appointments" class="tab-pane fade show active">
+                <div class="card card-table mb-0">
+                  <div class="card-body">
+                    <div class="table-responsive">
+                      <table class="table table-hover table-center mb-0" id="appt_table">
+                        <thead>
+                          <tr>
+                            <th>Doctor</th>
+                            <th>Appt Date</th>
+                            <th>Slot</th>
+                            <th>Feedback</th>
+                            <th>Status</th>
+                            <th>Actions</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          {% for ap in appointments reversed %}
+                          <tr name="appt_{{ ap.id }}" >
+                            <td>
+                              <h2 class="table-avatar">
+                                <a href="{% url 'home:doctor_public_profile' ap.doctor.user.id %}" class="avatar avatar-sm mr-2">
+                                  <img class="avatar-img rounded-circle" src="{% if ap.doctor.user.avatar %}{{ ap.doctor.user.avatar.url }}{% else %}{% if ap.doctor.user.gender == 'Male' %}{% static 'img/male_profile.png' %}{% else %}{% static 'img/female_profile.png' %}{% endif %}{% endif %}" alt="User Image">
+                                </a>
+                                <a href="{% url 'home:doctor_public_profile' ap.doctor.user.id %}">{{ ap.doctor.title }} {{ ap.doctor.user.get_full_name }} <span>{{ ap.clinic }}</span></a>
+                              </h2>
+                            </td>
+                            <td><a class="text-info" href="{% url 'relative:appt_detail' ap.id %}">{{ ap.appt_date|date:"d, M. Y" }}</a></td>
+                            <td>{{ ap.start_appt_time }} - {{ ap.end_appt_time }}</td>
+                            <td>
+                              {% if not ap.feedback_status and ap.status == 'COMPLETED' %}
+                              <a href="{% url 'patient:feedback' ap.id %}" class="btn btn-sm bg-success-light">
+                                <i class="fa fa-comment"></i> Give Feedback
+                              </a>
+                              {% elif ap.status == 'BOOKED' %}
+                              
+                              {% else %}
+                              Given
+                              {% endif %}
+                            </td>
+                            {% if ap.status == "COMPLETED" %}
+                            <td><span class="badge badge-pill bg-success">{{ ap.status }}</span></td>
+                            
+                            {% elif ap.status == "EXPIRED" %}
+                            <td><span class="badge badge-pill bg-danger">{{ ap.status }}</span></td>
+                            {% elif ap.status == "PATIENT_CANCELED" %}
+                            <td><span class="badge badge-pill bg-danger-light">{{ ap.status }}</span></td>
+                            {% elif ap.status == "DOCTOR_CANCELED" %}
+                            <td><span class="badge badge-pill bg-danger-light">{{ ap.status }}</span></td>
+                            {% elif ap.status == "BOOKED" %}
+                            <td><span class="badge badge-pill bg-warning">{{ ap.status }}</span></td>
+                            {% endif %}
+                            <td>
+                              <div class="btn-group">
+                                <button type="button" class="btn btn-info dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Action</button>
+                                <div class="dropdown-menu">
+                                  <a href="{% url 'relative:appt_detail' ap.id %}" class="dropdown-item">
+                                    <i class="far fa-eye text-info"></i>&nbsp;&nbsp; Detail
+                                  </a>
+                                  {% if ap.status == "BOOKED" %}
+                                  <div class="dropdown-divider"></div>
+                                  <a href="{% url 'appointment:reschedule' ap.doctor.user.id ap.relative.user.id %}" class="dropdown-item">
+                                    <i class="fa fa-clock text-success"></i>&nbsp;&nbsp; Reschedule
+                                  </a>
+                                  <a href="javascript:void(0);" name="cancel_appointment" data-appid="{{ap.id}}" class="dropdown-item">
+                                    <i class="fa fa-times text-danger"></i>&nbsp;&nbsp; Cancel
+                                  </a>
+                                  {% endif %}
+                                </div>
+                              </div>
+                            </td>
+                          </tr>
+                          {% empty %}
+                          <td>
+                            <h4>no appointments</h4>
+                          </td>
+                          {% endfor %}
+                        </tbody>
+                      </table>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <!-- /Appointment Tab -->
+              <!-- Medical Records Tab -->
+              {% include "relative/relative_medicalrecord_tab.html" %}
+              <!-- /Medical Records Tab -->
+            </div>
+            <!-- Tab Content -->
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock content %}
+{% block pagelevel_styles %}
+<style>
+.error {
+  color: red;
+}
+</style>
+<link rel="stylesheet" type="text/css" href="{% static 'medicalrecord/css/filesharing.css' %}">
+{% endblock pagelevel_styles %}
+{% block script %}
+<script src="{% static 'form_validation.min.js' %}"></script>
+{% include "relative/script/edit_family_script.html" %}
+{% endblock script %}

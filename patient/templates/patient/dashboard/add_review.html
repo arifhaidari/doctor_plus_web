@@ -1,0 +1,174 @@
+{% extends 'sidebar.html' %}
+{% load static %}
+{% load doctor_tags %}
+{% block title %}
+Reviews | Doctor
+{% endblock title %}
+{% block breadcrumb %}
+<div class="breadcrumb-bar">
+  <div class="container-fluid">
+    <div class="row align-items-center">
+      <div class="col">
+        <nav aria-label="breadcrumb" class="page-breadcrumb">
+          <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="{% url 'patient:patient_dashboard_view' %}">Dashboard</a></li>
+            <li class="breadcrumb-item"><a href="#">Doctor Feedback</a></li>
+          </ol>
+        </nav>
+        <h2 class="breadcrumb-title">
+          Doctor Feedback
+        </h2>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock breadcrumb %}
+{% block content %}
+<div class="col-md-7 col-lg-8 col-xl-9">
+  <div class="card">
+    <div class="card-body d-block">
+      <div class="doctor-widget">
+        <div class="doc-info-left">
+          <div class="doctor-img">
+            <a href="doctor-profile.html">
+              <img src="{% if appointment.doctor.user.avatar %}{{ appointment.doctor.user.avatar.url }}{% else %}{% if appointment.doctor.user.gender == 'Male' %}{% static 'img/male_profile.png' %}{% else %}{% static 'img/female_profile.png' %}{% endif %}{% endif %}" class="img-fluid" alt="User Image">
+            </a>
+          </div>
+          <div class="doc-info-cont">
+            <h4 class="doc-name"><a href="doctor-profile.html">{{ appointment.doctor.title }} {{ appointment.doctor }}</a></h4>
+            <p class="doc-speciality">
+              {% for sp in appointment.doctor.speciality.all %}
+              {% if forloop.last %}
+              {{sp}}.
+              {% else %}
+              {{sp}},
+              {% endif %}
+              {% endfor %}
+            </p>
+            {% doctor_rating appointment.doctor %}
+            <div class="clinic-services">
+              {% for service in appointment.doctor.service.all %}
+              <span class="mb-1 ml-1">{{ service }}</span>
+              {% endfor %}
+            </div>
+          </div>
+        </div>
+        <div class="doc-info-right">
+          <h3>Address</h3>
+          <div class="clinic-details">
+            {% for clin in appointment.doctor.clinic_set.all %}
+            <p class="doc-location pb-0 mb-0"><i class="fas fa-map-marker-alt"></i><b> {{clin}}</b>
+              <br>{{ clin.address }}
+            </p>
+            <p></p>
+            {% endfor %}
+          </div>
+          <div class="clini-infos">
+            <ul>
+              <li><i class="far fa-money-bill-alt"></i> {{ appointment.doctor.fee }} </li>
+            </ul>
+          </div>
+          <div class="clinic-booking">
+            <a class="view-pro-btn" href="{% url 'home:doctor_public_profile' appointment.doctor.user.id %}">View Profile</a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="doc-review review-listing">
+    <ul class="comments-list">
+      <li>
+        <div class="comment">
+          <img class="avatar rounded-circle" alt="User Image" src="{% if appointment.doctor.user.avatar %}{{ appointment.doctor.user.avatar.url }}{% else %}{% if appointment.doctor.user.gender == 'Male' %}{% static 'img/male_profile.png' %}{% else %}{% static 'img/female_profile.png' %}{% endif %}{% endif %}">
+          <div class="comment-body w-100">
+            <div class="meta-data">
+              <span class="comment-author">{{ appointment.doctor.title }} {{ appointment.doctor }}</span>
+              <span class="comment-date">Appoinment Compeleted on {{ appointment.appt_date|date:"D d M Y" }}.</span>
+              <div class="review-count rating">
+                <div name="good-stars">
+                  {% for item in ""|ljust:comment.good_count %}
+                  <i class="fas fa-star filled"></i>
+                  {% endfor %}
+                </div>
+                <div name="bad-stars">
+                  {% for item in ""|ljust:comment.bad_count %}
+                  <i class="fas fa-star"></i>
+                  {% endfor %}
+                </div>
+              </div>
+            </div>
+            <div class="row">
+              <div class="col-md-9">
+                <p class="comment-content">
+                  {# <h5><b>{{ comment.comment }}: </b><br></h5> #}
+                  {% for rep in comment.replies.all %}
+                <ul class="comments-reply">
+                  <!-- Comment Reply List -->
+                  <li>
+                    <div class="comment ">
+                      <img class="avatar rounded-circle" alt="User Image" src="{% if rep.author.user.avatar %}{{ rep.author.user.avatar.url }}{% else %}{% if rep.author.user.gender == 'Male' %}{% static 'img/male_profile.png' %}{% else %}{% static 'img/female_profile.png' %}{% endif %}{% endif %}">
+                      <div class="comment-body w-100">
+                        <div class="meta-data">
+                          <span class="comment-author">{{ rep.author }}</span>
+                          <span class="comment-date">{{ rep.timestamp|date:"g:i A, D d M Y" }}</span>
+                          <input type="hidden" name="replied" value="true">
+                        </div>
+                        <p class="comment-content">
+                          {{ rep.reply }}
+                        </p>
+                      </div>
+                    </div>
+                  </li>
+                  <!-- /Comment Reply List -->
+                </ul>
+                {% endfor %}
+                <div name="add-rep-{{ comment.id }}"></div>
+                <div class="comment-reply text-info">
+                  <a class="comment-btn" style="cursor:pointer;">
+                    <i class="fas fa-reply"></i> Comment
+                  </a>
+                  <div class="card-body">
+                    <form method="POST" name="create-reply">
+                      {% csrf_token %}
+                      <div class="form-group">
+                        <textarea rows="4" class="form-control" name="reply"></textarea>
+                        <input type="hidden" name="comment-id" value="{{ comment.id }}">
+                        <input type="hidden" name="submit" value="create-reply">
+                      </div>
+                      <div class="submit-section">
+                        <button class="btn btn-primary submit-btn" type="submit">Submit</button>
+                      </div>
+                    </form>
+                  </div>
+                </div>
+                </p>
+              </div>
+              <div class="col-md-3 pb-5">
+                <form action="POST" id="rating-changed">
+                  {% csrf_token %}
+                  {{ rating_form }}
+                </form>
+                {% if not appointment.feedback_status %}
+                <div name="feedback-now" class="mt-3">
+                  <span class="badge badge-info">You haven't rate your doctor.</span>
+                  <button class="btn btn-block btn-primary" onclick="submit_rate({{appointment.id}});">Submit Feedback</button>
+                </div>
+                {% endif %}
+              </div>
+            </div>
+          </div>
+        </div>
+      </li>
+    </ul>
+  </div>
+</div>
+{% endblock content %}
+{% block script %}
+<script type="text/javascript">
+  var csrftoken = '{{ csrf_token }}';
+
+</script>
+<script type="text/javascript" src="/static/axios.min.js"></script>
+<script type="text/javascript" src="/static/swtalert.js"></script>
+<script type="text/javascript" src="/static/patient/dashboard/js/add_review.js"></script>
+{% endblock script %}

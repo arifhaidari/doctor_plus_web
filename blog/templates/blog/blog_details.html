@@ -1,0 +1,231 @@
+{% extends "base.html" %}
+{% load static %}
+{% block title %}
+Post Details
+{% endblock title %}
+{% block breadcrumb %}
+<div class="breadcrumb-bar">
+  <div class="container-fluid">
+    <div class="row align-items-center">
+      <div class="col">
+        <nav aria-label="breadcrumb" class="page-breadcrumb">
+          <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="{% url 'home:homepage' %}">Home</a></li>
+            <li class="breadcrumb-item"><a href="{% url 'blog:list' %}">Blog</a></li>
+            <li class="breadcrumb-item"><a href="#">Blog Details</a></li>
+          </ol>
+        </nav>
+        <h2 class="breadcrumb-title">
+          Blog Details
+        </h2>
+      </div>
+    </div>
+  </div>
+</div>
+<br>
+{% endblock breadcrumb %}
+{% block content %}
+<!-- Page Content -->
+<div class="content">
+  <div class="container">
+    <div class="row">
+      <div class="col-lg-8 col-md-12">
+        <div class="blog-view">
+          <div class="blog blog-single-post">
+            {% if blog.images.all|length == 1 %}
+            <div class="blog-image">
+              <a href="javascript:void(0);"><img alt="blog image" src="{{ blog.images.first.image.url }}" class="img-fluid" width="100%" height="100%"></a>
+            </div>
+            {% else %}
+            <div class="row">
+            {% for photo in blog.images.all %}
+            <div class="col-md-6">
+              <div class="blog-image">
+                <a href="javascript:void(0);"><img alt="blog image" src="{{ photo.image.url }}" class="img-fluid" width="100%" height="100%"></a>
+              </div>
+            </div>
+            {% endfor %}
+            </div>  
+            {% endif %}
+            <h3 class="blog-title">{{ blog.title|title }}</h3>
+            <div class="blog-info clearfix">
+              <div class="post-left">
+                <ul>
+                  <li>
+                    <div class="post-author">
+                      <a href=""><img src="{% if blog.blogger.user.avatar %}{{ blog.blogger.user.avatar.url }}{% else %}{% if blog.blogger.user.gender == 'Male' %}{% static 'img/male_profile.png' %}{% else %}{% static 'img/female_profile.png' %}{% endif %}{% endif %}" alt="Post Author"> <span>{{ blog.blogger.user.get_full_name|title }}</span></a>
+                    </div>
+                  </li>
+                  <li><i class="far fa-calendar"></i>{{ blog.timestamp|date:"d, M. Y" }}</li>
+                  {# <li><i class="far fa-comments"></i>12 Comments</li> #}
+                  <li><i class="fa fa-tags"></i>{% for cat in blog.category.all %}{{cat}}. {% endfor %}</li>
+                </ul>
+              </div>
+            </div>
+            <div class="blog-content">
+              <p>{{ blog.body|capfirst }}</p>
+            </div>
+          </div>
+          <div class="card blog-share clearfix">
+            <div class="card-header">
+              <h4 class="card-title">{{ blog.images.all|length }} Share the post</h4>
+            </div>
+            <div class="card-body">
+              <ul class="social-share">
+                <li><a href="#" title="Facebook"><i class="fab fa-facebook"></i></a></li>
+                <li><a href="#" title="Twitter"><i class="fab fa-twitter"></i></a></li>
+                <li><a href="#" title="Linkedin"><i class="fab fa-linkedin"></i></a></li>
+                <li><a href="#" title="Google Plus"><i class="fab fa-google-plus"></i></a></li>
+                <li><a href="#" title="Youtube"><i class="fab fa-youtube"></i></a></li>
+              </ul>
+            </div>
+          </div>
+          <!-- 
+          <div class="card author-widget clearfix">
+            <div class="card-header">
+              <h4 class="card-title">About Author</h4>
+            </div>
+            <div class="card-body">
+              <div class="about-author">
+                <div class="about-author-img">
+                  <div class="author-img-wrap">
+                    <a href="doctor-profile.html"><img class="img-fluid rounded-circle" alt="" src="/static/img/doctors/doctor-thumb-02.jpg"></a>
+                  </div>
+                </div>
+                <div class="author-details">
+                  <a href="doctor-profile.html" class="blog-author-name">Dr. Darren Elder</a>
+                  <p class="mb-0">Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation.</p>
+                </div>
+              </div>
+            </div>
+          </div>
+           -->
+           <!-- 
+          <div class="card blog-comments clearfix">
+            <div class="card-header">
+              <h4 class="card-title">Comments (12)</h4>
+            </div>
+            <div class="card-body pb-0">
+              <ul class="comments-list">
+                <li>
+                  <div class="comment">
+                    <div class="comment-author">
+                      <img class="avatar" alt="" src="/static/img/patients/patient4.jpg">
+                    </div>
+                    <div class="comment-block">
+                      <span class="comment-by">
+                        <span class="blog-author-name">Michelle Fairfax</span>
+                      </span>
+                      <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nam viverra euismod odio, gravida pellentesque urna varius vitae, gravida pellentesque urna varius vitae. Lorem ipsum dolor sit amet, consectetur adipiscing elit.</p>
+                      <p class="blog-date">Dec 6, 2017</p>
+                      <a class="comment-btn" href="#">
+                        <i class="fas fa-reply"></i> Reply
+                      </a>
+                    </div>
+                  </div>
+                  <ul class="comments-list reply">
+                    <li>
+                      <div class="comment">
+                        <div class="comment-author">
+                          <img class="avatar" alt="" src="/static/img/patients/patient5.jpg">
+                        </div>
+                        <div class="comment-block">
+                          <span class="comment-by">
+                            <span class="blog-author-name">Gina Moore</span>
+                          </span>
+                          <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nam viverra euismod odio, gravida pellentesque urna varius vitae, gravida pellentesque urna varius vitae.</p>
+                          <p class="blog-date">Dec 6, 2017</p>
+                          <a class="comment-btn" href="#">
+                            <i class="fas fa-reply"></i> Reply
+                          </a>
+                        </div>
+                      </div>
+                    </li>
+                    <li>
+                      <div class="comment">
+                        <div class="comment-author">
+                          <img class="avatar" alt="" src="/static/img/patients/patient3.jpg">
+                        </div>
+                        <div class="comment-block">
+                          <span class="comment-by">
+                            <span class="blog-author-name">Carl Kelly</span>
+                          </span>
+                          <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nam viverra euismod odio, gravida pellentesque urna varius vitae, gravida pellentesque urna varius vitae.</p>
+                          <p class="blog-date">December 7, 2017</p>
+                          <a class="comment-btn" href="#">
+                            <i class="fas fa-reply"></i> Reply
+                          </a>
+                        </div>
+                      </div>
+                    </li>
+                  </ul>
+                </li>
+                <li>
+                  <div class="comment">
+                    <div class="comment-author">
+                      <img class="avatar" alt="" src="/static/img/patients/patient6.jpg">
+                    </div>
+                    <div class="comment-block">
+                      <span class="comment-by">
+                        <span class="blog-author-name">Elsie Gilley</span>
+                      </span>
+                      <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit.</p>
+                      <p class="blog-date">December 11, 2017</p>
+                    </div>
+                  </div>
+                </li>
+                <li>
+                  <div class="comment">
+                    <div class="comment-author">
+                      <img class="avatar" alt="" src="/static/img/patients/patient7.jpg">
+                    </div>
+                    <div class="comment-block">
+                      <span class="comment-by">
+                        <span class="blog-author-name">Joan Gardner</span>
+                      </span>
+                      <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit.</p>
+                      <p class="blog-date">December 13, 2017</p>
+                      <a class="comment-btn" href="#">
+                        <i class="fas fa-reply"></i> Reply
+                      </a>
+                    </div>
+                  </div>
+                </li>
+              </ul>
+            </div>
+          </div>
+          <div class="card new-comment clearfix">
+            <div class="card-header">
+              <h4 class="card-title">Leave Comment</h4>
+            </div>
+            <div class="card-body">
+              <form>
+                <div class="form-group">
+                  <label>Name <span class="text-danger">*</span></label>
+                  <input type="text" class="form-control">
+                </div>
+                <div class="form-group">
+                  <label>Your Email Address <span class="text-danger">*</span></label>
+                  <input type="email" class="form-control">
+                </div>
+                <div class="form-group">
+                  <label>Comments</label>
+                  <textarea rows="4" class="form-control"></textarea>
+                </div>
+                <div class="submit-section">
+                  <button class="btn btn-primary submit-btn" type="submit">Submit</button>
+                </div>
+              </form>
+            </div>
+          </div>
+            -->
+        </div>
+      </div>
+      <!-- Blog Sidebar -->
+      {% include "blog/blog_sidebar.html" %}
+      <!-- /Blog Sidebar -->
+    </div>
+  </div>
+</div>
+<!-- /Page Content -->
+{% endblock content %}

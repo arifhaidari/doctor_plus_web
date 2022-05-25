@@ -1,0 +1,101 @@
+{% extends 'sidebar.html' %}
+{% load static %}
+{% load doctor_tags %}
+{% block title %}
+Favorite Doctor
+{% endblock title %}
+{% block content %}
+<div class="col-md-7 col-lg-8 col-xl-9">
+  <div class="row row-grid">
+    {% for fav_doctor in object_list.first.doctor.all %}
+    <div class="col-md-6 col-lg-4 col-xl-3" name="fav_doctor_card_{{fav_doctor.user.id}}">
+      <div class="card widget-profile pat-widget-profile">
+        <div class="card-body">
+          <div class="pro-widget-content">
+            <div class="profile-info-widget">
+              <a href="{% url 'home:doctor_public_profile' fav_doctor.user.id %}" class="booking-doc-img">
+                <img src="{% if fav_doctor.user.avatar %}{{ fav_doctor.user.avatar.url }}{% else %}{% if fav_doctor.user.gender == 'Male' %}{% static 'img/male_profile.png' %}{% else %}{% static 'img/female_profile.png' %}{% endif %}{% endif %}" alt="User Image">
+              </a>
+              <div class="profile-det-info">
+                <h3><a href="{% url 'home:doctor_public_profile' fav_doctor.user.id %}">{{ fave_doctor.user.get_full_name }}</a></h3>
+                <div class="patient-details">
+                  <h3> {{ fav_doctor.title }} {{ fav_doctor.user.full_name }} </h3>
+                  {% if fav_doctor.speciality.all %}
+                  <h5> {% for sp in fav_doctor.speciality.all %}{{ sp }}{% if forloop.last %}{% else %},&nbsp;{% endif %}{% endfor %} </h5>
+                  {% else %}
+                  <h5>---, ---</h5>
+                  {% endif %}
+                  <div align="left">
+                    {% doctor_rating fav_doctor %}
+                    <h5><span class="far fa-money-bill-alt"></span> {{ fav_doctor.fee|default:"--" }} AFN</h5>
+                  </div>
+                  <div align="right" class="mt-n5"><a href="javascript:rm_from_fav({{fav_doctor.user.id}})" class="btn btn-white fav-btn">
+                      <i class="far fa-heart"></i>
+                    </a></div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="patient-info">
+            <div class="row row-sm">
+              <div class="col-6">
+                <a href="{% url 'home:doctor_public_profile' fav_doctor.user.id %}" class="btn view-btn">View Profile</a>
+              </div>
+              <div class="col-6">
+                <a href="{% url 'appointment:public_time_slot' fav_doctor.user.id %}" class="btn book-btn">Book Now</a>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+</div>
+{% endblock content %}
+{% block pagelevel_styles %}
+<style>
+.fav-btn {
+  color: red;
+}
+.fav-btn:hover {
+  color: black;
+}
+</style>
+{% endblock pagelevel_styles %}
+{% block script %}
+<script src="/static/swtalert.js"></script>
+<script>
+// remove doc from fav
+function rm_from_fav(doc_id) {
+  Swal.fire({
+    title: 'Remove Bookmark?',
+    text: "Doctor will be removed from your favourite doctors!",
+    icon: 'warning',
+    showCancelButton: true,
+    confirmButtonColor: '#3085d6',
+    cancelButtonColor: '#d33',
+    confirmButtonText: 'Unbookmarkd!'
+  }).then((result) => {
+    if (result.isConfirmed) {
+      let form = new FormData();
+      form.append("csrfmiddlewaretoken", '{{ csrf_token }}');
+      form.append('rm_from_fav', doc_id);
+      axios.post(".", form).then((response) => {
+        if (response.data.status == "success") {
+          console.log(response.data)
+          Swal.fire(
+            'Bookmark Removed!',
+            'Doctor has been removed from your favourite doctors.',
+            'success'
+          );
+          $("div[name='fav_doctor_card_" + response.data.id + "']").hide("slow");
+        }
+      }).catch((error) => {
+        console.error(error);
+      })
+    }
+  });
+}
+</script>
+{% endblock script %}

@@ -1,0 +1,140 @@
+{% load static %}
+{% load patient_tags %}
+{% url 'patient:dashboard' as patient_dashboard %}
+{% url 'patient:change_password' as patient_password %}
+{% url 'patient:favorite_doctor' as patient_favorite_doctor %}
+{% url 'patient:patient_profile' as patient_profile %}
+{% url 'relative:list' as relative_list %}
+{% url 'patient:patient_note' as patient_note %}
+{% url 'patient:chat' as patient_chat %}
+{% load static %}
+<!DOCTYPE html>
+<html>
+
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+  <title>
+    {% block title %}{% endblock title %}
+  </title>
+  {% include "base_snippets/css.html" %}
+  <script src="/static/swtalert.js"></script>
+  {% block pagelevel_styles %}{% endblock pagelevel_styles %}
+</head>
+
+<body>
+  <div class="main-wrapper">
+    {% include "base_snippets/navbar.html" %}
+    {% include "base_snippets/django_messages.html" %}
+    {% block breadcrumb %}
+    {% include 'base_snippets/breadcrumb.html' %}
+    {% endblock breadcrumb %}
+    <!-- Page Content -->
+    <div class="content">
+      <div class="container-fluid">
+        <div class="row">
+          <!-- Profile Sidebar -->
+          <div class="col-md-5 col-lg-4 col-xl-3 theiaStickySidebar">
+            <div class="profile-sidebar">
+              <div class="widget-profile pro-widget-content">
+                <div class="profile-info-widget">
+                  <a href="#" class="booking-doc-img">
+                    <img src="{% if request.user.avatar %}{{ request.user.avatar.url }}{% else %}{% static 'img/patients/patient.jpg' %}{% endif %}" alt="User Image">
+                  </a>
+                  <div class="profile-det-info">
+                    <h3>{{ request.user }}</h3>
+                    <div class="patient-details">
+                      <h5><i class="fas fa-birthday-cake"></i> {% if request.user.date_of_birth %}{{ request.user.date_of_birth }}{% else %}Unknown DOB{% endif %}, {% if request.user.date_of_birth %}{{ request.user.user_age|default:"Not Calculated" }}{% else %}Unknown Age{% endif %} years</h5>
+                      <h5 class="mb-0"><i class="fas fa-map-marker-alt"></i> {{ request.user.address.district }}, {{ request.user.address.city }}</h5>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div class="dashboard-widget">
+                <nav class="dashboard-menu">
+                  <ul>
+                    <li name="menu-item">
+                        <a href="{% url 'patient:patient_dashboard_view' %}">
+                          <i class="fas fa-columns"></i>
+                          <span>Dashboard</span>
+                        </a>
+                    </li>
+                    <li name="menu-item">
+                      <a href="{% url 'patient:favorite_doctor' %}">
+                        <i class="fas fa-bookmark"></i>
+                        <span>Favourite Doctors</span>
+                      </a>
+                    </li>
+                    <li name="menu-item">
+                      <a href="{% url 'relative:list' %}">
+                        <i class="fas fa-user-injured"></i>
+                        <span>Family Members</span>
+                      </a>
+                    </li>
+                    <li name="menu-item">
+                        <a href="{% url 'patient:notifications' %}">
+                          <i class="fas fa-bell"></i>
+                          <span>Notifications</span>
+                          <small class="unread-msg">{% total_notifications request.user %} new</small>
+                        </a>
+                    </li>
+                    <li name="menu-item">
+                      
+                        <a href="{% patiet_last_chat request.user %}">
+                          <i class="fas fa-comments"></i>
+                          <span>Message</span>
+                          <small class="unread-msg">{% total_chat_notifications request.user %} new</small>
+                        </a>
+                    </li>
+                    <li name="menu-item">
+                      <a href="{% url 'patient:patient_profile' %}">
+                        <i class="fas fa-user-cog"></i>
+                        <span>Profile Settings</span>
+                      </a>
+                    </li>
+                    <li name="menu-item">
+                      <a href="{% url 'patient:change_password' %}">
+                        <i class="fas fa-lock"></i>
+                        <span>Change Password</span>
+                      </a>
+                    </li>
+                    <li>
+                      <a href="{% url 'logout' %}">
+                        <i class="fas fa-sign-out-alt"></i>
+                        <span>Logout</span>
+                      </a>
+                    </li>
+                  </ul>
+                </nav>
+              </div>
+            </div>
+          </div>
+          <!-- / Profile Sidebar -->
+          <!-- content goes here -->
+          {% block content %}
+          {% endblock content %}
+        </div>
+      </div>
+    </div>
+    {% include "base_snippets/footer.html" %}
+  </div>
+  {% include "base_snippets/js.html" %}
+  {% block outside_wrapper %}{% endblock outside_wrapper %}
+  <!-- script -->
+  <script>
+    // active related sidebar item
+    function sidebar_active_item() {
+        let active_item = $("li[name='menu-item']");
+        for(let x of active_item){
+          if ($(x).find('a').attr('href') == location.pathname) {
+            $(x).addClass('active');
+          };
+        };
+      };
+      sidebar_active_item();
+  </script>
+  {% block script %}
+  {% endblock script %}
+</body>
+
+</html>

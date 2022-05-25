@@ -1,0 +1,128 @@
+{% extends 'sidebar.html' %}
+{% load static %}
+
+{% load doctor_tags %}
+{% block title %}
+Feedback
+{% endblock title %}
+{% block content %}
+
+<div class="col-md-7 col-lg-8 col-xl-9">
+  <div class="card">
+    <div class="card-body">
+      <!-- Profile Settings Form -->
+      <form method="POST" >
+        {% csrf_token %}
+        <div class="row form-row">
+          <div class="col-12 col-md-12">
+            <!-- Doctor Widget -->
+    <div class="card">
+     <div class="card-body">
+       <div class="doctor-widget">
+         <div class="doc-info-left">
+           <div class="doctor-img">
+             <img src="{% if doctor.user.avatar %}{{ doctor.user.avatar.url }}{% else %}{% if doctor.user.gender == 'Male' %}{% static 'img/male_profile.png' %}{% else %}{% static 'img/female_profile.png' %}{% endif %}{% endif %}" class="img-fluid" alt="User Image">
+           </div>
+           <div class="doc-info-cont">
+             <br>
+             <h4 class="doc-name">{{ doctor.title }} {{ doctor.user.get_full_name }}</h4>
+             <p class="doc-speciality">
+               {% for sp in doctor.speciality.all %}
+               {% if forloop.last %}
+               {{sp}}.
+               {% else %}
+               {{sp}},
+               {% endif %}
+               {% endfor %}</p>
+               <div><i class="far fa-thumbs-up"></i> {{ feedback_no }} Feedbacks, On Avg {{ average_star }}/5</div>
+               <br>
+             <div class="clinic-services">
+               
+               {% for service in doctor.service.all %}
+               <span class="mb-1 ml-1">{{ service }}</span>
+               {% endfor %}
+             </div>
+           </div>
+         </div>
+         <div class="doc-info-right">
+           <div class="clini-infos">
+             <ul>
+               
+               {% for clin in doctor.clinic_set.all %}
+               <li><i class="fas fa-map-marker-alt"></i> {{clin.address}}</li>
+               {% endfor %}
+             </ul>
+           </div>
+           
+          
+         </div>
+       </div>
+     </div>
+   </div>
+   <!-- /Doctor Widget -->
+   <input type="hidden" value="{{appt_id}}" name="appt_id">
+   <input type="hidden" value="{{ request.META.HTTP_REFERER }}" name="redirect_url">
+          </div>
+          <div class="col-12 col-md-12">
+            <div class="form-group">
+              <label>Wirte Review (optional)</label>
+              <input type="text" name="review" id="name" class="form-control">
+            </div>
+          </div>
+
+          <div class="col-12 col-md-6">
+            <div class="form-group">
+               <label>Staff Behavior</label>
+              <select name="staff_behavior" class="form-control select">
+                <option value="Good" selected>Good<span class="text-danger">*</span></option>
+                <option value="Better">Better<span class="text-danger">*</span></option>
+              </select>
+            </div>
+          </div>
+
+          <div class="col-12 col-md-6">
+          <div class="form-group">
+               <label>Doctor Checkup</label>
+               <select name="doctor_checkup" class="form-control select">
+               <option value="Good" selected>Good<span class="text-danger">*</span></option>
+               <option value="Better">Better<span class="text-danger">*</span></option>
+               </select>
+          </div>
+          </div>
+
+          <div class="col-12 col-md-6">
+          <div class="form-group">
+               <label>Clinic Environment</label>
+               <select name="clinic_environment" class="form-control select">
+               <option value="Good" selected>Good<span class="text-danger">*</span></option>
+               <option value="Better">Better<span class="text-danger">*</span></option>
+               </select>
+          </div>
+          </div>
+
+          <div class="col-12 col-md-6">
+          <div class="form-group">
+               <label>Overall Experience</label>
+               <select name="overall_experience" class="form-control select">
+               <option value="Good" selected>Good<span class="text-danger">*</span></option>
+               <option value="Better">Better<span class="text-danger">*</span></option>
+               </select>
+          </div>
+          </div>
+         
+          
+        </div>
+        <div class="submit-section">
+          <button type="submit" id="submit_feedback" class="btn btn-primary submit-btn">Submit</button>
+        </div>
+      </form>
+      <!-- /Profile Settings Form -->
+    </div>
+  </div>
+</div>
+
+{% endblock content %}
+<!--  -->
+{% block script %}
+{% include 'patient/scripts/patient_profile_script.html' %}
+{% endblock script %}

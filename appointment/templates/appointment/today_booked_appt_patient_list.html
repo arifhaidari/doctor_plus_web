@@ -1,0 +1,165 @@
+{% extends 'doctor_sidebar.html' %}
+{% load static %}
+{% load doctor_tags %}
+{% block title %}
+Booked Appt
+{% endblock title %}
+{% block doctor_breadcrumb %}
+<div class="breadcrumb-bar">
+  <div class="container-fluid">
+    <div class="row align-items-center">
+      <div class="col">
+        <nav aria-label="breadcrumb" class="page-breadcrumb">
+          <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="{% url 'doctor:dashboard' %}">Dashboard</a></li>
+            <li class="breadcrumb-item"><a href="#">Today Appointments</a></li>
+          </ol>
+        </nav>
+        <h2 class="breadcrumb-title">
+          Today Appointments
+        </h2>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock doctor_breadcrumb %}
+{% block content %}
+<div class="col-md-7 col-lg-8 col-xl-9" id="printable">
+  <div class="row">
+    <div class="col-md-12">
+      <div class="card dash-card">
+        <div class="card-body">
+          <div class="row">
+            <div class="col-md-4 col-lg-4 col-xl-4 col-sm-4 pb-1">
+              <div class="dash-widget">
+                <div class="">
+                  <i class="fa fa-clinic-medical fa-6x text-secondary"></i>
+                </div>
+                <div class="dash-widget-info pl-3">
+                  <h6>Clinic</h6>
+                  <h3> <b>{{ clinic.clinic_name }}</b></h3>
+                  <h6>{{ clinic.city }}, {{ clinic.district }}</h6>
+                </div>
+              </div>
+            </div>
+            <div class="col-md-4 col-lg-4 col-xl-4 col-sm-4 pb-1">
+              <div class="dash-widget">
+                <div class="profile-info-widget">
+                  <a href="#" class="booking-doc-img">
+                    <img src="{% if request.user.avatar %}{{ request.user.avatar.url }}{% else %}{% if request.user.gender == 'Male' %}{% static 'img/male_profile.png' %}{% else %}{% static 'img/female_profile.png' %}{% endif %}{% endif %}" class="avatar-img">
+                  </a>
+                </div>
+                <div class="dash-widget-info">
+                  <h4> {{ request.user.doctor }}</h4>
+                  {% doctor_rating request.user.doctor %}
+                </div>
+              </div>
+            </div>
+            <div class="col-md-4 col-lg-4 col-xl-4 col-sm-4 pb-1">
+              <div class="dash-widget">
+                <div class="">
+                  <i class="fa fa-address-book fa-6x text-secondary"></i>
+                </div>
+                <div class="dash-widget-info pl-3">
+                  <h3>Patient No: {{ clinic_booked_appt_list|length }}</h3>
+                  <h6><b>Today</b> {% now "" %}</h6>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="row row-grid">
+    {% for booked_appt in clinic_booked_appt_list %}
+    <div class="col-md-6 col-lg-4 col-xl-3">
+      <div class="card widget-profile pat-widget-profile">
+        <div class="card-body">
+          <div class="pro-widget-content">
+            <div class="profile-info-widget">
+              {% if booked_appt.appt_slot.relative %}
+              <a href="{% url 'doctor:my_patient_detail' 'rel' booked_appt.appt_slot.relative.user.id %}" class="avatar avatar-xxl">
+                {% else %}
+                <a href="{% url 'doctor:my_patient_detail' 'pat' booked_appt.appt_slot.patient.user.id %}" class="avatar avatar-xxl">
+                  {% endif %}
+                  <img src="{% if booked_appt.qr_code_img %}{{ booked_appt.qr_code_img.url }}{% else %}{{ booked_appt.patient.user.avatar.url }}{% endif %}" class="card-img-top" alt=" User Image">
+                </a>
+                <div class="profile-det-info">
+                  <h3>
+                    {{ booked_appt.appt_slot.relative.user.full_name|default:booked_appt.appt_slot.patient.user.full_name }}
+                  </h3>
+                </div>
+            </div>
+          </div>
+          <div class="patient-info">
+            <ul>
+              <li>Phone <span>{{ booked_appt.appt_slot.relative.user.phone|default:booked_appt.appt_slot.patient.user.phone }}</span></li>
+              <li>Age <span>{{ booked_appt.appt_slot.relative.user.user_age|default:booked_appt.appt_slot.patient.user.user_age }}</span></li>
+              <li>Blood Group <span>{{ booked_appt.appt_slot.relative.blood_group|default:booked_appt.appt_slot.patient.blood_group }}</span></li>
+              <hr>
+              <li><span class="fa fa-clock"></span> Start Time <b>{{ booked_appt.appt_slot.start_appt_time }}</b></li>
+              <li><span class="fa fa-clock"></span> End Time <b>{{ booked_appt.appt_slot.end_appt_time }}</b></li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+    {% empty %}
+    <h1 align="center" class="w-100"> There is no appointment booked for this clinic today.</h1>
+    {% endfor %}
+  </div>
+  {% if clinic_booked_appt_list %}
+  <div class="submit-section text-right submit-btn-bottom">
+    <a href="javascript:void(0);" class="btn btn-secondary submit-btn print"><i class="fa fa-print"></i> Print Booked Appointments</a>
+  </div>
+  {% endif %}
+</div>
+{% endblock content %}
+{% block script %}
+<script src="/static/plugins/jQuery-Plugin-To-Print-Any-Part-Of-Your-Page-Print/jQuery.print.js" charset="utf-8"></script>
+<script type='text/javascript'>
+  $(function() {
+    $("#printable").find('.print').on('click', function() {
+      // custom js codes before print
+      let header = $(".col-md-4.col-lg-4.col-xl-4.col-sm-4.pb-1");
+      let items = $(".col-md-6.col-lg-4.col-xl-3");
+      $("div[name='rating-stars']").children('i').hide()
+      header.addClass('col-4');
+      items.addClass('col-4');
+
+      // print
+      $("#printable").print({
+        // Custom title
+        title: "Today Appointments",
+        // Don't print this
+        noPrintSelector: ".print",
+        // Add this on top
+        // append: "<h1>After Contnet</h1><br/>",
+        // Add this at bottom
+        prepend: `<img alt="Logo" class="img-fluid p-3" src="/static/img/logo.png">`,
+      });
+      // custom js code after print
+      header.removeClass('col-4');
+      items.removeClass('col-4');
+      $("div[name='rating-stars']").children('i').show();
+    });
+  });
+
+</script>
+{% endblock script %}
+{% block pagelevel_styles %}
+<style type="text/css" media="print">
+  /* remove header and footer of the page in print */
+  @media print {
+    @page {
+      margin: 0;
+    }
+
+    body {
+      margin: 1.6cm;
+    }
+  }
+
+</style>
+{% endblock pagelevel_styles %}

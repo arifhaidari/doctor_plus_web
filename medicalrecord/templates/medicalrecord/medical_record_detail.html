@@ -1,0 +1,131 @@
+{% extends 'base.html' %}
+{% load static %}
+{% load patient_tags %}
+{% block title %}
+Medical Record Detail
+{% endblock title %}
+{% block breadcrumb %}
+<div class="breadcrumb-bar">
+  <div class="container-fluid">
+    <div class="row align-items-center">
+      <div class="col">
+        <nav aria-label="breadcrumb" class="page-breadcrumb">
+          <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="{% if request.user.user_type == 'Patient' %}{% url 'patient:patient_dashboard_view' %}{% else %}{% url 'doctor:dashboard' %}{% endif %}">Dashboard</a></li>
+            <li class="breadcrumb-item"><a href="">Medical Record Detail</a></li>
+          </ol>
+        </nav>
+        <h2 class="breadcrumb-title">
+          Medical Record - <small>Medical Record Detail</small>
+        </h2>
+      </div>
+      
+    </div>
+  </div>
+</div>
+
+{% endblock breadcrumb %}
+{% block content %}
+<!-- Page Content -->
+<div class="content success-page-cont">
+     <div class="container-fluid">
+     
+          <div class="row justify-content-center">
+               <div class="col-lg-6">
+               
+                    <!-- Success Card -->
+                    <div class="card success-card">
+                         <div class="card-body">
+                              <div class="success-cont">
+                                   <i class="fas fa-check"></i>
+                                   <h3>Medical Record Detail</h3>
+                                   <div class="filter-container p-5 row">
+                                   {% for attach in medical_object.medicalrecordfile_set.all %}
+                                   
+
+                                   <div class="msg-box">
+                                        <div>
+                                             <div class="chat-msg-attachments">
+                                             <div class="chat-attachment">
+                                             <img src="/static/img/file.jpg" alt="Attachment">
+                                             <div class="chat-attach-caption">
+                                                  {% is_file attach.file %}
+                                             </div>
+                                             <a href="{{ attach.file.url }}" class="chat-attach-download">
+                                                  <i class="fas fa-download"></i>
+                                             </a>
+                                             </div>
+                                             </div>
+                                        </div>
+                                        </div>
+                                 
+                                   {% endfor %}
+                                   </div>
+                                   <p>Title: <strong>{{ medical_object.title }}</strong><br></p>
+                                   <p>Related Doctor: <strong>{{ medical_object.related_doctor.title }} {{ medical_object.related_doctor.user.full_name }}</strong><br></p>
+                                   <p>Patient: <strong>
+                                        {% if medical_object.relative %}
+                                        {{ medical_object.relative.user.full_name }}
+                                        {% else %}
+                                        {{ medical_object.patient.user.full_name }}
+                                        {% endif %}
+                                   </strong><br></p>
+                                   <p>General Access: <strong>
+                                        {% if medical_object.relative %}
+                                             {% if medical_object.general_access or file.relative.share_record_to_all %}
+                                             Yes
+                                             {% else %}
+                                             No
+                                             {% endif %}
+                                        {% else %}
+                                             {% if medical_object.general_access or file.patient.share_record_to_all %}
+                                             Yes
+                                             {% else %}
+                                             No
+                                             {% endif %}
+                                        {% endif %}
+                                   
+                                   </strong><br></p>
+
+                                   <p>Shared With: 
+                                   <strong>
+
+                                        {% if medical_object.relative %}
+                                             {% if medical_object.general_access or file.relative.share_record_to_all %}
+                                             Share with all patient's doctor
+                                             {% else %}
+                                             {% for a_doctor in medical_object.shared_with.all %}
+                                        <br>{{ a_doctor.user.full_name }},
+                                        {% endfor %}
+                                             {% endif %}
+                                        {% else %}
+                                             {% if medical_object.general_access or file.patient.share_record_to_all %}
+                                             Share with all patient's doctor
+                                             {% else %}
+                                             {% for a_doctor in medical_object.shared_with.all %}
+                                        <br>{{ a_doctor.user.full_name }},
+                                        {% endfor %}
+                                             {% endif %}
+                                        {% endif %}
+
+                                        
+
+                                   </strong><br></p>
+
+                                   <p>Updated At: <strong>{{ medical_object.updated_at }}</strong><br></p>
+                                   <p>Timestamp: <strong>{{ medical_object.timestamp }}</strong><br></p>
+                                   {% if request.user.user_type == 'Patient' %}
+                                    <a href="{% url 'medicalrecord:edit_medical' medical_object.id %}" class="btn btn-primary view-inv-btn">Edit</a>
+                                   {% endif %}
+                              </div>
+                         </div>
+                    </div>
+                    <!-- /Success Card -->
+                    
+               </div>
+          </div>
+          
+     </div>
+</div>		
+<!-- /Page Content -->
+{% endblock content %}

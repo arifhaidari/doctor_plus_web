@@ -1,0 +1,67 @@
+{% include "base_snippets/css.html" %}
+<br>
+<div class="col-md-7 col-lg-8 col-xl-9">
+
+     <div class="row">
+          <div class="col-md-12">
+               <div class="card dash-card">
+                    <div class="card-body">
+                         <div class="row">
+                              <div class="col-md-12 col-lg-4">
+                                   
+                              </div>
+                              
+                              <div class="col-md-12 col-lg-4">
+                                   <div class="dash-widget">
+                                        <div class="">
+                                             <i class="fa fa-clinic-medical fa-6x text-secondary"></i>
+                                        </div>
+                                        <div class="dash-widget-info">
+                                             <h6> Clinic: {{ clinic.clinic_name }}</h6>
+                                             <h3 class="text-center">Patient No: {{ clinic_booked_appt_list|length }}</h3>
+                                             <p class="text-muted"> {% now 'SHORT_DATETIME_FORMAT' %}</p>
+                                        </div>
+                                   </div>
+                              </div>
+                              
+                              <div class="col-md-12 col-lg-4">
+                              </div>
+                         </div>
+                    </div>
+               </div>
+          </div>
+     </div>
+						
+     <div class="row row-grid">
+          {% if clinic_booked_appt_list %}
+          {% for booked_appt in clinic_booked_appt_list %}
+          <div class="col-md-6 col-lg-4 col-xl-3">
+               <div class="card widget-profile pat-widget-profile">
+                    <div class="card-body">
+                         <div class="pro-widget-content">
+                              <div class="profile-info-widget">
+                                   <a href="" class="avatar avatar-xxl">
+                                        <img src="{% if booked_appt.qr_code_img %}{{ booked_appt.qr_code_img.url }}{% else %}{{ booked_appt.patient.user.avatar.url }}{% endif %}" class="card-img-top"" alt="User Image">
+                                   </a>
+                                   <div class="profile-det-info">
+                                        <h3><a href="">{{ booked_appt.patient.user.full_name }}</a></h3>
+                                   </div>
+                              </div>
+                         </div>
+                         <div class="patient-info">
+                              <ul>
+                                   <li>Phone <span>{{ booked_appt.patient.user.phone }}</span></li>
+                                   <li>Age <span>{{ booked_appt.patient.user.user_age }}</span></li>
+                                   <li>Blood Group <span>{{ booked_appt.patient.blood_group }}</span></li>
+                              </ul>
+                         </div>
+                    </div>
+               </div>
+          </div>
+          {% endfor %}
+          {% endif %}
+     </div>
+
+</div>
+
+{% include "base_snippets/js.html" %}

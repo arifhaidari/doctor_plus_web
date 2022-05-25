@@ -1,0 +1,17 @@
+{% extends "blog/blog_dashboard.html" %}
+{% block title %}
+Profile Settings
+{% endblock title %}
+{% block main %}
+<form method="post" enctype="multipart/form-data">
+{% csrf_token %}
+  {{ form.as_p }}
+  <div class="row">
+    <div class="col-6 col-md-6 col-sm-12">
+      <button type="submit" class="btn btn-outline-primary">Save Changes</button>
+      <button type="button" class="btn btn-outline-secondary">Reset</button>
+    </div>
+  </div>
+</form>
+<br><br><br>
+{% endblock main %}
