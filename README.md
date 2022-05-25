@@ -215,6 +215,3 @@ _you need to be authenticated a patient to use these APIs._
 * **Edit**: endpoint `patient/api/relative/<relative-user-id>/`
 * **Delete**: endpoint `patient/api/relative/<relative-user-id>/`
 
-### Patient Profile
-* **Reterive**: endpoint `patient/api/user/<user-id>/`
-* **Update**: endpoint `patient/api/user/<user-id>/`
